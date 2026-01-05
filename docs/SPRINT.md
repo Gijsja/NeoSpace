@@ -1,17 +1,17 @@
 # LocalBBS Sprint Tracker
 
-## Current Sprint: #1
+## Current Sprint: #2 (SHIPPED ✅)
 
 **Dates**: Jan 5-6, 2026  
-**Theme**: Foundation & UI Scaffold
+**Theme**: Chat Functionality Polish
 
 ### Sprint Goals
 
-- [x] Initialize git repository
-- [x] Integrate Tailwind CSS
-- [x] Build three-pane dashboard layout
-- [x] Create feature page scaffolds (Wall, Code Editor, Internals)
-- [x] Wire up navigation
+- [x] Fix message hover actions (group-hover CSS)
+- [x] Make sidebar rooms clickable (visual state sync)
+- [x] Add typing indicators (animated dots + socket events)
+- [x] Test with real WebSocket connection
+- [x] Style refinements
 
 ### Shipped
 
@@ -19,26 +19,37 @@ All goals completed. ✅
 
 ---
 
-## Next Sprint: #2
+## Previous Sprints
 
-**Theme**: Chat Functionality Polish
+### Sprint #1 (SHIPPED ✅)
 
-### Proposed Goals
+**Theme**: Foundation & UI Scaffold
 
-- [ ] Fix message hover actions (show edit/delete on hover)
-- [ ] Make sidebar rooms clickable (multi-room support)
-- [ ] Add typing indicators
-- [ ] Test with real WebSocket connection
-- [ ] Style refinements
+- Git init + Tailwind CSS
+- Three-pane dashboard
+- Feature page scaffolds (Wall, Code Editor, Internals)
+- Navigation wiring
 
 ---
 
-## Backlog (Future Sprints)
+## Next Sprint: #3
+
+**Theme**: Backend Integration & Live Testing
+
+### Proposed Goals
+
+- [ ] Start dev server and live test
+- [ ] Verify WebSocket works with new UI
+- [ ] Add emoji picker
+- [ ] Add persistent room state
+
+---
+
+## Backlog
 
 ### UI Polish
 
-- [ ] Add emoji picker
-- [ ] Add sticker drag-and-drop on wall
+- [ ] Sticker drag-and-drop on wall
 - [ ] Voice recording for voice intro
 - [ ] Code editor syntax highlighting (CodeMirror/Monaco)
 

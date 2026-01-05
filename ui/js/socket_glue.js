@@ -23,6 +23,8 @@ const scrollBottomBtn = document.getElementById('scroll-bottom');
 const searchInput = document.getElementById('search-input');
 const searchClear = document.getElementById('search-clear');
 const unreadBadge = document.getElementById('unread-badge');
+const typingIndicator = document.getElementById('typing-indicator');
+const typingUsers = document.getElementById('typing-users');
 
 // State
 let currentUser = localStorage.getItem('localbbs_username') || '';
@@ -30,6 +32,9 @@ let messageIds = new Set();
 let isLoading = false;
 let pendingDeleteId = null;
 let allMessages = []; // Store messages for search
+let typingTimeout = null;
+let isTyping = false;
+let typingUsersList = new Set();
 
 // Initialize username from localStorage
 usernameInput.value = currentUser;
@@ -38,6 +43,19 @@ usernameInput.value = currentUser;
 usernameInput.addEventListener('change', () => {
   currentUser = usernameInput.value.trim() || 'anonymous';
   localStorage.setItem('localbbs_username', currentUser);
+});
+
+// Typing indicator: emit when user types
+messageInput.addEventListener('input', () => {
+  if (!isTyping) {
+    isTyping = true;
+    socket.emit('typing', { user: currentUser || 'anonymous' });
+  }
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    isTyping = false;
+    socket.emit('stop_typing', { user: currentUser || 'anonymous' });
+  }, 2000);
 });
 
 /**
@@ -428,7 +446,8 @@ function createMessageElement(msg) {
       }
     });
   } else {
-    article.querySelector('.message-actions').style.display = 'none';
+    // Hide actions for messages from other users
+    article.querySelector('.message-actions').classList.add('!hidden');
   }
   
   return article;
@@ -507,6 +526,36 @@ socket.on('backfill', payload => {
   updateEmptyState();
   updateScrollButton();
   updateUnreadCount();
+});
+
+// Typing indicator event handlers
+function updateTypingUI() {
+  if (typingUsersList.size === 0) {
+    typingIndicator.classList.add('hidden');
+    return;
+  }
+  
+  typingIndicator.classList.remove('hidden');
+  const users = Array.from(typingUsersList);
+  if (users.length === 1) {
+    typingUsers.textContent = `${users[0]} is typing...`;
+  } else if (users.length === 2) {
+    typingUsers.textContent = `${users[0]} and ${users[1]} are typing...`;
+  } else {
+    typingUsers.textContent = `${users.length} people are typing...`;
+  }
+}
+
+socket.on('typing', ({ user }) => {
+  if (user !== currentUser && user) {
+    typingUsersList.add(user);
+    updateTypingUI();
+  }
+});
+
+socket.on('stop_typing', ({ user }) => {
+  typingUsersList.delete(user);
+  updateTypingUI();
 });
 
 // Form submission
