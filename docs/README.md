@@ -4,25 +4,32 @@
 
 ## Quick Navigation
 
-| Document                                | Purpose                            |
-| --------------------------------------- | ---------------------------------- |
-| [PROJECT_OVERVIEW](PROJECT_OVERVIEW.md) | System philosophy and architecture |
-| [CORE_FROZEN](CORE_FROZEN.md)           | Core stability guarantees          |
-| [CORE_INVARIANTS](CORE_INVARIANTS.md)   | Non-negotiable system rules        |
-| [SOCKET_CONTRACT](SOCKET_CONTRACT.md)   | WebSocket event specifications     |
-| [API_REFERENCE](API_REFERENCE.md)       | HTTP endpoint documentation        |
-| [V2_SCOPE](V2_SCOPE.md)                 | Evolution layer boundaries         |
-| [VERSIONING](VERSIONING.md)             | Version and tagging policy         |
-| [WIREFRAMES](design/WIREFRAMES.md)      | **Visual Design & UX Specs**       |
+| Document                        | Purpose                              |
+| ------------------------------- | ------------------------------------ |
+| [ARCHITECTURE](ARCHITECTURE.md) | System philosophy (Server Authority) |
+| [PRINCIPLES](PRINCIPLES.md)     | Core invariants & frozen rules       |
+| [ROADMAP](ROADMAP.md)           | Active sprint plan & backlog         |
+| [KNOWN_ISSUES](KNOWN_ISSUES.md) | Trade-offs and self-critique         |
+| [EVOLUTION](EVOLUTION.md)       | Epoch boundaries (E1-E3)             |
 
-## Project Health
+### Reference
 
-| Document                                  | Purpose                         |
-| ----------------------------------------- | ------------------------------- |
-| [GOOD_BAD_UGLY](GOOD_BAD_UGLY.md)         | Honest assessment of trade-offs |
-| [ROAST](ROAST.md)                         | Known risks and mitigations     |
-| [RUNBOOK_WEIRDNESS](RUNBOOK_WEIRDNESS.md) | Debugging guide                 |
+| Document                                      | Purpose                 |
+| --------------------------------------------- | ----------------------- |
+| [api/SOCKET_CONTRACT](api/SOCKET_CONTRACT.md) | WebSocket Protocol      |
+| [api/HTTP_ENDPOINTS](api/HTTP_ENDPOINTS.md)   | REST API Reference      |
+| [guides/DEBUGGING](guides/DEBUGGING.md)       | Troubleshooting Runbook |
+| [guides/VERSIONING](guides/VERSIONING.md)     | Release policy          |
+
+### Design (UX/UI)
+
+| Document                                        | Purpose                         |
+| ----------------------------------------------- | ------------------------------- |
+| [design/INDEX](design/INDEX.md)                 | **Visual Gallery (Start Here)** |
+| [design/WIREFRAMES](design/WIREFRAMES.md)       | Detailed UX/UI specs            |
+| [design/user_journey](design/user_journey.md)   | Creator flow narrative          |
+| [design/project_brief](design/project_brief.md) | Vision & Philosophy             |
 
 ---
 
-_Start with [PROJECT_OVERVIEW](PROJECT_OVERVIEW.md) for the full picture._
+_Start with [ARCHITECTURE](ARCHITECTURE.md) for the full picture._

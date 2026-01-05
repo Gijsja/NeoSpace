@@ -43,11 +43,37 @@ All goals completed. ✅
 - [x] **Persistent Room State**: Remembers last visited room across reloads.
 - [x] **Server Accessibility**: Bound to `0.0.0.0` for full access.
 
-### Next Steps (Sprint #4)
+### Sprint #4: Data Persistence & File Sharing
 
-- [ ] **Message History**: Implement database storage for messages.
-- [ ] **User Accounts**: Basic auth or session persistence.
-- [ ] **File Uploads**: Drag and drop support.
+- [ ] **Message Timestamps**: Add `created_at` to schema, display in UI
+- [ ] **File Uploads**: Drag-and-drop images to chat
+- [ ] **Image Display**: Render uploaded images inline
+
+### Sprint #5: OAuth Login (Google + Apple)
+
+- [ ] **Google OAuth**: Cloud Console setup + credentials
+- [ ] **Apple Sign-In**: Developer account + Sign in with Apple setup
+- [ ] **Login Page**: Unified UI with Google & Apple buttons
+- [ ] **OAuth Flow**: `/auth/google` + `/auth/apple` → callbacks → session
+- [ ] **User Creation**: Auto-create user on first login (either provider)
+- [ ] **Account Linking**: Link Google/Apple to same user if email matches
+- [ ] **Session Management**: Secure HTTPOnly cookies, logout endpoint
+- [ ] **Protected Routes**: Require auth for chat/profile
+
+### Sprint #6: User Profiles & Social Wall
+
+- [ ] **Profiles Table**: Bio, avatar, custom CSS storage
+- [ ] **Profile Page**: Customizable wall (MySpace 2.0 style)
+- [ ] **Direct Messages**: Private 1:1 chat with encryption at rest
+- [ ] **User Directory**: Browse/search other users
+
+### Sprint #7: Review, Views & Polish
+
+- [ ] **Wall View**: Finish `wall.html` with sticker drag-drop
+- [ ] **Code Editor**: Wire up Monaco/CodeMirror integration
+- [ ] **Internals View**: Real connection stats in `internals.html`
+- [ ] **UI Polish**: Animations, transitions, mobile responsive
+- [ ] **Accessibility**: ARIA labels, keyboard navigation
 
 ---
 
