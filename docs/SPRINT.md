@@ -32,16 +32,22 @@ All goals completed. ✅
 
 ---
 
-## Next Sprint: #3
+## Sprint #3: Backend Integration & Live Testing (SHIPPED)
 
-**Theme**: Backend Integration & Live Testing
+**Goal:** Verify WebSocket connectivity, fix server issues, and implement persistent state.
 
-### Proposed Goals
+**Shipped Features:**
 
-- [ ] Start dev server and live test
-- [ ] Verify WebSocket works with new UI
-- [ ] Add emoji picker
-- [ ] Add persistent room state
+- [x] **Live WebSocket Connection**: Fixed `socket_glue.js` loading and server binding.
+- [x] **Emoji Picker**: Added `emoji-picker-element` with UI integration.
+- [x] **Persistent Room State**: Remembers last visited room across reloads.
+- [x] **Server Accessibility**: Bound to `0.0.0.0` for full access.
+
+### Next Steps (Sprint #4)
+
+- [ ] **Message History**: Implement database storage for messages.
+- [ ] **User Accounts**: Basic auth or session persistence.
+- [ ] **File Uploads**: Drag and drop support.
 
 ---
 

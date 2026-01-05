@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/ui/css/styles.css" />
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -92,7 +93,12 @@
         </div>
 
         <!-- Input area -->
-        <footer class="p-4 bg-bbs-surface border-t border-bbs-border shrink-0">
+        <footer class="p-4 bg-bbs-surface border-t border-bbs-border shrink-0 relative">
+          <!-- Emoji Picker Container -->
+          <div id="emoji-picker-container" class="absolute bottom-full left-4 mb-2 hidden z-50 shadow-2xl rounded-lg overflow-hidden border border-bbs-border">
+            <emoji-picker class="dark"></emoji-picker>
+          </div>
+
           <!-- Typing indicator -->
           <div id="typing-indicator" class="hidden text-sm text-slate-500 mb-2 flex items-center gap-2">
             <span class="typing-dots flex gap-1">
@@ -103,6 +109,9 @@
             <span id="typing-users">Someone is typing...</span>
           </div>
           <form class="flex gap-2" id="message-form">
+            <button type="button" id="emoji-btn" class="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded transition" title="Insert Emoji">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+            </button>
             <input type="text" id="input" placeholder="Type a message…" autocomplete="off" class="flex-1 px-4 py-2 bg-bbs-bg border border-bbs-border rounded focus:outline-none focus:border-bbs-accent placeholder-slate-500" />
             <button type="submit" class="px-6 py-2 bg-bbs-accent hover:bg-blue-600 rounded text-white font-medium transition" id="send-btn">Send</button>
           </form>
@@ -243,6 +252,7 @@
       });
     </script>
 
-    <script src="/ui/js/socket_glue.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="/ui/js/socket_glue.js?v=2" defer></script>
   </body>
 </html>

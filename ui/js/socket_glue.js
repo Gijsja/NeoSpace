@@ -3,7 +3,17 @@
  * Handles WebSocket communication and UI updates
  */
 
-const socket = io();
+console.log('socket_glue.js loaded');
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('socket_glue.js starting...');
+  let socket;
+  try {
+    socket = io();
+    console.log('Socket initialized', socket);
+  } catch (e) {
+    console.error('Failed to initialize socket:', e);
+  }
 
 // DOM elements
 const messagesContainer = document.getElementById('messages');
@@ -25,9 +35,13 @@ const searchClear = document.getElementById('search-clear');
 const unreadBadge = document.getElementById('unread-badge');
 const typingIndicator = document.getElementById('typing-indicator');
 const typingUsers = document.getElementById('typing-users');
+const emojiBtn = document.getElementById('emoji-btn');
+const emojiPickerContainer = document.getElementById('emoji-picker-container');
+const emojiPicker = document.querySelector('emoji-picker');
 
 // State
 let currentUser = localStorage.getItem('localbbs_username') || '';
+let currentRoom = localStorage.getItem('localbbs_last_room') || '# general';
 let messageIds = new Set();
 let isLoading = false;
 let pendingDeleteId = null;
@@ -578,6 +592,69 @@ messageForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Initialize
-setConnectionStatus('connecting');
-updateEmptyState();
+  // Initialize
+  setConnectionStatus('connecting');
+  updateEmptyState();
+
+  // Restore last room
+  if (currentRoom) {
+    document.getElementById('current-room-name').textContent = currentRoom;
+    document.querySelectorAll('.room-link').forEach(l => {
+      if (l.dataset.room === currentRoom) {
+        l.classList.add('bg-bbs-accent/20', 'text-bbs-accent');
+        l.classList.remove('text-slate-400');
+      } else {
+        l.classList.remove('bg-bbs-accent/20', 'text-bbs-accent');
+        l.classList.add('text-slate-400');
+      }
+    });
+  }
+
+  // Persist room selection
+  document.querySelectorAll('.room-link').forEach(link => {
+    link.addEventListener('click', () => {
+      currentRoom = link.dataset.room;
+      localStorage.setItem('localbbs_last_room', currentRoom);
+    });
+  });
+
+  // Emoji Picker Logic
+  if (emojiBtn && emojiPickerContainer && emojiPicker) {
+    // Toggle picker
+    emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emojiPickerContainer.classList.toggle('hidden');
+    });
+
+    // Handle emoji selection
+    emojiPicker.addEventListener('emoji-click', (event) => {
+      const emoji = event.detail.unicode;
+      insertAtCursor(messageInput, emoji);
+      emojiPickerContainer.classList.add('hidden');
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!emojiPickerContainer.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
+        emojiPickerContainer.classList.add('hidden');
+      }
+    });
+
+    // Stop closing when clicking inside picker
+    emojiPickerContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+}); // End DOMContentLoaded
+
+/**
+ * Insert text at cursor position
+ */
+function insertAtCursor(input, text) {
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const value = input.value;
+  input.value = value.substring(0, start) + text + value.substring(end);
+  input.selectionStart = input.selectionEnd = start + text.length;
+  input.focus();
+}

@@ -21,6 +21,10 @@ def create_app():
     def serve_js(filename):
         return send_from_directory("ui/js", filename)
 
+    @app.route("/ui/views/<path:filename>")
+    def serve_views(filename):
+        return send_from_directory("ui/views", filename)
+
     @app.before_request
     def load_user():
         g.user = request.headers.get("X-User", "anonymous")
