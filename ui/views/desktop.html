@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LocalBBS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/ui/css/styles.css" />
+    
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'bbs-bg': '#0a0f1a',
+              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
+              'bbs-accent': '#60a5fa',
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.3s ease-out forwards',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Electron Drag Region */
+        .titlebar-drag { -webkit-app-region: drag; }
+        .no-drag { -webkit-app-region: no-drag; }
+
+        /* Message Bubbles */
+        .message.own { flex-direction: row-reverse; }
+        .message.own .bubble {
+            background-color: #3b82f6; 
+            color: white;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 1rem;
+        }
+        .message:not(.own) .bubble {
+            background-color: #1e293b; 
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+        .message.own .meta-info { align-items: flex-end; }
+        .message:not(.own) .meta-info { align-items: flex-start; }
+
+        /* Editing State */
+        .message.editing .inline-editor { display: block; }
+        .message.editing .message-content { display: none; }
+
+        /* Connection Status */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; transition: background-color 0.3s; }
+        .status-dot.connected { background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .status-dot.disconnected { background-color: #ef4444; }
+        .status-dot.reconnecting { background-color: #f59e0b; animation: pulse 1s infinite; }
+
+        /* Empty State */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.5; height: 100%; min-height: 200px; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* Avatar Colors Fallback */
+        .user-color-0 { background-color: #ef4444; }
+        .user-color-1 { background-color: #f97316; }
+        .user-color-2 { background-color: #f59e0b; }
+        .user-color-3 { background-color: #10b981; }
+        .user-color-4 { background-color: #06b6d4; }
+        .user-color-5 { background-color: #3b82f6; }
+        .user-color-6 { background-color: #8b5cf6; }
+        .user-color-7 { background-color: #ec4899; }
+    </style>
+</head>
+<body class="h-screen flex flex-col lg:flex-row items-center justify-center bg-[#0a0f1a] text-slate-200 font-sans overflow-hidden">
+    
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- LEFT SPLIT IS NOW HANDLED IN MAIN CONTAINER -->
+    <!-- We remove the old profile sidebar because the new layout is focused on productivity -->
+
+    <!-- 3-PANE DESKTOP LAYOUT -->
+    <div class="flex w-full h-full overflow-hidden relative">
+
+        <!-- LEFT PANE: CHAT (Fixed Width) -->
+        <div class="w-80 lg:w-96 flex flex-col border-r border-slate-800 bg-[#0a0f1a] shrink-0 z-20">
+            
+            <!-- Chat Header -->
+            <div class="h-10 lg:h-14 flex items-center justify-between px-4 border-b border-slate-800 bg-slate-900/50 titlebar-drag select-none">
+                <div class="flex items-center gap-2 no-drag">
+                    <!-- Window Controls (Mac Style) -->
+                    <div class="flex gap-1.5 mr-2 group">
+                        <div class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 cursor-pointer"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 cursor-pointer"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 cursor-pointer"></div>
+                    </div>
+                    <div id="status-dot" class="status-dot connected"></div>
+                    <span id="current-room-name" class="font-bold text-slate-300 text-sm"># general</span>
+                </div>
+                <div id="unread-badge" class="hidden bg-red-500 text-white text-[10px] px-1.5 rounded-full">0</div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="flex-1 overflow-y-auto custom-scroll relative bg-black/20" id="messages-scroll">
+                 <div id="messages" class="flex flex-col p-4 gap-4 pb-20">
+                     <!-- Socket Glue injects here -->
+                 </div>
+                 
+                 <div id="typing-indicator" class="absolute bottom-2 left-4 text-xs text-slate-500 hidden pb-20">
+                    <span class="animate-pulse">Typing...</span>
+                 </div>
+            </div>
+
+            <!-- Chat Input (Sticky Bottom) -->
+            <div class="p-4 bg-[#0a0f1a] border-t border-slate-800">
+                <form id="message-form" class="relative">
+                    <div class="flex flex-col gap-2 bg-slate-800 p-2 rounded-lg border border-slate-700 focus-within:border-blue-500 transition-colors">
+                        <textarea id="input" rows="2" class="bg-transparent border-none text-white text-sm focus:outline-none resize-none placeholder-slate-500 font-mono leading-relaxed" placeholder="cmd/chat..."></textarea>
+                        <div class="flex justify-between items-center pt-1 border-t border-white/5">
+                             <div class="flex gap-2 text-slate-400">
+                                 <button type="button" id="emoji-btn" class="hover:text-yellow-400"><i class="ph-bold ph-smiley"></i></button>
+                                 <button type="button" id="upload-btn" class="hover:text-green-400"><i class="ph-bold ph-image"></i></button>
+                             </div>
+                             <button type="submit" id="send-btn" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded font-bold transition">SEND</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- CENTER PANE: THE STAGE (Flexible) -->
+        <div class="flex-1 flex flex-col bg-[#0f172a] relative overflow-hidden transition-all duration-300" id="center-stage">
+            
+            <!-- Stage Tabs -->
+            <div class="h-10 bg-[#0a0f1a] border-b border-slate-800 flex items-center px-2 gap-1 draggable-header">
+                <button class="stage-tab active px-4 py-1.5 text-xs font-bold text-blue-400 bg-slate-800 rounded-t-lg border-t border-x border-slate-700 relative top-[1px]" data-target="view-sandbox">
+                    <i class="ph-bold ph-code"></i> Sandbox
+                </button>
+                <button class="stage-tab px-4 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-300 transition" data-target="view-wall">
+                    <i class="ph-bold ph-square"></i> Wall
+                </button>
+                <button class="stage-tab px-4 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-300 transition" data-target="view-system">
+                    <i class="ph-bold ph-cpu"></i> System
+                </button>
+                
+                <div class="ml-auto flex items-center pr-2">
+                    <button id="toggle-context-btn" class="text-slate-500 hover:text-blue-400 p-1.5 rounded hover:bg-slate-800 transition" title="Toggle Context Pane">
+                        <i class="ph-bold ph-sidebar-simple"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Viewport -->
+            <div class="flex-1 relative bg-slate-900 scrollbar-hide">
+                <!-- Sandbox View -->
+                <iframe id="view-sandbox" src="/ui/views/playground.html" class="stage-view w-full h-full border-none block"></iframe>
+                <!-- Wall View -->
+                <iframe id="view-wall" src="/ui/views/wall.html" class="stage-view w-full h-full border-none hidden"></iframe>
+                <!-- System View -->
+                <iframe id="view-system" src="/ui/views/internals.html" class="stage-view w-full h-full border-none hidden"></iframe>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANE: CONTEXT (Toggleable) -->
+        <div id="right-pane" class="w-72 lg:w-80 border-l border-slate-800 bg-[#0a0f1a] flex flex-col shrink-0 z-20 pane-slide hidden">
+            <!-- Context Header -->
+             <div class="h-10 flex items-center justify-between px-4 border-b border-slate-800 bg-slate-900/50">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Context</span>
+                <button id="close-context-btn" class="text-slate-500 hover:text-white"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <!-- Dynamic Content Area -->
+            <div id="context-content" class="flex-1 overflow-y-auto p-4 custom-scroll">
+                
+                <!-- DEFAULT STATE: MINI PROFILE -->
+                <div id="context-mini-profile" class="hidden">
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="w-20 h-20 rounded-full bg-slate-700 mb-3 bg-cover bg-center shadow-lg border-2 border-slate-600" id="ctx-avatar"></div>
+                        <h3 class="text-lg font-bold text-white" id="ctx-name">User</h3>
+                        <p class="text-xs text-slate-400 font-mono" id="ctx-handle">@handle</p>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-lg p-3 mb-4 border border-slate-700/50">
+                        <div id="ctx-status-container" class="mb-3 hidden">
+                            <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Status</p>
+                            <p class="text-sm text-white flex items-center gap-2">
+                                <span id="ctx-emoji" class="text-lg"></span> 
+                                <span id="ctx-status-msg" class="italic text-slate-300"></span>
+                            </p>
+                        </div>
+                        
+                        <div id="ctx-now-container" class="mb-3 hidden">
+                            <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Doing Now</p>
+                            <div class="flex items-center gap-2">
+                                <span id="ctx-now-icon" class="text-blue-400"></span>
+                                <span id="ctx-now-text" class="text-xs text-slate-300"></span>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Bio</p>
+                        <p class="text-sm text-slate-300 italic" id="ctx-bio">Loading bio...</p>
+                    </div>
+
+                    <div id="ctx-voice-container" class="hidden mb-4 p-3 bg-indigo-900/20 rounded-lg border border-indigo-500/20">
+                         <div class="flex items-center gap-2 mb-2">
+                             <i class="ph-bold ph-microphone text-indigo-400"></i>
+                             <span class="text-xs font-bold text-indigo-200">Voice Intro</span>
+                         </div>
+                         <audio id="ctx-audio-player" controls class="w-full h-8 opacity-70 hover:opacity-100 transition"></audio>
+                    </div>
+                    
+                    <div id="ctx-anthem-container" class="hidden mb-4 p-3 bg-fuchsia-900/20 rounded-lg border border-fuchsia-500/20">
+                         <div class="flex items-center gap-2 text-fuchsia-300">
+                             <i class="ph-bold ph-music-notes"></i>
+                             <span class="text-xs font-bold">Has Profile Anthem</span>
+                         </div>
+                         <p class="text-[10px] text-fuchsia-400/70 mt-1">Visit wall to listen.</p>
+                    </div>
+
+                    <a href="#" id="ctx-wall-link" class="block w-full text-center py-2 bg-slate-800 hover:bg-slate-700 rounded text-xs font-bold text-blue-400 uppercase tracking-wide transition mb-2">
+                        View Full Wall
+                    </a>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div id="context-empty" class="text-center text-slate-600 mt-20">
+                    <i class="ph-duotone ph-sidebar text-4xl mb-2"></i>
+                    <p class="text-xs">Select a user or item<br>to view context.</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- Toast & Modals (Global) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Templates -->
+    <template id="message-template">
+      <article class="message flex w-full items-end mb-2 group animate-fade-in-up" data-id="">
+        <div class="message-avatar w-10 h-10 rounded-full mx-3 mb-1 bg-slate-700 flex items-center justify-center font-bold text-white shrink-0 shadow-lg text-sm select-none"></div>
+        <div class="flex flex-col max-w-[85%] meta-info">
+             <div class="flex items-baseline gap-2 mb-1 px-1 opacity-0 group-hover:opacity-100 transition duration-300 select-none">
+                <span class="message-user font-bold text-slate-400 text-[10px] uppercase tracking-wide"></span>
+                <span class="message-time text-[10px] text-slate-600 font-mono"></span>
+             </div>
+             <div class="bubble rounded-2xl p-3 shadow-md text-sm md:text-base leading-relaxed break-words relative">
+                <div class="message-content"></div>
+                <div class="inline-editor hidden mt-2 min-w-[200px]">
+                    <input type="text" class="edit-input w-full px-2 py-1 bg-black/20 rounded text-sm text-white border border-white/10 mb-2 focus:outline-none focus:border-white/30" placeholder="Edit...">
+                    <div class="flex gap-2">
+                        <button class="btn-save text-xs bg-black/20 hover:bg-black/40 px-2 py-1 rounded">Save</button>
+                        <button class="btn-cancel text-xs hover:text-red-300 px-2 py-1">Cancel</button>
+                    </div>
+                </div>
+                 <div class="message-actions absolute -top-8 right-0 bg-slate-800 rounded-lg shadow-xl border border-slate-700 hidden group-hover:flex overflow-hidden">
+                    <button class="btn-edit px-3 py-1 text-xs hover:bg-blue-500 hover:text-white text-slate-400 transition"><i class="ph-bold ph-pencil"></i></button>
+                    <button class="btn-delete px-3 py-1 text-xs hover:bg-red-500 hover:text-white text-slate-400 transition"><i class="ph-bold ph-trash"></i></button>
+                 </div>
+             </div>
+              <div class="message-edited text-[10px] text-slate-500 mt-1 italic hidden ml-1">edited</div>
+        </div>
+      </article>
+    </template>
+    
+    <!-- Confirm Modal -->
+    <div class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm" id="confirm-modal">
+        <div class="bg-slate-800 rounded-2xl p-6 w-80 shadow-2xl border border-slate-700 transform transition-all scale-100">
+            <h2 class="text-xl font-bold text-white mb-2">Delete Message?</h2>
+            <p class="text-slate-400 mb-6 text-sm">Real talk? This is permanent.</p>
+            <div class="flex gap-3 justify-end">
+                <button id="modal-cancel" class="px-4 py-2 text-slate-300 hover:text-white text-sm font-bold">Cancel</button>
+                <button id="modal-confirm" class="px-6 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-white text-sm font-bold shadow-glow transition">Boom</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Elements needed by JS -->
+    <div id="scroll-bottom" class="hidden"></div>
+    <div id="search-input" class="hidden"></div>
+    <div id="search-clear" class="hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="/ui/js/socket_glue.js?v=3"></script>
+    <script>
+        // UI Glue Logic
+        // We removed the sidebar profile, so we only need to verify auth here
+        
+        async function initUI() {
+             try {
+                 const res = await fetch('/auth/me');
+                 const data = await res.json();
+                 if(!data.logged_in) {
+                     window.location = '/auth/login';
+                 }
+             } catch(e) {
+                 console.error("Auth check failed", e);
+             }
+        }
+        initUI();
+        
+        // Navigation Logic
+        document.querySelectorAll('.room-link').forEach(l => {
+            l.addEventListener('click', (e) => {
+                e.preventDefault();
+                const room = l.dataset.room;
+                headerRoom.textContent = '# ' + room;
+                
+                 // Update visual active state
+                document.querySelectorAll('.room-link').forEach(link => {
+                     link.classList.remove('text-blue-400', 'bg-slate-700/50');
+                     link.classList.add('text-slate-300');
+                     link.querySelector('i').classList.remove('text-blue-400');
+                     link.querySelector('i').classList.add('text-slate-500');
+                });
+                l.classList.add('text-blue-400', 'bg-slate-700/50');
+                l.classList.remove('text-slate-300');
+                l.querySelector('i').classList.add('text-blue-400');
+                l.querySelector('i').classList.remove('text-slate-500');
+            });
+        });
+
+        // Desktop Tab Logic
+        const tabs = document.querySelectorAll('.stage-tab');
+        const views = document.querySelectorAll('.stage-view');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Deactivate all
+                tabs.forEach(t => {
+                    t.classList.remove('text-blue-400', 'bg-slate-800', 'rounded-t-lg', 'border-t', 'border-x', 'border-slate-700');
+                    t.classList.add('text-slate-500');
+                });
+                views.forEach(v => v.classList.add('hidden'));
+                
+                // Activate clicked
+                tab.classList.remove('text-slate-500');
+                tab.classList.add('text-blue-400', 'bg-slate-800', 'rounded-t-lg', 'border-t', 'border-x', 'border-slate-700');
+                
+                const targetId = tab.dataset.target;
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+
+        // Context Pane Logic
+        const rightPane = document.getElementById('right-pane');
+        const toggleContextBtn = document.getElementById('toggle-context-btn');
+        const closeContextBtn = document.getElementById('close-context-btn');
+        const contextContent = document.getElementById('context-content');
+        const ctxEmpty = document.getElementById('context-empty');
+        const ctxProfile = document.getElementById('context-mini-profile');
+        
+        function toggleContext(show) {
+            if (show) {
+                rightPane.classList.remove('hidden');
+                toggleContextBtn.classList.add('text-blue-400');
+            } else {
+                rightPane.classList.add('hidden');
+                toggleContextBtn.classList.remove('text-blue-400');
+            }
+        }
+        
+        if (toggleContextBtn) {
+            toggleContextBtn.addEventListener('click', () => {
+                const isHidden = rightPane.classList.contains('hidden');
+                toggleContext(isHidden);
+            });
+        }
+        
+        if (closeContextBtn) {
+           closeContextBtn.addEventListener('click', () => toggleContext(false));
+        }
+
+        // Intercept Avatar Clicks from Socket Glue
+        // Since messages are dynamic, we use event delegation on the container
+        const messagesContainer = document.getElementById('messages');
+        if (messagesContainer) {
+            messagesContainer.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('message-avatar') || e.target.classList.contains('message-user')) {
+                    const article = e.target.closest('.message');
+                    if (!article) return;
+                    
+                    const userEl = article.querySelector('.message-user');
+                    if (!userEl) return;
+                    
+                    const username = userEl.textContent;
+                    
+                    // Show Pane
+                    toggleContext(true);
+                    
+                    // Show Loading / Setup
+                    ctxEmpty.classList.add('hidden');
+                    ctxProfile.classList.remove('hidden');
+                    
+                    document.getElementById('ctx-name').textContent = username;
+                    document.getElementById('ctx-handle').textContent = '@' + username;
+                    document.getElementById('ctx-bio').textContent = "Loading...";
+                    const ctxAvatar = document.getElementById('ctx-avatar');
+                    ctxAvatar.style.backgroundImage = '';
+                    ctxAvatar.textContent = username.charAt(0);
+                    // Re-use color logic if available or default
+                    // We need to re-implement or expose getUserColorClass from socket_glue if we want consistent colors here
+                    // For now simple grey fallback is fine or inline hash logic
+                     
+                    // Reset UI
+                    document.getElementById('ctx-status-container').classList.add('hidden');
+                    document.getElementById('ctx-now-container').classList.add('hidden');
+                    document.getElementById('ctx-voice-container').classList.add('hidden');
+                    document.getElementById('ctx-anthem-container').classList.add('hidden');
+                     
+                    // Fetch real data
+                    try {
+                        const res = await fetch(`/users/lookup?username=${username}`);
+                        const data = await res.json();
+                        
+                        if (data.id) {
+                            document.getElementById('ctx-name').textContent = data.display_name || username;
+                            document.getElementById('ctx-bio').textContent = data.bio || "No bio set.";
+                            if (data.avatar_path) {
+                                ctxAvatar.style.backgroundImage = `url('${data.avatar_path}')`;
+                                ctxAvatar.textContent = '';
+                            }
+                            
+                            // Status
+                            if (data.status_message || data.status_emoji) {
+                                document.getElementById('ctx-status-container').classList.remove('hidden');
+                                document.getElementById('ctx-emoji').textContent = data.status_emoji || "👋";
+                                document.getElementById('ctx-status-msg').textContent = data.status_message || "";
+                            }
+                            
+                            // Now Activity
+                            if (data.now_activity) {
+                                document.getElementById('ctx-now-container').classList.remove('hidden');
+                                const typeIcons = {
+                                    'listening': 'ph-headphones',
+                                    'working': 'ph-briefcase',
+                                    'playing': 'ph-game-controller',
+                                    'reading': 'ph-book-open',
+                                    'thinking': 'ph-brain'
+                                };
+                                const iconClass = typeIcons[data.now_activity_type] || 'ph-lightning';
+                                document.getElementById('ctx-now-icon').className = `ph-bold ${iconClass} text-blue-400`;
+                                document.getElementById('ctx-now-text').textContent = data.now_activity;
+                            }
+                            
+                            // Voice Intro
+                            if (data.voice_intro_path) {
+                                const vContainer = document.getElementById('ctx-voice-container');
+                                vContainer.classList.remove('hidden');
+                                const audio = document.getElementById('ctx-audio-player');
+                                audio.src = data.voice_intro_path;
+                                // Reset audio when opening new profile
+                                audio.load();
+                            }
+                            
+                            // Anthem Indicator
+                            if (data.anthem_url) {
+                                document.getElementById('ctx-anthem-container').classList.remove('hidden');
+                            }
+                            
+                            // Set Wall Link to open in Center Pane
+                            const wallLink = document.getElementById('ctx-wall-link');
+                            wallLink.onclick = (ev) => {
+                                ev.preventDefault();
+                                // Switch tab to Wall
+                                const wallTab = document.querySelector('[data-target="view-wall"]');
+                                if (wallTab) wallTab.click();
+                                // Load specific user wall
+                                const iframe = document.getElementById('view-wall');
+                                iframe.src = `/ui/views/wall.html?user_id=${data.id}`;
+                            };
+                        }
+                    } catch (err) {
+                        console.error("Context fetch failed", err);
+                        document.getElementById('ctx-bio').textContent = "Could not load profile.";
+                    }
+                }
+            });
+        }
+        
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+B or Cmd+B to toggle Context Pane
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                const isHidden = rightPane.classList.contains('hidden');
+                toggleContext(isHidden);
+            }
+        });
+    </script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <!-- Reuse socket glue for chat functionality -->
+    <script src="/ui/js/socket_glue.js?v=4"></script> 
+</body>
+</html>

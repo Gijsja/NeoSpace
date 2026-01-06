@@ -38,15 +38,25 @@ We are transforming LocalBBS from a chat app into a **Creative Communication Ope
   - [x] Add "Voice Card" to `wall.html`.
   - [x] Interactive waveform player (click to seek).
 
+### Quick Wins (Sprint 11 Early Access) ✅
+
+**Theme**: NeoSpace Foundations
+
+- [x] **Audio Anthem**: Profile background music with autoplay and mute controls.
+- [x] **Vision to Docs**: Updated `PRINCIPLES.md` with the "NeoSpace Manifesto" (Anti-algorithm, Chaos, User Ownership).
+
 ## Upcoming
 
-### Sprint #10: Unified Desktop (The Dashboard)
+### Sprint #10 (SHIPPED ✅)
+
+**Theme**: Unified Desktop (The WebOS)
 
 **Goal**: The "Mega-View" for power users.
 
-- **Dashboard Layout**: 3-pane view unifing Nav, Chat, and Context.
-- **Mini-Wall**: Compact profile summary in the side panel.
-- **Electron Polish**: Native window controls and system tray.
+- [x] **Desktop Shell**: 3-pane layout (Chat / Stage / Context).
+- [x] **Tool Integration**: Sandbox, Wall, and Internals running in the stage.
+- [x] **Context Pane**: Dynamic side-panel (Voice/Docs).
+- [x] **Electron Polish**: Native window controls.
 
 ---
 

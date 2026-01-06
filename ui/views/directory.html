@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/ui/css/styles.css">
     <script>
       tailwind.config = {
         theme: {
@@ -137,8 +138,15 @@
                     userGrid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">No users found.</div>';
                 }
 
-                data.users.forEach(user => {
+                data.users.forEach((user, index) => {
                     const clone = template.content.cloneNode(true);
+                    
+                    // Add staggered animation
+                    const card = clone.querySelector('.user-card');
+                    card.style.opacity = '0';
+                    card.classList.add('animate-fade-in-up');
+                    card.style.animationDelay = `${index * 50}ms`;
+                    card.style.animationFillMode = 'forwards';
                     
                     const avatarEl = clone.querySelector('.avatar-container');
                     if (user.avatar_path) {

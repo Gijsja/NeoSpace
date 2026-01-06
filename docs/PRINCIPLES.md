@@ -6,6 +6,17 @@ This system deliberately trades convenience for reliability. Every design decisi
 
 ---
 
+## The NeoSpace Manifesto
+
+We are building an **Anti-Social Network**.
+
+1.  **Anti-algorithm**: No recommendations, only exploration. Discovery is active, not passive.
+2.  **User Ownership**: Your data is yours. Profile customization is raw (HTML/CSS), not just a form.
+3.  **Chaos as Feature**: Embrace the messiness of human connection. If it breaks, it's art.
+4.  **Social Without Performance**: No likes, no counts, just vibes. Connection > Validation.
+
+---
+
 ## The Five Invariants (Non-Negotiable)
 
 Violating any invariant is a critical bug.

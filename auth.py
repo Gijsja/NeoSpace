@@ -1,4 +1,6 @@
 import functools
+import sqlite3
+import time
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, send_from_directory, jsonify
 )
@@ -6,6 +8,26 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db import get_db
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+# Retry settings
+MAX_RETRIES = 5
+RETRY_DELAY_BASE = 0.05
+
+
+def _db_retry(operation):
+    """Execute a database operation with retry on lock."""
+    last_error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            return operation()
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e).lower() or "busy" in str(e).lower():
+                last_error = e
+                time.sleep(RETRY_DELAY_BASE * (2 ** attempt))
+            else:
+                raise
+    raise last_error
+
 
 @auth_bp.route('/register', methods=('POST',))
 def register():
@@ -24,14 +46,19 @@ def register():
         hash_val = ord(char) + ((hash_val << 5) - hash_val)
     color_class = f"user-color-{abs(hash_val) % 8}"
 
-    try:
+    def do_register():
         db.execute(
             "INSERT INTO users (username, password_hash, avatar_color) VALUES (?, ?, ?)",
             (username, generate_password_hash(password), color_class),
         )
         db.commit()
-    except db.IntegrityError:
+
+    try:
+        _db_retry(do_register)
+    except sqlite3.IntegrityError:
         return jsonify(error=f"User {username} is already registered."), 400
+    except sqlite3.OperationalError:
+        return jsonify(error="Database busy, please retry"), 503
 
     # Auto login
     user = db.execute(
@@ -39,11 +66,17 @@ def register():
     ).fetchone()
     
     # Create default profile for new user
-    db.execute(
-        "INSERT INTO profiles (user_id, display_name) VALUES (?, ?)",
-        (user['id'], username)
-    )
-    db.commit()
+    def do_create_profile():
+        db.execute(
+            "INSERT INTO profiles (user_id, display_name) VALUES (?, ?)",
+            (user['id'], username)
+        )
+        db.commit()
+    
+    try:
+        _db_retry(do_create_profile)
+    except sqlite3.OperationalError:
+        pass  # Profile creation failure is non-critical
     
     session.clear()
     session['user_id'] = user['id']

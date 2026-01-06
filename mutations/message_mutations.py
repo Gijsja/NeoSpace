@@ -2,20 +2,48 @@
 from flask import request, g, jsonify
 from db import get_db
 import html
+import sqlite3
+import time
+
+# Retry settings for database operations
+MAX_RETRIES = 5
+RETRY_DELAY_BASE = 0.05
+
+
+def _db_retry(operation):
+    """Execute a database operation with retry on lock."""
+    last_error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            return operation()
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e).lower() or "busy" in str(e).lower():
+                last_error = e
+                time.sleep(RETRY_DELAY_BASE * (2 ** attempt))
+            else:
+                raise
+    raise last_error
+
 
 def send_message():
     db = get_db()
-    content = html.escape(request.json.get("content",""))
+    content = html.escape(request.json.get("content", ""))
     username = g.user['username'] if g.user else 'anonymous'
     
-    # Optimized: Atomic insert and return ID
-    row = db.execute(
-        "INSERT INTO messages(user,content) VALUES (?,?) RETURNING id", 
-        (username, content)
-    ).fetchone()
-    db.commit()
+    def do_insert():
+        row = db.execute(
+            "INSERT INTO messages(user,content) VALUES (?,?) RETURNING id", 
+            (username, content)
+        ).fetchone()
+        db.commit()
+        return row
     
-    return jsonify(id=row['id'])
+    try:
+        row = _db_retry(do_insert)
+        return jsonify(id=row['id'])
+    except sqlite3.OperationalError:
+        return jsonify(error="Database busy, please retry"), 503
+
 
 def edit_message():
     """Edit message content. Requires 'id' and 'content' in JSON body."""
@@ -34,12 +62,19 @@ def edit_message():
     if row["user"] != username:
         return jsonify(ok=False, error="Not authorized"), 403
     
-    db.execute(
-        "UPDATE messages SET content=?, edited_at=datetime('now') WHERE id=?",
-        (content, msg_id)
-    )
-    db.commit()
-    return jsonify(ok=True, id=msg_id)
+    def do_update():
+        db.execute(
+            "UPDATE messages SET content=?, edited_at=datetime('now') WHERE id=?",
+            (content, msg_id)
+        )
+        db.commit()
+    
+    try:
+        _db_retry(do_update)
+        return jsonify(ok=True, id=msg_id)
+    except sqlite3.OperationalError:
+        return jsonify(ok=False, error="Database busy, please retry"), 503
+
 
 def delete_message():
     """Soft-delete a message. Requires 'id' in JSON body."""
@@ -57,9 +92,16 @@ def delete_message():
     if row["user"] != username:
         return jsonify(ok=False, error="Not authorized"), 403
     
-    db.execute(
-        "UPDATE messages SET deleted_at=datetime('now') WHERE id=?",
-        (msg_id,)
-    )
-    db.commit()
-    return jsonify(ok=True, id=msg_id)
+    def do_delete():
+        db.execute(
+            "UPDATE messages SET deleted_at=datetime('now') WHERE id=?",
+            (msg_id,)
+        )
+        db.commit()
+    
+    try:
+        _db_retry(do_delete)
+        return jsonify(ok=True, id=msg_id)
+    except sqlite3.OperationalError:
+        return jsonify(ok=False, error="Database busy, please retry"), 503
+

@@ -115,6 +115,10 @@
                         <i class="ph-bold ph-code text-slate-500 group-hover:text-green-400"></i> Sandbox
                       </a>
                   </nav>
+
+                  <a href="/desktop" class="block mt-4 px-3 py-2 rounded bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 text-blue-200 text-xs font-bold uppercase tracking-wider hover:border-blue-400 transition text-center shadow-lg group">
+                      <i class="ph-bold ph-desktop mr-1 group-hover:animate-pulse"></i> Switch to Pro OS
+                  </a>
             </div>
             
             <p class="text-xs text-slate-500 italic mt-4 hidden lg:block">"Creativity is the greatest rebellion."</p>
@@ -167,9 +171,11 @@
                 <!-- Input Form -->
                 <form id="message-form" class="mb-0 relative group">
                     <!-- Typing Indicator -->
-                    <div id="typing-indicator" class="hidden absolute bottom-full left-0 mb-2 pl-4 text-xs text-slate-500 font-mono flex items-center gap-1">
-                         <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
-                         <span id="typing-users">Someone is typing...</span>
+                    <div id="typing-indicator" class="hidden absolute bottom-full left-0 mb-2 pl-4 text-xs text-slate-500 font-mono flex items-center gap-2">
+                         <div class="typing-dots">
+                             <span></span><span></span><span></span>
+                         </div>
+                         <span id="typing-users">Someone is typing</span>
                     </div>
 
                     <div class="flex items-center bg-slate-800 border-b-2 border-blue-500 transition-colors focus-within:border-blue-400 rounded-t-lg py-2 px-4 shadow-lg">
@@ -182,7 +188,7 @@
                             <i class="ph-bold ph-image"></i>
                         </button>
 
-                        <input id="input" class="appearance-none bg-transparent border-none w-full mr-3 py-2 px-2 leading-tight focus:outline-none text-white placeholder-slate-500 font-medium" type="text" placeholder="Type a message..." autocomplete="off">
+                        <input id="input" class="appearance-none bg-transparent border-none w-full mr-3 py-2 px-2 leading-tight focus:outline-none text-white placeholder-slate-500 font-medium" type="text" placeholder="Write something dumb or brilliant..." autocomplete="off">
                         
                         <button id="send-btn" type="submit" class="flex-shrink-0 bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600 text-sm font-bold text-white py-1.5 px-6 rounded-lg transition transform hover:scale-105 active:scale-95 shadow-glow">
                             Send

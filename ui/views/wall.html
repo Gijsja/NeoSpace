@@ -67,47 +67,95 @@
         </div>
     </div>
 
-    <!-- Wall Container -->
+    <!-- Profile Wall 2.0 Container -->
     <div id="wall-container" class="relative min-h-screen overflow-hidden hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
       
-      <!-- Banner Area -->
-      <div class="h-48 relative overflow-hidden group">
-        <div class="absolute inset-0 bg-gradient-to-b from-purple-900/30 to-transparent"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bbs-bg/90 to-transparent"></div>
+      <!-- Hero Identity Block -->
+      <div class="relative max-w-6xl mx-auto pt-16 px-6 pb-8 mb-6 z-10">
+        <div class="flex flex-col md:flex-row items-start gap-8 md:gap-12">
+            
+            <!-- Avatar (Large & Distinctive) -->
+            <div class="relative group shrink-0">
+                <div id="avatar-container" class="w-32 h-32 md:w-48 md:h-48 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-white/10 shadow-2xl flex items-center justify-center overflow-hidden bg-cover bg-center transition-transform duration-500 hover:scale-[1.02] hover:shadow-glow hover:rotate-1">
+                    <span id="avatar-initial" class="text-6xl font-black text-white/10">?</span>
+                </div>
+                <!-- Online Dot -->
+                <div id="online-indicator" class="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-500 border-4 border-bbs-bg rounded-full shadow-lg hidden" title="Online"></div>
+                <!-- Edit Avatar (Owner) -->
+                <button id="edit-avatar-btn" class="absolute bottom-2 right-2 p-2 bg-black/50 hover:bg-bbs-accent text-white rounded-lg backdrop-blur opacity-0 group-hover:opacity-100 transition hidden pointer-events-auto">
+                     <i class="ph-bold ph-camera"></i>
+                </button>
+            </div>
+
+            <!-- Identity Info -->
+            <div class="flex-1 min-w-0 pt-2 space-y-5">
+                <div>
+                    <h1 class="text-4xl md:text-6xl font-black tracking-tight text-white mb-1 leading-none drop-shadow-lg" id="display-name">Username</h1>
+                    <div class="flex items-center gap-3">
+                        <p class="text-lg text-slate-400 font-mono tracking-wide" id="username-handle">@handle</p>
+                        <button id="edit-profile-btn" class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/5 rounded text-xs font-bold text-slate-300 transition hidden">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Line -->
+                <div class="relative group max-w-2xl bg-black/20 backdrop-blur rounded-xl p-4 border border-white/5 hover:bg-black/30 transition">
+                    <div class="flex items-start gap-4">
+                        <span id="status-emoji" class="text-3xl pt-0.5 filter drop-shadow">👋</span>
+                        <div class="flex-1">
+                            <p id="status-message" class="text-xl md:text-2xl text-slate-200 font-medium leading-snug">
+                                Setting up my space...
+                            </p>
+                            <p class="text-xs text-slate-500 mt-2 font-mono uppercase tracking-wider" id="status-label">Current Status</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Voice Intro Player (Dynamic) -->
+                <div id="voice-intro-section" class="hidden max-w-md">
+                     <!-- Injected by VoicePlayer -->
+                </div>
+            </div>
+
+            <!-- "Now" Block (Ephemeral) -->
+            <div class="w-full md:w-72 bg-bbs-surface/40 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl hover:border-bbs-accent/30 transition group relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition">
+                     <i class="ph-duotone ph-clock text-6xl rotate-12"></i>
+                </div>
+                
+                <div class="flex items-center justify-between mb-4 relative z-10">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Now
+                    </h3>
+                    <span id="now-activity-type-icon" class="text-bbs-accent text-lg">
+                        <i class="ph-fill ph-star"></i>
+                    </span>
+                </div>
+                
+                <p id="now-activity" class="text-white font-medium text-lg leading-relaxed relative z-10 italic">
+                    Just chilling...
+                </p>
+                
+                 <!-- Update Now Trigger (Owner) -->
+                 <button id="edit-now-btn" class="w-full mt-4 py-2 text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5 rounded transition hidden relative z-10">
+                    Update Status
+                 </button>
+            </div>
+        </div>
       </div>
+      
+      <!-- Content Container -->
+      <div class="max-w-6xl mx-auto px-6 relative z-10">
 
-      <!-- Profile Header -->
-      <div class="relative max-w-4xl mx-auto px-6 -mt-20">
-        <div class="flex items-end gap-6 mb-6">
-          <!-- Avatar -->
-          <div id="avatar-container" class="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 border-4 border-bbs-bg shadow-xl flex items-center justify-center text-4xl font-bold overflow-hidden bg-cover bg-center shrink-0">
-            <span id="avatar-initial">U</span>
-          </div>
-          <!-- Info -->
-          <div class="pb-2 flex-1 min-w-0">
-            <h1 class="text-3xl font-bold mb-1 flex items-center gap-2">
-                <span id="display-name" class="truncate">Username</span>
-                <span id="online-indicator" class="w-3 h-3 rounded-full bg-emerald-400 shadow-glow hidden shrink-0" title="Online"></span>
-            </h1>
-            <p class="text-slate-400 font-mono" id="username-handle">@username</p>
-          </div>
-          <!-- Edit Button (Owner only) -->
-          <button id="edit-btn" class="ml-auto px-4 py-2 bg-bbs-accent hover:bg-blue-600 rounded-lg text-sm font-medium transition shadow-glow hidden flex items-center gap-2 shrink-0">
-            <i class="ph-bold ph-pencil-simple"></i> Edit Wall
-          </button>
-        </div>
-
-        <!-- Voice Intro Player (Dynamic) -->
-        <div id="voice-intro-section" class="mb-4 hidden">
-             <!-- Injected by VoicePlayer -->
-        </div>
-
-        <!-- Bio -->
-        <div class="bg-bbs-surface/50 backdrop-blur rounded-xl p-5 mb-6 border border-bbs-border/50 shadow-lg relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-4 opacity-10">
-              <i class="ph-duotone ph-quotes text-6xl"></i>
-          </div>
-          <p class="text-slate-300 whitespace-pre-wrap relative z-10 leading-relaxed" id="bio-text">No bio yet.</p>
+        <!-- Pinned Scripts -->
+        <div id="pinned-scripts-section" class="mb-6 hidden">
+            <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1">
+                <i class="ph-bold ph-code"></i> Pinned Scripts
+            </h3>
+            <div id="pinned-scripts-grid">
+                <!-- Script cards injected here -->
+            </div>
         </div>
 
         <!-- Content Grid -->
@@ -208,13 +256,54 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Status Line</label>
+                    <div class="flex gap-2">
+                         <input type="text" name="status_emoji" id="input-status-emoji" class="w-16 bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white text-center text-xl focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition" placeholder="👋" maxlength="4" />
+                         <input type="text" name="status_message" id="input-status-msg" class="flex-1 bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition" placeholder="What's your vibe today?" maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                     <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5 flex items-center gap-2">
+                        <i class="ph-bold ph-clock"></i> The "Now" Block
+                     </label>
+                     <div class="grid grid-cols-3 gap-2 mb-2">
+                        <select name="now_activity_type" id="input-now-type" class="col-span-1 bg-bbs-bg border border-bbs-border rounded-lg px-2 py-2 text-white text-xs focus:border-bbs-accent focus:outline-none">
+                            <option value="thinking">Thinking</option>
+                            <option value="listening">Listening</option>
+                            <option value="working">Working</option>
+                            <option value="playing">Playing</option>
+                            <option value="reading">Reading</option>
+                             <option value="watching">Watching</option>
+                        </select>
+                        <input type="text" name="now_activity" id="input-now-activity" class="col-span-2 bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white text-sm focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition" placeholder="e.g. Listening to Jazz..." maxlength="50" />
+                     </div>
+                </div>
+
+                <div>
                     <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Display Name</label>
                     <input type="text" name="display_name" id="input-name" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition" required maxlength="50" />
                 </div>
 
                 <div>
-                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Bio</label>
-                    <textarea name="bio" id="input-bio" rows="3" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition resize-none" maxlength="500"></textarea>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Bio (Legacy)</label>
+                    <textarea name="bio" id="input-bio" rows="2" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition resize-none" maxlength="500"></textarea>
+                </div>
+
+                <!-- Sprint 11: Audio Anthem -->
+                <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-3 rounded-lg border border-purple-500/20">
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5 flex items-center gap-2">
+                        <i class="ph-bold ph-music-notes text-purple-400"></i> Profile Anthem
+                    </label>
+                    <input type="url" name="anthem_url" id="input-anthem-url" 
+                           class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-purple-400 focus:outline-none focus:ring-1 focus:ring-purple-400 transition mb-2" 
+                           placeholder="https://example.com/song.mp3" />
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="anthem_autoplay" id="input-anthem-autoplay" 
+                               class="rounded bg-bbs-bg border-bbs-border text-purple-400 focus:ring-offset-0 focus:ring-0 w-4 h-4" checked />
+                        <span class="text-sm text-slate-300 group-hover:text-white transition">Autoplay for visitors</span>
+                    </label>
+                    <p class="text-[10px] text-slate-500 mt-2">Direct link to MP3/audio file. Will loop on your wall.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -255,6 +344,15 @@
             </form>
         </div>
     </div>
+
+    <!-- Audio Anthem Player (Hidden) -->
+    <audio id="anthem-player" preload="auto" loop></audio>
+    
+    <!-- Anthem Mute Toggle -->
+    <button id="anthem-toggle" class="fixed bottom-4 right-4 z-50 w-12 h-12 bg-purple-600/80 hover:bg-purple-500 backdrop-blur rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 hover:scale-110 hidden" title="Toggle Music">
+        <i class="ph-bold ph-speaker-high text-xl" id="anthem-icon"></i>
+    </button>
+
 
     <script>
         // DOM Elements
@@ -327,7 +425,25 @@
             // Text fields
             document.getElementById('display-name').textContent = data.display_name;
             document.getElementById('username-handle').textContent = `@${data.username}`;
-            document.getElementById('bio-text').textContent = data.bio || "No bio yet.";
+            // document.getElementById('bio-text').textContent = data.bio || ""; // Bio moved/deprecated for Status?
+            
+            // Status & Now
+            document.getElementById('status-message').textContent = data.status_message || "Just setting up my space...";
+            document.getElementById('status-emoji').textContent = data.status_emoji || "👋";
+            document.getElementById('now-activity').textContent = data.now_activity || "Just chilling...";
+            
+            // Icon mapping for "Now" type
+            const activityIcons = {
+                'listening': 'ph-headphones',
+                'working': 'ph-laptop',
+                'playing': 'ph-game-controller',
+                'reading': 'ph-book-open',
+                'thinking': 'ph-brain',
+                'watching': 'ph-monitor-play'
+            };
+            const iconClass = activityIcons[data.now_activity_type] || 'ph-star';
+            document.getElementById('now-activity-type-icon').innerHTML = `<i class="ph-fill ${iconClass}"></i>`;
+
             document.getElementById('member-since').textContent = new Date(data.member_since).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
 
             // Avatar
@@ -355,8 +471,11 @@
                 new VoicePlayer('voice-intro-section', data.voice_intro_path, waveform);
             } else {
                 voiceSection.classList.add('hidden');
-                voiceSection.innerHTML = ''; // Helper to clear if removed
+                voiceSection.innerHTML = ''; 
             }
+
+            // Audio Anthem (Sprint 11)
+            setupAnthem(data.anthem_url, data.anthem_autoplay);
 
             // Theme & Accent
             if (themes[data.theme_preset]) {
@@ -366,13 +485,22 @@
             
             // Interaction
             if (data.is_own) {
-                document.getElementById('edit-btn').classList.remove('hidden');
-                document.getElementById('edit-btn').onclick = openEditModal;
+                // Show edit controls
+                ['edit-avatar-btn', 'edit-profile-btn', 'edit-now-btn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.classList.remove('hidden');
+                        el.onclick = openEditModal; // For now all open main modal
+                    }
+                });
             }
             
             if (data.show_online_status) {
                 document.getElementById('online-indicator').classList.remove('hidden');
             }
+            
+            // Pinned Scripts
+            renderPinnedScripts(data.pinned_scripts);
         }
 
         // --- Edit Logic ---
@@ -383,10 +511,21 @@
             
             document.getElementById('input-name').value = d.display_name;
             document.getElementById('input-bio').value = d.bio;
+            
+            // New Fields
+            if(document.getElementById('input-status-msg')) document.getElementById('input-status-msg').value = d.status_message || "";
+            if(document.getElementById('input-status-emoji')) document.getElementById('input-status-emoji').value = d.status_emoji || "👋";
+            if(document.getElementById('input-now-activity')) document.getElementById('input-now-activity').value = d.now_activity || "";
+            if(document.getElementById('input-now-type')) document.getElementById('input-now-type').value = d.now_activity_type || "thinking";
+
             document.getElementById('input-theme').value = d.theme_preset;
             document.getElementById('input-accent').value = d.accent_color;
-            document.getElementById('input-public').checked = d.is_public !== false; // defaults to true
+            document.getElementById('input-public').checked = d.is_public !== false; 
             document.getElementById('input-online').checked = d.show_online_status !== false;
+            
+            // Anthem fields
+            if(document.getElementById('input-anthem-url')) document.getElementById('input-anthem-url').value = d.anthem_url || '';
+            if(document.getElementById('input-anthem-autoplay')) document.getElementById('input-anthem-autoplay').checked = d.anthem_autoplay !== false;
 
             // Preview current avatar
             const prev = document.getElementById('preview-avatar');
@@ -522,6 +661,7 @@
             // checkbox handling
             payload.is_public = formData.get('is_public') === 'on';
             payload.show_online_status = formData.get('show_online_status') === 'on';
+            payload.anthem_autoplay = formData.get('anthem_autoplay') === 'on';
 
             try {
                 const res = await fetch('/profile/update', {
@@ -539,6 +679,62 @@
             } catch (err) {
                 alert("Update error");
             }
+        };
+
+        // =============================================
+        // AUDIO ANTHEM (Sprint 11)
+        // =============================================
+        let anthemMuted = false;
+        const anthemPlayer = document.getElementById('anthem-player');
+        const anthemToggle = document.getElementById('anthem-toggle');
+        const anthemIcon = document.getElementById('anthem-icon');
+        
+        function setupAnthem(url, autoplay) {
+            if (!url) {
+                anthemToggle.classList.add('hidden');
+                anthemPlayer.pause();
+                anthemPlayer.src = '';
+                return;
+            }
+            
+            anthemPlayer.src = url;
+            anthemToggle.classList.remove('hidden');
+            
+            if (autoplay) {
+                // Try to play (may be blocked by browser policy)
+                anthemPlayer.play().then(() => {
+                    updateAnthemIcon(false);
+                }).catch(() => {
+                    // Autoplay blocked - show as muted, user can click to play
+                    anthemMuted = true;
+                    updateAnthemIcon(true);
+                });
+            } else {
+                anthemMuted = true;
+                updateAnthemIcon(true);
+            }
+        }
+        
+        function updateAnthemIcon(muted) {
+            if (muted) {
+                anthemIcon.className = 'ph-bold ph-speaker-x text-xl';
+                anthemToggle.classList.add('bg-slate-600/80');
+                anthemToggle.classList.remove('bg-purple-600/80');
+            } else {
+                anthemIcon.className = 'ph-bold ph-speaker-high text-xl';
+                anthemToggle.classList.remove('bg-slate-600/80');
+                anthemToggle.classList.add('bg-purple-600/80');
+            }
+        }
+        
+        anthemToggle.onclick = () => {
+            anthemMuted = !anthemMuted;
+            if (anthemMuted) {
+                anthemPlayer.pause();
+            } else {
+                anthemPlayer.play().catch(() => {});
+            }
+            updateAnthemIcon(anthemMuted);
         };
 
         function setupPalette() {
@@ -576,6 +772,179 @@
                 });
             }
         }
+        
+        // =============================================
+        // PINNED SCRIPTS RENDERING (Masonry)
+        // =============================================
+        function renderPinnedScripts(scripts) {
+            if (!scripts || scripts.length === 0) {
+                document.getElementById('pinned-scripts-section').classList.add('hidden');
+                return;
+            }
+            
+            const section = document.getElementById('pinned-scripts-section');
+            const grid = document.getElementById('pinned-scripts-grid');
+            section.classList.remove('hidden');
+            grid.innerHTML = '';
+            
+            // Switch grid to masonry columns via CSS class if not already set
+            grid.className = 'columns-1 md:columns-3 gap-6 space-y-6';
+            
+            scripts.forEach(script => {
+                const card = document.createElement('div');
+                
+                // Random aspect ratio for masonry effect (Tall, Square, Wide)
+                // We'll use a pseudo-random determined by script ID so it's stable
+                const heights = ['h-64', 'h-80', 'h-56'];
+                const heightClass = heights[script.id % heights.length];
+                
+                card.className = `glass-panel-interactive rounded-xl overflow-hidden relative group ${heightClass} break-inside-avoid transition-all duration-300 hover:shadow-glow-md mb-6 w-full`;
+                
+                // HTML structure for immersive card
+                card.innerHTML = `
+                    <!-- Header Overlay -->
+                    <div class="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+                        <h4 class="font-bold text-white text-shadow-sm truncate pr-2">${script.title}</h4>
+                        <span class="text-[10px] uppercase font-mono bg-black/50 px-1.5 py-0.5 rounded text-slate-300 border border-white/10 backdrop-blur">${script.script_type}</span>
+                    </div>
+
+                    <!-- Script Container -->
+                    <div class="script-container absolute inset-0 bg-slate-900 z-10">
+                        <!-- Placeholder / Play Trigger -->
+                         <div class="placeholder absolute inset-0 flex items-center justify-center cursor-pointer group-hover:bg-white/5 transition z-20">
+                             <div class="w-12 h-12 rounded-full bg-bbs-accent/20 border border-bbs-accent/50 flex items-center justify-center backdrop-blur group-hover:scale-110 transition shadow-glow">
+                                <i class="ph-fill ph-play text-bbs-accent text-xl"></i>
+                             </div>
+                             <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-slate-400 opacity-0 group-hover:opacity-100 transition">
+                                Click to Run
+                             </div>
+                        </div>
+                    </div>
+                `;
+                
+                const placeholder = card.querySelector('.placeholder');
+                placeholder.onclick = (e) => {
+                    e.stopPropagation();
+                    activateScript(card, script);
+                };
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        async function activateScript(card, script) {
+            const container = card.querySelector('.script-container');
+            const placeholder = card.querySelector('.placeholder');
+            
+            // Loading state
+            placeholder.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-bbs-accent text-2xl"></i>';
+            
+            // Fetch content if not provided in list (we need full content)
+            // The profile endpoint might perform optimization and not send full content for huge scripts
+            // But currently it does include full content via join if we check mutations/profile.py
+            // Actually get_pinned_scripts returns id, title, script_type... 
+            // We need to fetch full content!
+            
+            try {
+                const res = await fetch(`/scripts/get?id=${script.id}`);
+                const data = await res.json();
+                
+                if (!data.ok) {
+                    placeholder.innerHTML = '<span class="text-red-400 text-xs">Failed</span>';
+                    return;
+                }
+                
+                const fullScript = data.script;
+                const mode = fullScript.script_type || 'p5';
+                
+                // Construct Iframe
+                const iframe = document.createElement('iframe');
+                iframe.className = "w-full h-full border-none bg-black absolute inset-0 z-30 animate-fade-in";
+                iframe.setAttribute('sandbox', 'allow-scripts');
+                
+               // Generate iframe content with autosize
+                let html = '';
+                if (mode === 'p5') {
+                    html = `<!DOCTYPE html>
+<html>
+<head>
+    <style>body { margin: 0; overflow: hidden; }</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
+</head>
+<body>
+    <script>
+    // Force P5 to fit container
+    function windowResized() {
+       if (typeof resizeCanvas === 'function') resizeCanvas(window.innerWidth, window.innerHeight);
+    }
+    
+    try {
+        ${fullScript.content}
+        
+        // Inject auto-resize if not present
+        if (!${fullScript.content.includes('setup')}) {
+            // If they wrote raw p5 without setup (global mode), wrapper might be needed
+            // But assuming standard p5 instance mode or global mode:
+            // We'll leave it to user code, but default p5 canvas matches display size usually
+        }
+    } catch (e) {
+        document.body.innerHTML = '<pre style="color:red; padding:10px; font-size:10px;">' + e.toString() + '</pre>';
+    }
+    <\/script>
+</body>
+</html>`;
+                } else if (mode === 'three') {
+                    html = `<!DOCTYPE html>
+<html>
+<head><style>body { margin: 0; overflow: hidden; }</style></head>
+<body>
+    <script type="module">
+    try {
+        ${fullScript.content}
+    } catch (e) {
+        document.body.innerHTML = '<pre style="color:red; padding:10px; font-size:10px;">' + e.toString() + '</pre>';
+    }
+    <\/script>
+</body>
+</html>`;
+                } else {
+                    html = `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;color:#fff;font-family:monospace;font-size:12px;"><script>${fullScript.content}<\/script></body></html>`;
+                }
+                
+                // Clear placeholder and inject iframe
+                container.innerHTML = '';
+                container.appendChild(iframe);
+                
+                // Write content safely using srcdoc (avoids cross-origin issues with sandbox)
+                iframe.srcdoc = html;
+                
+                // Add "Stop" button overlay on hover
+                const stopBtn = document.createElement('button');
+                stopBtn.className = "absolute top-3 right-3 z-40 bg-black/50 hover:bg-red-500/80 text-white p-1 rounded backdrop-blur opacity-0 group-hover:opacity-100 transition";
+                stopBtn.innerHTML = '<i class="ph-bold ph-stop"></i>';
+                stopBtn.title = "Stop Script";
+                stopBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Re-render this card to reset
+                    renderPinnedScripts([script]); // This is a bit heavy-handed, actually better to just reset this card's innerHTML
+                    // But simpler for now to revert to renderPinnedScripts logic for single item? 
+                    // Let's just reload the whole list to be safe or re-call render for that item.
+                    // For now, reload page section:
+                    fetchProfile();
+                };
+                card.appendChild(stopBtn);
+                
+            } catch (err) {
+                 placeholder.innerHTML = '<span class="text-red-400 text-xs">Error</span>';
+                 console.error(err);
+            }
+        }
+        
+        // Close preview modal
+        document.getElementById('close-preview').onclick = () => {
+            document.getElementById('script-preview-modal').classList.add('hidden');
+            document.getElementById('preview-iframe').srcdoc = ''; // Stop execution
+        };
 
         // Init
         fetchProfile();

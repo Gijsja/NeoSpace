@@ -59,6 +59,9 @@ def init_sockets(app):
         Handle message sending via WebSocket.
         Uses server-authenticated username, ignoring any client-provided user.
         """
+        import time
+        import sqlite3
+        
         # Get authenticated user from our socket registry
         auth_info = authenticated_sockets.get(request.sid)
         if not auth_info:
@@ -75,21 +78,40 @@ def init_sockets(app):
         # Sanitize content
         safe_content = html.escape(content)
         
-        # Insert directly (avoiding test_request_context complexity)
-        # Insert directly and return data in one atomic query (SQLite 3.35+)
-        # This eliminates the race condition and 2 extra round-trips
+        # Insert with retry logic for high concurrency
+        MAX_RETRIES = 5
+        RETRY_DELAY_BASE = 0.05
+        
         db = get_db()
-        try:
-            row = db.execute(
-                "INSERT INTO messages(user, content) VALUES (?, ?) RETURNING id, user, content, created_at",
-                (username, safe_content)
-            ).fetchone()
-            db.commit()
-        except Exception as e:
-            # Fallback for older SQLite versions just in case, or error handling
-            db.rollback()
-            print(f"Error inserting message: {e}")
-            emit("error", {"message": "Database error"})
+        row = None
+        last_error = None
+        
+        for attempt in range(MAX_RETRIES):
+            try:
+                row = db.execute(
+                    "INSERT INTO messages(user, content) VALUES (?, ?) RETURNING id, user, content, created_at",
+                    (username, safe_content)
+                ).fetchone()
+                db.commit()
+                break
+            except sqlite3.OperationalError as e:
+                if "locked" in str(e).lower() or "busy" in str(e).lower():
+                    last_error = e
+                    delay = RETRY_DELAY_BASE * (2 ** attempt)
+                    time.sleep(delay)
+                else:
+                    print(f"Error inserting message: {e}")
+                    emit("error", {"message": "Database error"})
+                    return
+            except Exception as e:
+                db.rollback()
+                print(f"Error inserting message: {e}")
+                emit("error", {"message": "Database error"})
+                return
+        
+        if row is None:
+            print(f"Message insert failed after {MAX_RETRIES} retries: {last_error}")
+            emit("error", {"message": "Database busy, please retry"})
             return
 
         emit("message", {

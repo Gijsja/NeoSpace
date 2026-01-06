@@ -20,7 +20,6 @@ const messagesContainer = document.getElementById('messages');
 const messagesScroll = document.getElementById('messages-scroll');
 const messageForm = document.getElementById('message-form');
 const messageInput = document.getElementById('input');
-// const usernameInput = document.getElementById('username'); // Removed from DOM
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const messageTemplate = document.getElementById('message-template');
@@ -52,13 +51,6 @@ let allMessages = []; // Store messages for search
 let typingTimeout = null;
 let isTyping = false;
 let typingUsersList = new Set();
-
-// Username persistence
-// usernameInput is removed from DOM, so we rely on localStorage set by app.html init
-// usernameInput.addEventListener('change', () => {
-//   currentUser = usernameInput.value.trim() || 'anonymous';
-//   localStorage.setItem('localbbs_username', currentUser);
-// });
 
 // Typing indicator: emit when user types
 messageInput.addEventListener('input', () => {
@@ -96,23 +88,34 @@ function formatRelativeTime(date) {
  */
 function updateAllTimestamps() {
   document.querySelectorAll('.message[data-timestamp]').forEach(msg => {
-    // Check if timestamp is ISO string (server) or ms (local optimistic)
     let date;
     const ts = msg.dataset.timestamp;
     
-    // If it looks like ISO string (contains T or - or :)
     if (ts && (ts.includes('T') || ts.includes('-') || ts.includes(':'))) {
-      // Append Z for UTC if missing and looks like DB format "YYYY-MM-DD HH:MM:SS"
       date = new Date(ts.endsWith('Z') ? ts : ts + 'Z');
     } else {
       date = new Date(parseInt(ts, 10));
     }
     
     const timeEl = msg.querySelector('.message-time');
+    
     if (timeEl && !isNaN(date.getTime())) {
       timeEl.textContent = formatRelativeTime(date);
-      // Store accessible title
       timeEl.title = date.toLocaleString();
+    }
+
+    // UX GOD: Living Wall Decay Logic
+    const ageMs = Date.now() - date.getTime();
+    msg.classList.remove('age-fresh', 'age-recent', 'age-old', 'age-ancient');
+    
+    if (ageMs < 10 * 1000) { // < 10 seconds
+        msg.classList.add('age-fresh');
+    } else if (ageMs < 5 * 60 * 1000) { // < 5 mins
+        msg.classList.add('age-recent');
+    } else if (ageMs < 60 * 60 * 1000) { // < 1 hour
+        msg.classList.add('age-old');
+    } else {
+        msg.classList.add('age-ancient');
     }
   });
 }
@@ -143,7 +146,7 @@ function showToast(message, type = 'info', duration = 3000) {
 function setLoading(loading) {
   isLoading = loading;
   sendBtn.disabled = loading;
-  sendBtn.textContent = loading ? 'Sending...' : 'Send';
+  sendBtn.textContent = loading ? '...' : 'Send';
 }
 
 /**
@@ -159,7 +162,7 @@ function updateEmptyState() {
       empty.className = 'empty-state';
       empty.innerHTML = `
         <div class="empty-state-icon">💬</div>
-        <div class="empty-state-text">No messages yet. Start the conversation!</div>
+        <div class="empty-state-text">No messages yet.</div>
       `;
       messagesContainer.appendChild(empty);
     }
@@ -173,7 +176,13 @@ function updateEmptyState() {
  */
 function updateScrollButton() {
   const distanceFromBottom = messagesScroll.scrollHeight - messagesScroll.scrollTop - messagesScroll.clientHeight;
-  scrollBottomBtn.classList.toggle('visible', distanceFromBottom > 200);
+  if (scrollBottomBtn) {
+      if (distanceFromBottom > 200) {
+          scrollBottomBtn.classList.remove('hidden');
+      } else {
+          scrollBottomBtn.classList.add('hidden');
+      }
+  }
 }
 
 /**
@@ -183,10 +192,7 @@ function scrollToBottom() {
   messagesScroll.scrollTop = messagesScroll.scrollHeight;
 }
 
-// Scroll button click handler
-scrollBottomBtn.addEventListener('click', scrollToBottom);
-
-// Monitor scroll position
+if (scrollBottomBtn) scrollBottomBtn.addEventListener('click', scrollToBottom);
 messagesScroll.addEventListener('scroll', updateScrollButton);
 
 /**
@@ -196,18 +202,19 @@ async function updateUnreadCount() {
   try {
     const res = await fetch('/unread');
     const data = await res.json();
-    if (data.count > 0) {
-      unreadBadge.textContent = data.count > 99 ? '99+' : data.count;
-      unreadBadge.hidden = false;
-    } else {
-      unreadBadge.hidden = true;
+    if (unreadBadge) {
+        if (data.count > 0) {
+          unreadBadge.textContent = data.count > 99 ? '99+' : data.count;
+          unreadBadge.classList.remove('hidden');
+        } else {
+          unreadBadge.classList.add('hidden');
+        }
     }
   } catch (err) {
     console.error('Failed to fetch unread count:', err);
   }
 }
 
-// Update unread count on load and periodically
 updateUnreadCount();
 setInterval(updateUnreadCount, 30000);
 
@@ -216,7 +223,7 @@ setInterval(updateUnreadCount, 30000);
  */
 function searchMessages(query) {
   const q = query.toLowerCase().trim();
-  searchClear.hidden = !q;
+  if (searchClear) searchClear.hidden = !q;
   
   document.querySelectorAll('.message').forEach(msg => {
     if (!q) {
@@ -237,29 +244,23 @@ function searchMessages(query) {
   });
 }
 
-// Search input handler with debounce
 let searchTimeout;
-searchInput.addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    searchMessages(searchInput.value);
-  }, 200);
-});
+if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchMessages(searchInput.value);
+      }, 200);
+    });
+}
 
-// Clear search button
-searchClear.addEventListener('click', () => {
-  searchInput.value = '';
-  searchMessages('');
-  searchInput.focus();
-});
-
-// Escape to clear search
-searchInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    searchInput.value = '';
-    searchMessages('');
-  }
-});
+if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchMessages('');
+      searchInput.focus();
+    });
+}
 
 /**
  * Show confirmation modal
@@ -270,21 +271,16 @@ function showConfirmModal(messageId) {
   modalConfirmBtn.focus();
 }
 
-/**
- * Hide confirmation modal
- */
 function hideConfirmModal() {
   confirmModal.classList.add('hidden');
   pendingDeleteId = null;
 }
 
-// Modal event handlers
 modalCancelBtn.addEventListener('click', hideConfirmModal);
 confirmModal.addEventListener('click', (e) => {
   if (e.target === confirmModal) hideConfirmModal();
 });
 
-// Escape key to close modal
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !confirmModal.classList.contains('hidden')) {
     hideConfirmModal();
@@ -293,10 +289,8 @@ document.addEventListener('keydown', (e) => {
 
 modalConfirmBtn.addEventListener('click', async () => {
   if (!pendingDeleteId) return;
-  
   const id = pendingDeleteId;
   hideConfirmModal();
-  
   try {
     const res = await fetch('/delete', {
       method: 'POST',
@@ -308,13 +302,13 @@ modalConfirmBtn.addEventListener('click', async () => {
     });
     
     const data = await res.json();
-    
     if (res.ok) {
       const msgEl = document.querySelector(`[data-id="${id}"]`);
       if (msgEl) {
         msgEl.querySelector('.message-content').textContent = '[deleted]';
         msgEl.classList.add('deleted');
-        msgEl.querySelector('.message-actions').style.display = 'none';
+        const actions = msgEl.querySelector('.message-actions');
+        if(actions) actions.style.display = 'none';
       }
       showToast('Message deleted', 'success');
       updateUnreadCount();
@@ -323,7 +317,7 @@ modalConfirmBtn.addEventListener('click', async () => {
     }
   } catch (err) {
     console.error('Delete error:', err);
-    showToast('Network error. Please try again.', 'error');
+    showToast('Network error', 'error');
   }
 });
 
@@ -338,9 +332,6 @@ function getUserColorClass(username) {
   return `user-color-${Math.abs(hash) % 8}`;
 }
 
-/**
- * Get initials from username
- */
 function getInitials(username) {
   return username.slice(0, 2).toUpperCase();
 }
@@ -351,21 +342,17 @@ function getInitials(username) {
 function startEdit(article, currentContent) {
   article.classList.add('editing');
   const input = article.querySelector('.edit-input');
-  input.value = currentContent;
-  input.focus();
-  input.select();
+  if(input) {
+      input.value = currentContent;
+      input.focus();
+      input.select();
+  }
 }
 
-/**
- * Cancel inline editing
- */
 function cancelEdit(article) {
   article.classList.remove('editing');
 }
 
-/**
- * Save inline edit
- */
 async function saveEdit(article, id) {
   const input = article.querySelector('.edit-input');
   const newContent = input.value.trim();
@@ -374,7 +361,6 @@ async function saveEdit(article, id) {
     showToast('Message cannot be empty', 'warning');
     return;
   }
-  
   try {
     const res = await fetch('/edit', {
       method: 'POST',
@@ -384,9 +370,7 @@ async function saveEdit(article, id) {
       },
       body: JSON.stringify({ id, content: newContent })
     });
-    
     const data = await res.json();
-    
     if (res.ok) {
       article.querySelector('.message-content').textContent = newContent;
       article.querySelector('.message-edited').hidden = false;
@@ -396,8 +380,7 @@ async function saveEdit(article, id) {
       showToast(data.error || 'Failed to edit message', 'error');
     }
   } catch (err) {
-    console.error('Edit error:', err);
-    showToast('Network error. Please try again.', 'error');
+    showToast('Network error', 'error');
   }
 }
 
@@ -409,11 +392,19 @@ function createMessageElement(msg) {
   const article = template.querySelector('.message');
   
   article.dataset.id = msg.id;
-  
-  // Add timestamp for relative time updates
-  // Add timestamp for relative time updates
   const timestamp = msg.created_at || Date.now();
   article.dataset.timestamp = timestamp;
+  
+  // UX GOD: Scribble Mode (Random Rotation)
+  // Only rotate if not "own" message to keep input clean? No, let's rot all for fun.
+  const rotation = Math.floor(Math.random() * 5); // 0 to 4
+  if (rotation > 0) {
+      article.classList.add(`scribble-${rotation}`);
+  }
+  
+  // UX GOD: Organic Margins
+  const margin = Math.floor(Math.random() * 4) + 1; // 1-4
+  article.classList.add(`margin-${margin}`);
   
   // Avatar
   const avatar = article.querySelector('.message-avatar');
@@ -422,8 +413,6 @@ function createMessageElement(msg) {
   
   // User name
   article.querySelector('.message-user').textContent = msg.user;
-  
-  // Timestamp
   article.querySelector('.message-time').textContent = formatRelativeTime(new Date(timestamp));
   
   // Content
@@ -435,7 +424,6 @@ function createMessageElement(msg) {
     content.textContent = msg.content;
   }
   
-  // Edited indicator
   if (msg.edited) {
     article.querySelector('.message-edited').hidden = false;
   }
@@ -444,39 +432,31 @@ function createMessageElement(msg) {
   const effectiveUser = currentUser.trim();
   if (effectiveUser && msg.user === effectiveUser) {
     article.classList.add('own');
-    
-    // Edit button - start inline edit
-    article.querySelector('.btn-edit').addEventListener('click', () => {
-      startEdit(article, content.textContent);
-    });
-    
-    // Delete button - show modal
-    article.querySelector('.btn-delete').addEventListener('click', () => {
-      showConfirmModal(msg.id);
-    });
-    
-    // Inline editor save button
-    article.querySelector('.btn-save').addEventListener('click', () => {
-      saveEdit(article, msg.id);
-    });
-    
-    // Inline editor cancel button
-    article.querySelector('.btn-cancel').addEventListener('click', () => {
-      cancelEdit(article);
-    });
-    
-    // Enter to save, Escape to cancel
-    article.querySelector('.edit-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        saveEdit(article, msg.id);
-      } else if (e.key === 'Escape') {
-        cancelEdit(article);
-      }
-    });
+    if (article.querySelector('.btn-edit')) {
+        article.querySelector('.btn-edit').addEventListener('click', () => {
+          startEdit(article, content.textContent);
+        });
+        article.querySelector('.btn-delete').addEventListener('click', () => {
+          showConfirmModal(msg.id);
+        });
+        article.querySelector('.btn-save')?.addEventListener('click', () => {
+          saveEdit(article, msg.id);
+        });
+        article.querySelector('.btn-cancel')?.addEventListener('click', () => {
+          cancelEdit(article);
+        });
+        article.querySelector('.edit-input')?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            saveEdit(article, msg.id);
+          } else if (e.key === 'Escape') {
+            cancelEdit(article);
+          }
+        });
+    }
   } else {
-    // Hide actions for messages from other users
-    article.querySelector('.message-actions').classList.add('!hidden');
+    const actions = article.querySelector('.message-actions');
+    if(actions) actions.classList.add('!hidden');
   }
   
   return article;
@@ -488,90 +468,79 @@ function createMessageElement(msg) {
 function addMessage(msg) {
   if (messageIds.has(msg.id)) return;
   messageIds.add(msg.id);
-  allMessages.push(msg);
   
   updateEmptyState();
-  
   const element = createMessageElement(msg);
-  
-  // Basic Markdown processing for content
   const contentEl = element.querySelector('.message-content');
   const rawContent = msg.content || '';
   
-  // 1. Image handling (if content starts with img: prefix or looks like image url)
-  if (rawContent.startsWith('img:') || rawContent.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-      const src = rawContent.startsWith('img:') ? rawContent.substring(4) : rawContent;
-      contentEl.innerHTML = `<img src="${src}" alt="Uploaded image" class="max-w-full h-auto rounded-lg border border-slate-700 mt-2" loading="lazy" />`;
+  // 1. Script Card (script:ID) - NEW
+  const scriptMatch = rawContent.match(/^script:(\d+)$/);
+  if (scriptMatch) {
+      const scriptId = scriptMatch[1];
+      contentEl.innerHTML = `
+          <div class="script-card bg-black/30 border border-slate-700/50 rounded-lg p-2 w-full max-w-[280px]">
+              <div class="flex items-center gap-2 mb-2 text-slate-300">
+                  <i class="ph-duotone ph-cube text-blue-400"></i>
+                  <span class="text-[10px] font-bold uppercase tracking-wider">Sketch #${scriptId}</span>
+              </div>
+              <div class="aspect-video bg-black/80 rounded flex items-center justify-center cursor-pointer hover:bg-slate-900 transition group script-preview relative overflow-hidden" data-id="${scriptId}">
+                  <i class="ph-fill ph-play text-3xl text-white opacity-90 group-hover:scale-110 transition z-10"></i>
+                  <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/20 to-purple-900/20"></div>
+              </div>
+          </div>
+      `;
+      contentEl.querySelector('.script-preview').addEventListener('click', (e) => {
+           loadAndRunScript(e.currentTarget, scriptId);
+      });
   } 
-  // 2. Code blocks (```code```)
+  // 2. Image handling
+  else if (rawContent.startsWith('img:') || rawContent.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+      const src = rawContent.startsWith('img:') ? rawContent.substring(4) : rawContent;
+      contentEl.innerHTML = `<img src="${src}" alt="Uploaded image" class="max-w-full h-auto rounded-lg border border-slate-700 mt-2 hover:shadow-lg transition" loading="lazy" />`;
+  } 
+  // 3. Code blocks
   else if (rawContent.includes('```')) {
-      // Simple code block replacement
-      const formatted = rawContent.replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 p-2 rounded text-xs font-mono overflow-x-auto my-2">$1</pre>');
+      const formatted = rawContent.replace(/```([\s\S]*?)```/g, '<pre class="bg-black/50 p-2 rounded text-xs font-mono overflow-x-auto my-2 border border-white/5">$1</pre>');
       contentEl.innerHTML = formatted;
   }
-  // 3. Inline code (`code`)
+  // 4. Inline code
   else if (rawContent.includes('`')) {
-      const formatted = rawContent.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1 py-0.5 rounded text-xs font-mono text-amber-300">$1</code>');
+      const formatted = rawContent.replace(/`([^`]+)`/g, '<code class="bg-black/30 px-1 py-0.5 rounded text-xs font-mono text-green-300">$1</code>');
       contentEl.innerHTML = formatted;
   }
   
   messagesContainer.appendChild(element);
   
-  // Apply current search filter
-  if (searchInput.value.trim()) {
+  if (searchInput && searchInput.value.trim()) {
     searchMessages(searchInput.value);
   }
   
-  // Auto-scroll if near bottom
   const isNearBottom = messagesScroll.scrollHeight - messagesScroll.scrollTop - messagesScroll.clientHeight < 100;
   if (isNearBottom) {
     scrollToBottom();
   }
-  
   updateScrollButton();
   updateUnreadCount();
 }
 
-/**
- * Update connection status indicator
- */
 function setConnectionStatus(status) {
-  statusDot.className = 'status-dot ' + status;
-  const labels = {
-    connected: 'Connected',
-    disconnected: 'Disconnected',
-    reconnecting: 'Reconnecting...'
-  };
-  statusText.textContent = labels[status] || status;
+  if(statusDot) {
+      statusDot.className = 'status-dot ' + status;
+      if(statusText) {
+          const labels = {connected:'Connected', disconnected:'Offline', reconnecting:'...'};
+          statusText.textContent = labels[status] || status;
+          statusText.hidden = (status === 'connected');
+      }
+  }
 }
 
-// Socket event handlers
-socket.on('connect', () => {
-  setConnectionStatus('connected');
-});
-
-socket.on('connected', () => {
-  socket.emit('request_backfill', { after_id: 0 });
-});
-
-socket.on('disconnect', () => {
-  setConnectionStatus('disconnected');
-  showToast('Connection lost', 'warning');
-});
-
-socket.on('reconnect', () => {
-  setConnectionStatus('connected');
-  showToast('Reconnected', 'success');
-});
-
-socket.on('reconnecting', () => {
-  setConnectionStatus('reconnecting');
-});
-
-socket.on('message', msg => {
-  addMessage(msg);
-});
-
+socket.on('connect', () => setConnectionStatus('connected'));
+socket.on('connected', () => socket.emit('request_backfill', { after_id: 0 }));
+socket.on('disconnect', () => { setConnectionStatus('disconnected'); showToast('Offline', 'warning'); });
+socket.on('reconnect', () => { setConnectionStatus('connected'); showToast('Back online', 'success'); });
+socket.on('reconnecting', () => setConnectionStatus('reconnecting'));
+socket.on('message', msg => addMessage(msg));
 socket.on('backfill', payload => {
   payload.messages.forEach(msg => addMessage(msg));
   updateEmptyState();
@@ -579,22 +548,14 @@ socket.on('backfill', payload => {
   updateUnreadCount();
 });
 
-// Typing indicator event handlers
 function updateTypingUI() {
   if (typingUsersList.size === 0) {
     typingIndicator.classList.add('hidden');
     return;
   }
-  
   typingIndicator.classList.remove('hidden');
   const users = Array.from(typingUsersList);
-  if (users.length === 1) {
-    typingUsers.textContent = `${users[0]} is typing...`;
-  } else if (users.length === 2) {
-    typingUsers.textContent = `${users[0]} and ${users[1]} are typing...`;
-  } else {
-    typingUsers.textContent = `${users.length} people are typing...`;
-  }
+  typingUsers.textContent = users.length === 1 ? `${users[0]} is typing...` : `${users.length} users typing...`;
 }
 
 socket.on('typing', ({ user }) => {
@@ -603,52 +564,36 @@ socket.on('typing', ({ user }) => {
     updateTypingUI();
   }
 });
-
 socket.on('stop_typing', ({ user }) => {
   typingUsersList.delete(user);
   updateTypingUI();
 });
 
-// Form submission
 messageForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const content = messageInput.value.trim();
   if (!content || isLoading) return;
-  
   setLoading(true);
   const user = currentUser || 'anonymous';
-  
   try {
     socket.emit('send_message', { user, content });
     messageInput.value = '';
   } catch (err) {
-    showToast('Failed to send message', 'error');
+    showToast('Failed to send', 'error');
   } finally {
     setLoading(false);
     messageInput.focus();
   }
 });
 
-  // Initialize
   setConnectionStatus('connecting');
   updateEmptyState();
 
-  // Restore last room
   if (currentRoom) {
       const roomHeader = document.getElementById('current-room-name');
       if (roomHeader) roomHeader.textContent = currentRoom;
-    document.querySelectorAll('.room-link').forEach(l => {
-      if (l.dataset.room === currentRoom) {
-        l.classList.add('bg-bbs-accent/20', 'text-bbs-accent');
-        l.classList.remove('text-slate-400');
-      } else {
-        l.classList.remove('bg-bbs-accent/20', 'text-bbs-accent');
-        l.classList.add('text-slate-400');
-      }
-    });
   }
 
-  // Persist room selection
   document.querySelectorAll('.room-link').forEach(link => {
     link.addEventListener('click', () => {
       currentRoom = link.dataset.room;
@@ -656,141 +601,74 @@ messageForm.addEventListener('submit', async (e) => {
     });
   });
 
-  // Emoji Picker Logic
   if (emojiBtn && emojiPickerContainer && emojiPicker) {
-    // Toggle picker
     emojiBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       emojiPickerContainer.classList.toggle('hidden');
     });
-
-    // Handle emoji selection
     emojiPicker.addEventListener('emoji-click', (event) => {
-      const emoji = event.detail.unicode;
-      insertAtCursor(messageInput, emoji);
+      insertAtCursor(messageInput, event.detail.unicode);
       emojiPickerContainer.classList.add('hidden');
     });
-
-    // Close when clicking outside
     document.addEventListener('click', (e) => {
       if (!emojiPickerContainer.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
         emojiPickerContainer.classList.add('hidden');
       }
     });
-
-    // Stop closing when clicking inside picker
-    emojiPickerContainer.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
+    emojiPickerContainer.addEventListener('click', (e) => e.stopPropagation());
   }
 
-
-  // --- File Upload Handling ---
-
-  // Upload Button Click
+  // File Upload
   if (uploadBtn && fileInput) {
     uploadBtn.addEventListener('click', () => fileInput.click());
-    
     fileInput.addEventListener('change', () => {
         if (fileInput.files.length > 0) {
             handleUpload(fileInput.files[0]);
-            fileInput.value = ''; // Reset
+            fileInput.value = '';
         }
     });
   }
 
-  // Drag and Drop
   const dropZone = document.body;
-  
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-  });
-
-  function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  if(dragOverlay) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+      dropZone.addEventListener('dragenter', () => dragOverlay.classList.remove('hidden'));
+      dragOverlay.addEventListener('dragleave', (e) => {
+          if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+             dragOverlay.classList.add('hidden');
+          }
+      });
+      dropZone.addEventListener('drop', (e) => {
+        dragOverlay.classList.add('hidden');
+        if (e.dataTransfer.files.length > 0) handleUpload(e.dataTransfer.files[0]);
+      });
   }
 
-  dropZone.addEventListener('dragenter', () => {
-      dragOverlay.classList.remove('hidden');
-  });
-
-  dragOverlay.addEventListener('dragleave', (e) => {
-      // Only hide if leaving the window context
-      if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
-         dragOverlay.classList.add('hidden');
-      }
-  });
-
-  // Also handle drop on overlay
-  dropZone.addEventListener('drop', (e) => {
-    dragOverlay.classList.add('hidden');
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    if (files.length > 0) {
-        handleUpload(files[0]);
-    }
-  });
-  
-  // Hide overlay if user cancels drag/drop by dropping outside or similar
-  document.addEventListener('mouseup', () => dragOverlay.classList.add('hidden'));
-
-
-  // Paste Handling
-  document.addEventListener('paste', (e) => {
-      if (e.clipboardData && e.clipboardData.items) {
-          const items = e.clipboardData.items;
-          for (let i = 0; i < items.length; i++) {
-              if (items[i].type.indexOf('image') !== -1) {
-                  const blob = items[i].getAsFile();
-                  handleUpload(blob);
-                  e.preventDefault(); // Prevent pasting file path text
-                  break;
-              }
-          }
-      }
-  });
-
-  /**
-   * core upload logic
-   */
   async function handleUpload(file) {
       if (!file.type.startsWith('image/')) {
-          showToast('Only image files are allowed', 'warning');
+          showToast('Only images supported', 'warning');
           return;
       }
-
       setLoading(true);
-      showToast('Uploading image...', 'info', 2000); // Temporary status
-
       const formData = new FormData();
       formData.append('file', file);
-
       try {
           const res = await fetch('/upload', {
               method: 'POST',
               body: formData,
-              headers: {
-                  'X-User': currentUser || 'anonymous' // Auth header
-              }
+              headers: { 'X-User': currentUser || 'anonymous' }
           });
           const data = await res.json();
-
           if (res.ok) {
-              // Send message with image URL
-              // We use a convention: img:URL to render it
-              const content = `img:${data.url}`;
-              socket.emit('send_message', { 
-                  user: currentUser || 'anonymous', 
-                  content 
-              });
-              showToast('Image uploaded!', 'success');
+              socket.emit('send_message', { user: currentUser || 'anonymous', content: `img:${data.url}` });
           } else {
               showToast(data.error || 'Upload failed', 'error');
           }
       } catch (err) {
-          console.error('Upload Error:', err);
-          showToast('Upload network error', 'error');
+          showToast('Upload error', 'error');
       } finally {
           setLoading(false);
       }
@@ -798,9 +676,6 @@ messageForm.addEventListener('submit', async (e) => {
 
 }); // End DOMContentLoaded
 
-/**
- * Insert text at cursor position
- */
 function insertAtCursor(input, text) {
   const start = input.selectionStart;
   const end = input.selectionEnd;
@@ -808,4 +683,40 @@ function insertAtCursor(input, text) {
   input.value = value.substring(0, start) + text + value.substring(end);
   input.selectionStart = input.selectionEnd = start + text.length;
   input.focus();
+}
+
+/**
+ * Fetch and run script in chat
+ */
+async function loadAndRunScript(container, id) {
+    container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center bg-black/80"><i class="ph ph-spinner animate-spin text-white text-2xl"></i></div>';
+    try {
+        const res = await fetch(`/scripts/get?id=${id}`);
+        const data = await res.json();
+        if(data.ok) {
+            const s = data.script;
+            const iframe = document.createElement('iframe');
+            iframe.className = "w-full h-full border-none bg-white rounded";
+            iframe.sandbox = "allow-scripts allow-forms allow-pointer-lock allow-same-origin";
+            
+            let html = '';
+            // Simplified runner templates (similar to playground)
+            if(s.script_type === 'p5') {
+                 html = `<!DOCTYPE html><html><head><style>body{margin:0;overflow:hidden}</style><script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script></head><body><script>try{${s.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e+'</pre>'}<\/script></body></html>`;
+            } else if(s.script_type === 'three') {
+                 html = `<!DOCTYPE html><html><head><style>body{margin:0;overflow:hidden}</style></head><body><script type="module">try{${s.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e+'</pre>'}<\/script></body></html>`;
+            } else {
+                 html = `<!DOCTYPE html><html><body><script>${s.content}<\/script></body></html>`;
+            }
+            
+            iframe.srcdoc = html;
+            container.innerHTML = ''; // basic reset
+            container.appendChild(iframe);
+            // Re-add label overlay? No, let script take over.
+        } else {
+            container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center bg-red-900/80 text-white text-xs">Error loading script</div>';
+        }
+    } catch(e) {
+        container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center bg-red-900/80 text-white text-xs">Network error</div>';
+    }
 }

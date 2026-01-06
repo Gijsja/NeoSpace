@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/ui/css/styles.css">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -57,6 +58,9 @@
         </button>
         <button id="btn-save" class="flex items-center gap-2 px-3 py-1.5 bg-bbs-surface border border-bbs-border hover:bg-slate-700 rounded text-sm transition font-medium">
              <i class="ph-bold ph-floppy-disk"></i> Save
+        </button>
+        <button id="btn-share" class="flex items-center gap-2 px-3 py-1.5 bg-bbs-surface border border-bbs-border hover:bg-slate-700 rounded text-sm transition font-medium text-blue-400 border-blue-500/30">
+             <i class="ph-bold ph-export"></i> Share
         </button>
         <button id="btn-run" class="flex items-center gap-2 px-4 py-1.5 bg-bbs-accent text-white hover:bg-blue-600 rounded text-sm transition font-bold shadow-glow">
              <i class="ph-bold ph-play"></i> Run
@@ -182,6 +186,7 @@ document.body.innerHTML = '<h1>Hello World</h1>';`
         const frame = document.getElementById('runner-frame');
         const modeSelect = document.getElementById('mode-select');
         const btnSave = document.getElementById('btn-save');
+        const btnShare = document.getElementById('btn-share');
         const titleEl = document.getElementById('script-title');
         const saveStatus = document.getElementById('save-status');
 
@@ -275,6 +280,23 @@ document.body.innerHTML = '<h1>Hello World</h1>';`
              } finally {
                  btnSave.disabled = false;
                  btnSave.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Save';
+             }
+        });
+        
+        // --- Sharing Logic ---
+        const socket = io();
+        
+        btnShare.addEventListener('click', async () => {
+             if(!currentScriptId) {
+                 alert("Please save your script before sharing!");
+                 return;
+             }
+             
+             if(confirm("Post this script to the chat?")) {
+                 socket.emit('send_message', { 
+                     content: `script:${currentScriptId}` 
+                 });
+                 alert("Posted to chat!");
              }
         });
         

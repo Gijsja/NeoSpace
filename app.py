@@ -26,6 +26,12 @@ def create_app(test_config=None):
              return redirect(url_for("auth.login"))
         return send_from_directory("ui/views", "app.html")
 
+    @app.route("/desktop")
+    def desktop():
+        if g.user is None:
+             return redirect(url_for("auth.login"))
+        return send_from_directory("ui/views", "desktop.html")
+
     @app.route("/ui/css/<path:filename>")
     def serve_css(filename):
         return send_from_directory("ui/css", filename)
@@ -120,6 +126,55 @@ def create_app(test_config=None):
     app.add_url_rule("/scripts/list", "list_scripts", login_required(list_scripts), methods=["GET"])
     app.add_url_rule("/scripts/get", "get_script", get_script, methods=["GET"]) # Public read allowed
     app.add_url_rule("/scripts/delete", "delete_script", login_required(delete_script), methods=["POST"])
+
+    # =============================================
+    # POST CODE ON PROFILES: PINNED SCRIPTS
+    # =============================================
+    from mutations.profile_scripts import pin_script, unpin_script, reorder_pins
+    
+    @app.route("/profile/scripts/pin", methods=["POST"])
+    @login_required
+    def pin_script_route():
+        from flask import jsonify
+        data = request.get_json()
+        script_id = data.get("script_id")
+        display_order = data.get("display_order", 0)
+        
+        if not script_id:
+            return jsonify(error="script_id required"), 400
+            
+        result = pin_script(g.user["id"], script_id, display_order)
+        if result["ok"]:
+            return jsonify(ok=True)
+        return jsonify(error=result.get("error")), 400
+    
+    @app.route("/profile/scripts/unpin", methods=["POST"])
+    @login_required
+    def unpin_script_route():
+        from flask import jsonify
+        data = request.get_json()
+        script_id = data.get("script_id")
+        
+        if not script_id:
+            return jsonify(error="script_id required"), 400
+            
+        result = unpin_script(g.user["id"], script_id)
+        if result["ok"]:
+            return jsonify(ok=True)
+        return jsonify(error=result.get("error")), 400
+    
+    @app.route("/profile/scripts/reorder", methods=["POST"])
+    @login_required
+    def reorder_pins_route():
+        from flask import jsonify
+        data = request.get_json()
+        script_ids = data.get("script_ids", [])
+        
+        result = reorder_pins(g.user["id"], script_ids)
+        if result["ok"]:
+            return jsonify(ok=True)
+        return jsonify(error=result.get("error")), 400
+
 
 
     init_sockets(app)

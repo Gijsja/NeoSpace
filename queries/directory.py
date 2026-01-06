@@ -119,6 +119,13 @@ def get_user_by_username():
             u.username,
             p.display_name,
             p.avatar_path,
+            p.bio,
+            p.status_message,
+            p.status_emoji,
+            p.now_activity,
+            p.now_activity_type,
+            p.voice_intro_path,
+            p.anthem_url,
             p.is_public
         FROM users u
         LEFT JOIN profiles p ON u.id = p.user_id
@@ -139,5 +146,12 @@ def get_user_by_username():
         id=row["id"],
         username=row["username"],
         display_name=row["display_name"] or row["username"],
-        avatar_path=row["avatar_path"]
+        avatar_path=row["avatar_path"],
+        bio=row["bio"] or "",
+        status_message=row["status_message"],
+        status_emoji=row["status_emoji"],
+        now_activity=row["now_activity"],
+        now_activity_type=row["now_activity_type"],
+        voice_intro_path=row["voice_intro_path"],
+        anthem_url=row["anthem_url"]
     )

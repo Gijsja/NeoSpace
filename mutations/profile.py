@@ -70,7 +70,10 @@ def get_profile():
             u.id, u.username, u.created_at as member_since,
             p.id as profile_id, p.display_name, p.bio, p.avatar_path,
             p.theme_preset, p.accent_color,
+            p.status_message, p.status_emoji,
+            p.now_activity, p.now_activity_type,
             p.voice_intro_path, p.voice_waveform_json,
+            p.anthem_url, p.anthem_autoplay,
             p.is_public, p.show_online_status, p.dm_policy
         FROM users u
         LEFT JOIN profiles p ON u.id = p.user_id
@@ -101,6 +104,20 @@ def get_profile():
         ).fetchall()
         stickers = [dict(r) for r in sticker_rows]
     
+    # Get pinned scripts
+    pinned_scripts = []
+    if row["profile_id"]:
+        script_rows = db.execute(
+            """SELECT s.id, s.title, s.script_type, s.updated_at,
+                      ps.display_order
+               FROM profile_scripts ps
+               JOIN scripts s ON ps.script_id = s.id
+               WHERE ps.profile_id = ?
+               ORDER BY ps.display_order ASC""",
+            (row["profile_id"],)
+        ).fetchall()
+        pinned_scripts = [dict(r) for r in script_rows]
+    
     return jsonify(
         user_id=row["id"],
         username=row["username"],
@@ -109,13 +126,20 @@ def get_profile():
         avatar_path=row["avatar_path"],
         theme_preset=row["theme_preset"] or "default",
         accent_color=row["accent_color"] or "#3b82f6",
+        status_message=row["status_message"] or "",
+        status_emoji=row["status_emoji"] or "",
+        now_activity=row["now_activity"] or "",
+        now_activity_type=row["now_activity_type"] or "thinking",
         member_since=row["member_since"],
         is_own=is_own,
         dm_policy=row["dm_policy"] if is_own else None,
         show_online_status=bool(row["show_online_status"]) if row["show_online_status"] is not None else True,
         voice_intro_path=row["voice_intro_path"],
         voice_waveform_json=row["voice_waveform_json"],
+        anthem_url=row["anthem_url"] or "",
+        anthem_autoplay=bool(row["anthem_autoplay"]) if row["anthem_autoplay"] is not None else True,
         stickers=stickers,
+        pinned_scripts=pinned_scripts,
         viewer_id=g.user["id"] if g.user else None
     )
 
@@ -124,15 +148,6 @@ def get_profile():
 def update_profile():
     """
     Update the current user's profile.
-    
-    Request JSON (all optional):
-        display_name: str
-        bio: str
-        theme_preset: str (one of ALLOWED_THEMES)
-        accent_color: str (#RRGGBB)
-        is_public: bool
-        show_online_status: bool
-        dm_policy: str (one of ALLOWED_DM_POLICIES)
     """
     if g.user is None:
         return jsonify(error="Authentication required"), 401
@@ -149,6 +164,19 @@ def update_profile():
     
     if "bio" in data:
         updates["bio"] = sanitize_bio(data["bio"])
+    
+    # Hero Identity & Now Fields
+    if "status_message" in data:
+        updates["status_message"] = html.escape(data["status_message"].strip()[:100]) # 100 char limit
+    
+    if "status_emoji" in data:
+        updates["status_emoji"] = data["status_emoji"][:4] # Max 4 chars (1-2 emojis)
+    
+    if "now_activity" in data:
+        updates["now_activity"] = html.escape(data["now_activity"].strip()[:50]) # 50 char limit for "Now"
+        
+    if "now_activity_type" in data:
+        updates["now_activity_type"] = data["now_activity_type"]
     
     if "theme_preset" in data:
         theme = data["theme_preset"]
@@ -173,6 +201,17 @@ def update_profile():
         if policy not in ALLOWED_DM_POLICIES:
             return jsonify(error=f"Invalid DM policy. Choose from: {ALLOWED_DM_POLICIES}"), 400
         updates["dm_policy"] = policy
+    
+    # Sprint 11: Audio Anthem
+    if "anthem_url" in data:
+        url = data["anthem_url"].strip() if data["anthem_url"] else ""
+        # Basic URL validation (allow empty to clear)
+        if url and not (url.startswith("http://") or url.startswith("https://")):
+            return jsonify(error="Anthem URL must be http:// or https://"), 400
+        updates["anthem_url"] = url[:500]  # Limit length
+    
+    if "anthem_autoplay" in data:
+        updates["anthem_autoplay"] = 1 if data["anthem_autoplay"] else 0
     
     if not updates:
         return jsonify(error="No valid fields to update"), 400
