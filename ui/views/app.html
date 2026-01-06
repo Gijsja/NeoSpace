@@ -6,8 +6,10 @@
     <title>LocalBBS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/ui/css/styles.css" />
+    <!-- Phosphor Icons CDN -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
@@ -16,22 +18,57 @@
         theme: {
           extend: {
             colors: {
-              'bbs-bg': '#0f172a',
-              'bbs-surface': '#1e293b',
-              'bbs-border': '#475569',
-              'bbs-accent': '#3b82f6',
+              'bbs-bg': '#0a0f1a',
+              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
+              'bbs-surface-solid': '#1e293b',
+              'bbs-border': 'rgba(71, 85, 105, 0.5)',
+              'bbs-accent': '#60a5fa',
+              'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
+              'bbs-success': '#34d399',
+              'bbs-warning': '#fbbf24',
+              'bbs-danger': '#f87171',
             },
             fontFamily: {
               sans: ['Inter', 'system-ui', 'sans-serif'],
               mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-            }
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.3s ease-out',
+              'pop': 'pop 0.2s ease-out',
+              'wiggle': 'wiggle 0.3s ease-in-out',
+              'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              pop: {
+                '0%': { transform: 'scale(0.95)' },
+                '50%': { transform: 'scale(1.02)' },
+                '100%': { transform: 'scale(1)' },
+              },
+              wiggle: {
+                '0%, 100%': { transform: 'rotate(-1deg)' },
+                '50%': { transform: 'rotate(1deg)' },
+              },
+              glowPulse: {
+                '0%, 100%': { boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' },
+                '50%': { boxShadow: '0 0 20px rgba(96, 165, 250, 0.6)' },
+              },
+            },
+            boxShadow: {
+              'glow': '0 0 15px rgba(96, 165, 250, 0.5)',
+              'glow-lg': '0 0 30px rgba(96, 165, 250, 0.6)',
+              'inner-glow': 'inset 0 0 20px rgba(96, 165, 250, 0.1)',
+            },
           }
         }
       }
     </script>
     <script src="/socket.io/socket.io.js"></script>
   </head>
-  <body class="bg-bbs-bg text-slate-200">
+  <body class="bg-bbs-bg text-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen">
     <!-- Toast container -->
     <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
@@ -39,57 +76,95 @@
     <div class="flex h-screen">
       
       <!-- LEFT SIDEBAR: Rooms & Navigation -->
-      <aside id="sidebar" class="w-56 bg-bbs-surface border-r border-bbs-border flex flex-col shrink-0">
+      <aside id="sidebar" class="w-56 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
         <div class="p-4 border-b border-bbs-border">
-          <h1 class="text-lg font-semibold text-bbs-accent">LocalBBS</h1>
+          <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
+            <i class="ph-bold ph-broadcast text-bbs-accent"></i> LocalBBS
+          </h1>
         </div>
         <nav class="flex-1 overflow-y-auto p-2">
           <div class="mb-4">
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2">Channels</h2>
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
+              <i class="ph ph-hash"></i> Channels
+            </h2>
             <ul id="channel-list" class="space-y-1">
-              <li><a href="#" data-room="general" class="room-link active flex items-center gap-2 px-2 py-1.5 rounded bg-bbs-accent/20 text-bbs-accent text-sm"># general</a></li>
-              <li><a href="#" data-room="random" class="room-link flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-700 text-slate-400 text-sm"># random</a></li>
-              <li><a href="#" data-room="generative-art" class="room-link flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-700 text-slate-400 text-sm"># generative-art</a></li>
+              <li><a href="#" data-room="general" class="room-link active flex items-center gap-2 px-3 py-2 rounded-lg bg-bbs-accent/20 text-bbs-accent text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95">
+                <i class="ph ph-hash-straight"></i> general
+              </a></li>
+              <li><a href="#" data-room="random" class="room-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
+                <i class="ph ph-hash-straight"></i> random
+              </a></li>
+              <li><a href="#" data-room="generative-art" class="room-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
+                <i class="ph ph-hash-straight"></i> generative-art
+              </a></li>
             </ul>
           </div>
           <div>
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2">Direct Messages</h2>
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
+              <i class="ph ph-chats-circle"></i> Direct Messages
+            </h2>
             <ul id="dm-list" class="space-y-1">
-              <li><a href="#" data-room="dm-alex" class="room-link flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-700 text-slate-400 text-sm">
-                <span class="w-2 h-2 rounded-full bg-green-500"></span> Alex
+              <li><a href="/ui/views/messages.html" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
+                <i class="ph ph-chat-teardrop-dots text-bbs-accent"></i> Open Messages
+              </a></li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
+              <i class="ph ph-users-three"></i> Community
+            </h2>
+            <ul class="space-y-1">
+              <li><a href="/ui/views/directory.html" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
+                <i class="ph ph-address-book"></i> User Directory
               </a></li>
             </ul>
           </div>
         </nav>
-        <div class="p-2 border-t border-bbs-border">
-          <button id="btn-create-room" class="w-full px-3 py-2 text-sm bg-bbs-accent hover:bg-blue-600 rounded text-white font-medium transition">+ Create Room</button>
+        <div class="p-3 border-t border-bbs-border">
+          <button id="btn-create-room" class="w-full px-3 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg text-white font-semibold transition-all duration-200 shadow-glow hover:shadow-glow-lg active:scale-95 flex items-center justify-center gap-2">
+            <i class="ph-bold ph-plus"></i> Create Room
+          </button>
         </div>
       </aside>
 
       <!-- CENTER: Main Content Area -->
       <main class="flex-1 flex flex-col min-w-0">
         <!-- Header -->
-        <header class="flex items-center justify-between px-4 py-3 bg-bbs-surface border-b border-bbs-border shrink-0">
+        <header class="flex items-center justify-between px-5 py-3 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border shrink-0">
           <div class="flex items-center gap-3">
-            <span id="current-room-name" class="text-slate-300 font-medium"># general</span>
-            <span class="unread-badge hidden" id="unread-badge">0</span>
+            <span id="current-room-name" class="text-slate-200 font-semibold text-lg flex items-center gap-2">
+              <i class="ph ph-hash-straight text-bbs-accent"></i> general
+            </span>
+            <span class="unread-badge hidden bg-bbs-danger text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pop" id="unread-badge">0</span>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="relative">
-              <input type="search" id="search-input" placeholder="Search..." class="w-40 px-3 py-1.5 text-sm bg-bbs-bg border border-bbs-border rounded focus:outline-none focus:border-bbs-accent placeholder-slate-500" />
-              <button type="button" class="search-clear absolute right-1 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden" id="search-clear">×</button>
+          <div class="flex items-center gap-4">
+            <div class="relative group">
+              <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
+              <input type="search" id="search-input" placeholder="Search messages..." class="w-48 pl-9 pr-8 py-2 text-sm bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
+              <button type="button" class="search-clear absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden transition-colors" id="search-clear">
+                <i class="ph ph-x"></i>
+              </button>
             </div>
-            <div class="flex items-center gap-1.5 text-sm text-slate-400">
-              <span class="w-2 h-2 rounded-full bg-slate-500" id="status-dot"></span>
+            <div class="flex items-center gap-2 text-sm text-slate-400 bg-slate-800/30 px-3 py-1.5 rounded-full">
+              <span class="w-2 h-2 rounded-full bg-slate-500 transition-colors" id="status-dot"></span>
               <span id="status-text">Connecting...</span>
             </div>
-            <input type="text" id="username" placeholder="Your name" maxlength="20" class="w-24 px-2 py-1 text-sm bg-bbs-bg border border-bbs-border rounded focus:outline-none focus:border-bbs-accent placeholder-slate-500" />
+            <a href="/auth/logout" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-bbs-danger transition-all duration-200 hover:scale-105 active:scale-95">
+              <i class="ph ph-sign-out"></i> Logout
+            </a>
           </div>
         </header>
 
         <!-- Messages area -->
         <div class="flex-1 overflow-y-auto p-4" id="messages-scroll" role="log" aria-label="Chat messages">
           <div class="messages-container space-y-2" id="messages"></div>
+        </div>
+
+        <!-- Drag & Drop Overlay -->
+        <div id="drag-overlay" class="absolute inset-0 bg-bbs-bg/90 z-50 hidden flex flex-col items-center justify-center border-2 border-dashed border-bbs-accent m-4 rounded-xl backdrop-blur-sm pointer-events-none">
+          <div class="text-6xl mb-4">📂</div>
+          <h3 class="text-2xl font-bold text-white mb-2">Drop it like it's hot</h3>
+          <p class="text-slate-400">Upload to chat</p>
         </div>
 
         <!-- Input area -->
@@ -108,46 +183,67 @@
             </span>
             <span id="typing-users">Someone is typing...</span>
           </div>
-          <form class="flex gap-2" id="message-form">
-            <button type="button" id="emoji-btn" class="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded transition" title="Insert Emoji">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+          <form class="flex gap-3" id="message-form">
+            <input type="file" id="file-input" class="hidden" accept="image/*" />
+            <button type="button" id="emoji-btn" class="p-2.5 text-slate-400 hover:text-yellow-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Insert Emoji">
+              <i class="ph ph-smiley text-xl"></i>
             </button>
-            <input type="text" id="input" placeholder="Type a message…" autocomplete="off" class="flex-1 px-4 py-2 bg-bbs-bg border border-bbs-border rounded focus:outline-none focus:border-bbs-accent placeholder-slate-500" />
-            <button type="submit" class="px-6 py-2 bg-bbs-accent hover:bg-blue-600 rounded text-white font-medium transition" id="send-btn">Send</button>
+            <button type="button" id="upload-btn" class="p-2.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Upload Image">
+              <i class="ph ph-image text-xl"></i>
+            </button>
+            <input type="text" id="input" placeholder="Type a message or drag & drop an image…" autocomplete="off" class="flex-1 px-4 py-2.5 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
+            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg text-white font-semibold transition-all duration-200 shadow-glow hover:shadow-glow-lg active:scale-95 flex items-center gap-2" id="send-btn">
+              <i class="ph-bold ph-paper-plane-tilt"></i> Send
+            </button>
           </form>
         </footer>
       </main>
 
       <!-- RIGHT SIDEBAR: Context Panel -->
-      <aside id="context-panel" class="w-72 bg-bbs-surface border-l border-bbs-border flex flex-col shrink-0">
+      <aside id="context-panel" class="w-72 bg-bbs-surface backdrop-blur-xl border-l border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
         <div class="p-4 border-b border-bbs-border">
-          <h2 class="text-sm font-semibold text-slate-300">Your Profile</h2>
+          <h2 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+            <i class="ph ph-user-circle"></i> Your Profile
+          </h2>
         </div>
         <div class="p-4 flex flex-col items-center">
           <!-- Mini Profile Card -->
-          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold mb-3">U</div>
-          <div class="text-center mb-4">
-            <h3 class="font-semibold" id="profile-name">Username</h3>
-            <p class="text-sm text-slate-400">Local Creator</p>
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-3xl font-bold mb-3 shadow-glow ring-2 ring-bbs-accent/30 animate-glow-pulse">U</div>
+          <div class="text-center mb-5">
+            <h3 class="font-bold text-lg" id="profile-name">Username</h3>
+            <p class="text-sm text-slate-400 flex items-center justify-center gap-1">
+              <i class="ph ph-star text-yellow-400"></i> Local Creator
+            </p>
           </div>
           <!-- Mode Toggles -->
-          <div class="w-full space-y-2">
-            <button id="btn-code-mode" class="w-full px-3 py-2 text-sm bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/50 rounded text-emerald-400 font-medium transition flex items-center justify-center gap-2">
-              <span>⚡</span> Code Mode
+          <div class="w-full space-y-2.5">
+            <button id="btn-code-mode" class="w-full px-4 py-2.5 text-sm bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/50 rounded-lg text-emerald-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
+              <i class="ph-bold ph-lightning"></i> Code Mode
             </button>
-            <button id="btn-wall" class="w-full px-3 py-2 text-sm bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/50 rounded text-purple-400 font-medium transition flex items-center justify-center gap-2">
-              <span>🏠</span> My Wall
+            <button id="btn-wall" class="w-full px-4 py-2.5 text-sm bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/50 rounded-lg text-purple-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
+              <i class="ph-bold ph-house"></i> My Wall
             </button>
-            <button id="btn-internals" class="w-full px-3 py-2 text-sm bg-amber-600/20 hover:bg-amber-600/30 border border-amber-600/50 rounded text-amber-400 font-medium transition flex items-center justify-center gap-2">
-              <span>🔧</span> System Internals
+            <button id="btn-internals" class="w-full px-4 py-2.5 text-sm bg-amber-600/20 hover:bg-amber-600/30 border border-amber-600/50 rounded-lg text-amber-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
+              <i class="ph-bold ph-gear-six"></i> System Internals
+            </button>
+            <button id="btn-directory" class="w-full px-4 py-2.5 text-sm bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/50 rounded-lg text-blue-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
+              <i class="ph-bold ph-users-three"></i> Directory
             </button>
           </div>
         </div>
         <!-- Quick Stats -->
         <div class="mt-auto p-4 border-t border-bbs-border">
-          <div class="text-xs text-slate-500">
-            <div class="flex justify-between mb-1"><span>Messages</span><span class="text-slate-400">42</span></div>
-            <div class="flex justify-between"><span>Online</span><span class="text-green-400">● 3 users</span></div>
+          <div class="text-xs text-slate-500 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1"><i class="ph ph-chat-dots"></i> Messages</span>
+              <span class="text-slate-300 font-semibold bg-slate-700/50 px-2 py-0.5 rounded">42</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1"><i class="ph ph-users"></i> Online</span>
+              <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 3 users
+              </span>
+            </div>
           </div>
         </div>
       </aside>
@@ -235,7 +331,7 @@
       
       // Mode Toggle Navigation
       document.getElementById('btn-code-mode').addEventListener('click', () => {
-        window.location.href = '/ui/views/code_editor.html';
+        window.location.href = '/ui/views/playground.html';
       });
       document.getElementById('btn-wall').addEventListener('click', () => {
         window.location.href = '/ui/views/wall.html';
@@ -243,13 +339,27 @@
       document.getElementById('btn-internals').addEventListener('click', () => {
         window.location.href = '/ui/views/internals.html';
       });
-      
-      // Sync username to profile card
-      const usernameInput = document.getElementById('username');
-      const profileName = document.getElementById('profile-name');
-      usernameInput.addEventListener('input', () => {
-        profileName.textContent = usernameInput.value || 'Username';
+      document.getElementById('btn-directory').addEventListener('click', () => {
+        window.location.href = '/ui/views/directory.html';
       });
+      
+      // Fetch current user info
+      fetch('/auth/me')
+        .then(res => res.json())
+        .then(data => {
+            if (data.logged_in) {
+                document.getElementById('profile-name').textContent = data.username;
+                localStorage.setItem('localbbs_username', data.username); // Keep for legacy socket glue
+                // Update avatar color
+                const avatar = document.querySelector('.rounded-full.bg-gradient-to-br');
+                if (data.avatar_color) {
+                     // Could map class color here, for now simpler logic
+                     avatar.textContent = data.username.charAt(0).toUpperCase();
+                }
+            } else {
+                window.location.href = '/auth/login';
+            }
+        });
     </script>
 
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>

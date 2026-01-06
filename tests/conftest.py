@@ -27,3 +27,17 @@ def client(app):
     """Test client for HTTP requests."""
     return app.test_client()
 
+@pytest.fixture
+def auth_client(app):
+    """Test client with authenticated session."""
+    client = app.test_client()
+    
+    # Register and login a test user
+    with client:
+        client.post('/auth/register', json={
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        # Session is now set
+        yield client
+

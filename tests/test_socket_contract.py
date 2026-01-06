@@ -72,41 +72,41 @@ class TestBackfillContract:
 class TestBackfillIntegration:
     """Integration tests for backfill endpoint."""
 
-    def test_backfill_returns_messages(self, client, app):
+    def test_backfill_returns_messages(self, auth_client, app):
         """Backfill endpoint returns created messages."""
         # Create messages
-        client.post("/send", json={"content": "Message 1"}, headers={"X-User": "alice"})
-        client.post("/send", json={"content": "Message 2"}, headers={"X-User": "bob"})
+        auth_client.post("/send", json={"content": "Message 1"})
+        auth_client.post("/send", json={"content": "Message 2"})
         
         # Fetch backfill
-        res = client.get("/backfill")
+        res = auth_client.get("/backfill")
         assert res.status_code == 200
         data = res.get_json()
         assert "messages" in data
         assert len(data["messages"]) == 2
 
-    def test_backfill_respects_message_order(self, client, app):
+    def test_backfill_respects_message_order(self, auth_client, app):
         """Messages should be returned in creation order."""
-        client.post("/send", json={"content": "First"}, headers={"X-User": "alice"})
-        client.post("/send", json={"content": "Second"}, headers={"X-User": "bob"})
-        client.post("/send", json={"content": "Third"}, headers={"X-User": "alice"})
+        auth_client.post("/send", json={"content": "First"})
+        auth_client.post("/send", json={"content": "Second"})
+        auth_client.post("/send", json={"content": "Third"})
         
-        res = client.get("/backfill")
+        res = auth_client.get("/backfill")
         messages = res.get_json()["messages"]
         
         assert messages[0]["content"] == "First"
         assert messages[1]["content"] == "Second"
         assert messages[2]["content"] == "Third"
 
-    def test_backfill_includes_edited_flag(self, client, app):
+    def test_backfill_includes_edited_flag(self, auth_client, app):
         """Edited messages should have edited flag in backfill."""
         # Create and edit message
-        res = client.post("/send", json={"content": "Original"}, headers={"X-User": "alice"})
+        res = auth_client.post("/send", json={"content": "Original"})
         msg_id = res.get_json()["id"]
-        client.post("/edit", json={"id": msg_id, "content": "Edited"}, headers={"X-User": "alice"})
+        auth_client.post("/edit", json={"id": msg_id, "content": "Edited"})
         
         # Check backfill
-        res = client.get("/backfill")
+        res = auth_client.get("/backfill")
         messages = res.get_json()["messages"]
         edited_msg = next(m for m in messages if m["id"] == msg_id)
         
@@ -117,12 +117,12 @@ class TestBackfillIntegration:
 class TestCoreInvariants:
     """Tests for core invariants defined in CORE_INVARIANTS.md."""
 
-    def test_invariant_deleted_content_never_leaked(self, client, app):
+    def test_invariant_deleted_content_never_leaked(self, auth_client, app):
         """Invariant 4: Deleted content is never leaked."""
         # Create and delete message
-        res = client.post("/send", json={"content": "Secret message"}, headers={"X-User": "alice"})
+        res = auth_client.post("/send", json={"content": "Secret message"})
         msg_id = res.get_json()["id"]
-        client.post("/delete", json={"id": msg_id}, headers={"X-User": "alice"})
+        auth_client.post("/delete", json={"id": msg_id})
         
         # Verify content is not in database query result
         with app.app_context():
@@ -131,18 +131,23 @@ class TestCoreInvariants:
             # Content still exists in DB (soft delete), but...
             assert row["deleted_at"] is not None
 
-    def test_invariant_server_authoritative_on_ownership(self, client, app):
+    def test_invariant_server_authoritative_on_ownership(self, app):
         """Invariant 1: Server enforces message ownership."""
-        # Alice creates message
-        res = client.post("/send", json={"content": "Alice message here"}, headers={"X-User": "alice"})
-        msg_id = res.get_json()["id"]
+        client = app.test_client()
         
-        # Bob cannot edit
-        res = client.post("/edit", json={"id": msg_id, "content": "Hacked"}, headers={"X-User": "bob"})
+        # Alice creates message
+        client.post('/auth/register', json={'username': 'alice_inv', 'password': 'pass123'})
+        res = client.post("/send", json={"content": "Alice message here"})
+        msg_id = res.get_json()["id"]
+        client.get('/auth/logout')
+        
+        # Bob tries to edit/delete
+        client.post('/auth/register', json={'username': 'bob_inv', 'password': 'pass123'})
+        
+        res = client.post("/edit", json={"id": msg_id, "content": "Hacked"})
         assert res.status_code == 403
         
-        # Bob cannot delete
-        res = client.post("/delete", json={"id": msg_id}, headers={"X-User": "bob"})
+        res = client.post("/delete", json={"id": msg_id})
         assert res.status_code == 403
         
         # Verify message unchanged
@@ -151,16 +156,16 @@ class TestCoreInvariants:
             row = db.execute("SELECT content FROM messages WHERE id=?", (msg_id,)).fetchone()
             assert row["content"] == "Alice message here"
 
-    def test_invariant_reconnect_idempotent(self, client, app):
+    def test_invariant_reconnect_idempotent(self, auth_client, app):
         """Invariant 5: Multiple backfill requests produce same result."""
         # Create some messages
-        client.post("/send", json={"content": "Msg 1"}, headers={"X-User": "alice"})
-        client.post("/send", json={"content": "Msg 2"}, headers={"X-User": "bob"})
+        auth_client.post("/send", json={"content": "Msg 1"})
+        auth_client.post("/send", json={"content": "Msg 2"})
         
         # Multiple backfill requests
-        res1 = client.get("/backfill")
-        res2 = client.get("/backfill")
-        res3 = client.get("/backfill")
+        res1 = auth_client.get("/backfill")
+        res2 = auth_client.get("/backfill")
+        res3 = auth_client.get("/backfill")
         
         # All should return same data
         assert res1.get_json() == res2.get_json() == res3.get_json()
@@ -169,16 +174,16 @@ class TestCoreInvariants:
 class TestEdgeCases:
     """Edge case and boundary tests."""
 
-    def test_empty_content_rejected(self, client):
-        """Empty message content should be handled."""
-        res = client.post("/send", json={"content": ""}, headers={"X-User": "alice"})
+    def test_empty_content_allowed(self, auth_client):
+        """Empty message content is currently allowed."""
+        res = auth_client.post("/send", json={"content": ""})
         # Currently allowed - empty string is valid
         assert res.status_code == 200
 
-    def test_very_long_content(self, client, app):
+    def test_very_long_content(self, auth_client, app):
         """Very long messages should be stored correctly."""
         long_content = "X" * 10000
-        res = client.post("/send", json={"content": long_content}, headers={"X-User": "alice"})
+        res = auth_client.post("/send", json={"content": long_content})
         assert res.status_code == 200
         msg_id = res.get_json()["id"]
         
@@ -187,15 +192,10 @@ class TestEdgeCases:
             row = db.execute("SELECT content FROM messages WHERE id=?", (msg_id,)).fetchone()
             assert len(row["content"]) == 10000
 
-    def test_special_characters_in_username(self, client, app):
-        """Usernames with special characters should work."""
-        res = client.post("/send", json={"content": "Hello"}, headers={"X-User": "user@test.com"})
-        assert res.status_code == 200
-
-    def test_unicode_content(self, client, app):
+    def test_unicode_content(self, auth_client, app):
         """Unicode content should be preserved."""
         content = "Hello 世界 🌍 Привет"
-        res = client.post("/send", json={"content": content}, headers={"X-User": "alice"})
+        res = auth_client.post("/send", json={"content": content})
         msg_id = res.get_json()["id"]
         
         with app.app_context():
@@ -203,3 +203,8 @@ class TestEdgeCases:
             row = db.execute("SELECT content FROM messages WHERE id=?", (msg_id,)).fetchone()
             # Content is HTML escaped, so check for presence of unicode
             assert "世界" in row["content"]
+
+    def test_unauthenticated_send_rejected(self, client):
+        """Unauthenticated send should redirect to login."""
+        res = client.post("/send", json={"content": "Unauthorized"})
+        assert res.status_code == 302

@@ -20,7 +20,7 @@ const messagesContainer = document.getElementById('messages');
 const messagesScroll = document.getElementById('messages-scroll');
 const messageForm = document.getElementById('message-form');
 const messageInput = document.getElementById('input');
-const usernameInput = document.getElementById('username');
+// const usernameInput = document.getElementById('username'); // Removed from DOM
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const messageTemplate = document.getElementById('message-template');
@@ -38,6 +38,9 @@ const typingUsers = document.getElementById('typing-users');
 const emojiBtn = document.getElementById('emoji-btn');
 const emojiPickerContainer = document.getElementById('emoji-picker-container');
 const emojiPicker = document.querySelector('emoji-picker');
+const fileInput = document.getElementById('file-input');
+const uploadBtn = document.getElementById('upload-btn');
+const dragOverlay = document.getElementById('drag-overlay');
 
 // State
 let currentUser = localStorage.getItem('localbbs_username') || '';
@@ -50,14 +53,12 @@ let typingTimeout = null;
 let isTyping = false;
 let typingUsersList = new Set();
 
-// Initialize username from localStorage
-usernameInput.value = currentUser;
-
 // Username persistence
-usernameInput.addEventListener('change', () => {
-  currentUser = usernameInput.value.trim() || 'anonymous';
-  localStorage.setItem('localbbs_username', currentUser);
-});
+// usernameInput is removed from DOM, so we rely on localStorage set by app.html init
+// usernameInput.addEventListener('change', () => {
+//   currentUser = usernameInput.value.trim() || 'anonymous';
+//   localStorage.setItem('localbbs_username', currentUser);
+// });
 
 // Typing indicator: emit when user types
 messageInput.addEventListener('input', () => {
@@ -95,10 +96,23 @@ function formatRelativeTime(date) {
  */
 function updateAllTimestamps() {
   document.querySelectorAll('.message[data-timestamp]').forEach(msg => {
-    const timestamp = parseInt(msg.dataset.timestamp, 10);
+    // Check if timestamp is ISO string (server) or ms (local optimistic)
+    let date;
+    const ts = msg.dataset.timestamp;
+    
+    // If it looks like ISO string (contains T or - or :)
+    if (ts && (ts.includes('T') || ts.includes('-') || ts.includes(':'))) {
+      // Append Z for UTC if missing and looks like DB format "YYYY-MM-DD HH:MM:SS"
+      date = new Date(ts.endsWith('Z') ? ts : ts + 'Z');
+    } else {
+      date = new Date(parseInt(ts, 10));
+    }
+    
     const timeEl = msg.querySelector('.message-time');
-    if (timeEl && timestamp) {
-      timeEl.textContent = formatRelativeTime(new Date(timestamp));
+    if (timeEl && !isNaN(date.getTime())) {
+      timeEl.textContent = formatRelativeTime(date);
+      // Store accessible title
+      timeEl.title = date.toLocaleString();
     }
   });
 }
@@ -397,7 +411,8 @@ function createMessageElement(msg) {
   article.dataset.id = msg.id;
   
   // Add timestamp for relative time updates
-  const timestamp = Date.now();
+  // Add timestamp for relative time updates
+  const timestamp = msg.created_at || Date.now();
   article.dataset.timestamp = timestamp;
   
   // Avatar
@@ -478,6 +493,28 @@ function addMessage(msg) {
   updateEmptyState();
   
   const element = createMessageElement(msg);
+  
+  // Basic Markdown processing for content
+  const contentEl = element.querySelector('.message-content');
+  const rawContent = msg.content || '';
+  
+  // 1. Image handling (if content starts with img: prefix or looks like image url)
+  if (rawContent.startsWith('img:') || rawContent.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+      const src = rawContent.startsWith('img:') ? rawContent.substring(4) : rawContent;
+      contentEl.innerHTML = `<img src="${src}" alt="Uploaded image" class="max-w-full h-auto rounded-lg border border-slate-700 mt-2" loading="lazy" />`;
+  } 
+  // 2. Code blocks (```code```)
+  else if (rawContent.includes('```')) {
+      // Simple code block replacement
+      const formatted = rawContent.replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 p-2 rounded text-xs font-mono overflow-x-auto my-2">$1</pre>');
+      contentEl.innerHTML = formatted;
+  }
+  // 3. Inline code (`code`)
+  else if (rawContent.includes('`')) {
+      const formatted = rawContent.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1 py-0.5 rounded text-xs font-mono text-amber-300">$1</code>');
+      contentEl.innerHTML = formatted;
+  }
+  
   messagesContainer.appendChild(element);
   
   // Apply current search filter
@@ -598,7 +635,8 @@ messageForm.addEventListener('submit', async (e) => {
 
   // Restore last room
   if (currentRoom) {
-    document.getElementById('current-room-name').textContent = currentRoom;
+      const roomHeader = document.getElementById('current-room-name');
+      if (roomHeader) roomHeader.textContent = currentRoom;
     document.querySelectorAll('.room-link').forEach(l => {
       if (l.dataset.room === currentRoom) {
         l.classList.add('bg-bbs-accent/20', 'text-bbs-accent');
@@ -645,6 +683,119 @@ messageForm.addEventListener('submit', async (e) => {
       e.stopPropagation();
     });
   }
+
+
+  // --- File Upload Handling ---
+
+  // Upload Button Click
+  if (uploadBtn && fileInput) {
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            handleUpload(fileInput.files[0]);
+            fileInput.value = ''; // Reset
+        }
+    });
+  }
+
+  // Drag and Drop
+  const dropZone = document.body;
+  
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  dropZone.addEventListener('dragenter', () => {
+      dragOverlay.classList.remove('hidden');
+  });
+
+  dragOverlay.addEventListener('dragleave', (e) => {
+      // Only hide if leaving the window context
+      if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+         dragOverlay.classList.add('hidden');
+      }
+  });
+
+  // Also handle drop on overlay
+  dropZone.addEventListener('drop', (e) => {
+    dragOverlay.classList.add('hidden');
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+        handleUpload(files[0]);
+    }
+  });
+  
+  // Hide overlay if user cancels drag/drop by dropping outside or similar
+  document.addEventListener('mouseup', () => dragOverlay.classList.add('hidden'));
+
+
+  // Paste Handling
+  document.addEventListener('paste', (e) => {
+      if (e.clipboardData && e.clipboardData.items) {
+          const items = e.clipboardData.items;
+          for (let i = 0; i < items.length; i++) {
+              if (items[i].type.indexOf('image') !== -1) {
+                  const blob = items[i].getAsFile();
+                  handleUpload(blob);
+                  e.preventDefault(); // Prevent pasting file path text
+                  break;
+              }
+          }
+      }
+  });
+
+  /**
+   * core upload logic
+   */
+  async function handleUpload(file) {
+      if (!file.type.startsWith('image/')) {
+          showToast('Only image files are allowed', 'warning');
+          return;
+      }
+
+      setLoading(true);
+      showToast('Uploading image...', 'info', 2000); // Temporary status
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+          const res = await fetch('/upload', {
+              method: 'POST',
+              body: formData,
+              headers: {
+                  'X-User': currentUser || 'anonymous' // Auth header
+              }
+          });
+          const data = await res.json();
+
+          if (res.ok) {
+              // Send message with image URL
+              // We use a convention: img:URL to render it
+              const content = `img:${data.url}`;
+              socket.emit('send_message', { 
+                  user: currentUser || 'anonymous', 
+                  content 
+              });
+              showToast('Image uploaded!', 'success');
+          } else {
+              showToast(data.error || 'Upload failed', 'error');
+          }
+      } catch (err) {
+          console.error('Upload Error:', err);
+          showToast('Upload network error', 'error');
+      } finally {
+          setLoading(false);
+      }
+  }
+
 }); // End DOMContentLoaded
 
 /**

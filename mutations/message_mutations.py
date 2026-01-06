@@ -6,7 +6,8 @@ import html
 def send_message():
     db = get_db()
     content = html.escape(request.json.get("content",""))
-    db.execute("INSERT INTO messages(user,content) VALUES (?,?)", (g.user, content))
+    username = g.user['username'] if g.user else 'anonymous'
+    db.execute("INSERT INTO messages(user,content) VALUES (?,?)", (username, content))
     db.commit()
     mid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
     return jsonify(id=mid)
@@ -24,7 +25,8 @@ def edit_message():
     row = db.execute("SELECT user FROM messages WHERE id=? AND deleted_at IS NULL", (msg_id,)).fetchone()
     if not row:
         return jsonify(ok=False, error="Message not found"), 404
-    if row["user"] != g.user:
+    username = g.user['username'] if g.user else None
+    if row["user"] != username:
         return jsonify(ok=False, error="Not authorized"), 403
     
     db.execute(
@@ -46,7 +48,8 @@ def delete_message():
     row = db.execute("SELECT user FROM messages WHERE id=? AND deleted_at IS NULL", (msg_id,)).fetchone()
     if not row:
         return jsonify(ok=False, error="Message not found"), 404
-    if row["user"] != g.user:
+    username = g.user['username'] if g.user else None
+    if row["user"] != username:
         return jsonify(ok=False, error="Not authorized"), 403
     
     db.execute(

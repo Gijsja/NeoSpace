@@ -7,35 +7,57 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              'bbs-bg': '#0f172a',
-              'bbs-surface': '#1e293b',
-              'bbs-border': '#475569',
-              'bbs-accent': '#3b82f6',
+              'bbs-bg': '#0a0f1a',
+              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
+              'bbs-border': 'rgba(71, 85, 105, 0.5)',
+              'bbs-accent': '#60a5fa',
+              'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
+            },
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+            animation: {
+              'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            },
+            keyframes: {
+              pop: {
+                '0%': { transform: 'scale(0.9)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' }
+              }
+            },
+            boxShadow: {
+              'glow': '0 0 15px rgba(96, 165, 250, 0.5)',
             }
           }
         }
       }
     </script>
   </head>
-  <body class="bg-bbs-bg text-slate-200 min-h-screen">
+  <body class="bg-bbs-bg text-slate-200 min-h-screen font-sans" id="body-el">
     <!-- Back navigation -->
     <nav class="fixed top-4 left-4 z-50">
-      <a href="/ui/views/app.html" class="flex items-center gap-2 px-3 py-2 bg-bbs-surface/80 backdrop-blur border border-bbs-border rounded-lg text-sm text-slate-300 hover:text-white transition">
-        ← Back to Chat
+      <a href="/ui/views/app.html" class="flex items-center gap-2 px-3 py-2 bg-bbs-surface/80 backdrop-blur border border-bbs-border rounded-lg text-sm text-slate-300 hover:text-white transition shadow-lg">
+        <i class="ph-bold ph-arrow-left"></i> Back to Chat
       </a>
     </nav>
 
-    <!-- Wall Container (The "Canvas") -->
-    <div class="relative min-h-screen overflow-hidden" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+    <!-- Loading State -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-bbs-bg z-40">
+        <div class="text-2xl font-bold animate-pulse text-slate-500 flex items-center gap-2">
+            <i class="ph-bold ph-spinner animate-spin"></i> Loading Wall...
+        </div>
+    </div>
+
+    <!-- Wall Container -->
+    <div id="wall-container" class="relative min-h-screen overflow-hidden hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
       
       <!-- Banner Area -->
-      <div class="h-48 relative overflow-hidden">
+      <div class="h-48 relative overflow-hidden group">
         <div class="absolute inset-0 bg-gradient-to-b from-purple-900/30 to-transparent"></div>
         <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bbs-bg/90 to-transparent"></div>
       </div>
@@ -44,106 +66,330 @@
       <div class="relative max-w-4xl mx-auto px-6 -mt-20">
         <div class="flex items-end gap-6 mb-6">
           <!-- Avatar -->
-          <div class="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 border-4 border-bbs-bg shadow-xl flex items-center justify-center text-4xl font-bold">
-            U
+          <div id="avatar-container" class="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 border-4 border-bbs-bg shadow-xl flex items-center justify-center text-4xl font-bold overflow-hidden bg-cover bg-center shrink-0">
+            <span id="avatar-initial">U</span>
           </div>
           <!-- Info -->
-          <div class="pb-2">
-            <h1 class="text-3xl font-bold mb-1">Username</h1>
-            <p class="text-slate-400">Creative Coder • Joined 2026</p>
+          <div class="pb-2 flex-1 min-w-0">
+            <h1 class="text-3xl font-bold mb-1 flex items-center gap-2">
+                <span id="display-name" class="truncate">Username</span>
+                <span id="online-indicator" class="w-3 h-3 rounded-full bg-emerald-400 shadow-glow hidden shrink-0" title="Online"></span>
+            </h1>
+            <p class="text-slate-400 font-mono" id="username-handle">@username</p>
           </div>
-          <!-- Edit Button -->
-          <button class="ml-auto px-4 py-2 bg-bbs-accent hover:bg-blue-600 rounded-lg text-sm font-medium transition">
-            ✏️ Edit Wall
+          <!-- Edit Button (Owner only) -->
+          <button id="edit-btn" class="ml-auto px-4 py-2 bg-bbs-accent hover:bg-blue-600 rounded-lg text-sm font-medium transition shadow-glow hidden flex items-center gap-2 shrink-0">
+            <i class="ph-bold ph-pencil-simple"></i> Edit Wall
           </button>
         </div>
 
         <!-- Bio -->
-        <div class="bg-bbs-surface/50 backdrop-blur rounded-xl p-4 mb-6 border border-bbs-border/50">
-          <p class="text-slate-300">Welcome to my corner of the BBS! I make generative art and weird experiments. 🌈</p>
+        <div class="bg-bbs-surface/50 backdrop-blur rounded-xl p-5 mb-6 border border-bbs-border/50 shadow-lg relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10">
+              <i class="ph-duotone ph-quotes text-6xl"></i>
+          </div>
+          <p class="text-slate-300 whitespace-pre-wrap relative z-10 leading-relaxed" id="bio-text">No bio yet.</p>
         </div>
 
         <!-- Content Grid -->
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
           
           <!-- STICKER BOARD -->
-          <div class="col-span-2 bg-bbs-surface/30 backdrop-blur rounded-xl border border-bbs-border/50 min-h-[300px] relative overflow-hidden">
-            <div class="absolute top-3 left-3 text-xs text-slate-500 uppercase tracking-wide">Sticker Board</div>
-            <!-- Stickers (absolute positioned) -->
-            <div class="absolute top-12 left-8 text-4xl transform -rotate-12 hover:scale-110 transition cursor-pointer">🔥</div>
-            <div class="absolute top-20 right-12 text-3xl transform rotate-6 hover:scale-110 transition cursor-pointer">✨</div>
-            <div class="absolute bottom-16 left-1/3 text-4xl transform rotate-3 hover:scale-110 transition cursor-pointer">🎨</div>
-            <div class="absolute bottom-8 right-8 text-3xl transform -rotate-6 hover:scale-110 transition cursor-pointer">💜</div>
-            <div class="absolute top-1/2 left-1/2 text-5xl transform -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition cursor-pointer">🚀</div>
-            <!-- Add sticker button -->
-            <button class="absolute bottom-3 right-3 px-3 py-1.5 bg-bbs-accent/20 hover:bg-bbs-accent/40 border border-bbs-accent/50 rounded text-xs text-bbs-accent transition">
-              + Add Sticker
-            </button>
+          <div class="col-span-2 bg-bbs-surface/30 backdrop-blur rounded-xl border border-bbs-border/50 min-h-[300px] relative overflow-hidden group">
+            <div class="absolute top-3 left-3 text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1">
+                <i class="ph-bold ph-sticker"></i> Sticker Board
+            </div>
+            <!-- Static Stickers for demo -->
+            <div class="absolute top-12 left-8 text-4xl transform -rotate-12 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">🔥</div>
+            <div class="absolute top-20 right-12 text-3xl transform rotate-6 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">✨</div>
+            <div class="absolute bottom-16 left-1/3 text-4xl transform rotate-3 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">🎨</div>
+            <div class="absolute bottom-8 right-8 text-3xl transform -rotate-6 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">💜</div>
+            <div class="absolute top-1/2 left-1/2 text-5xl transform -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition cursor-pointer select-none drop-shadow-xl">🚀</div>
           </div>
 
-          <!-- VOICE INTRO -->
-          <div class="bg-bbs-surface/30 backdrop-blur rounded-xl p-4 border border-bbs-border/50">
-            <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3">Voice Intro</h3>
-            <div class="bg-bbs-bg/50 rounded-lg p-3">
-              <!-- Waveform visualization -->
-              <div class="flex items-center gap-1 h-12 mb-2">
-                <div class="w-1 bg-bbs-accent rounded-full h-3"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-6"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-10"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-8"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-12"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-6"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-9"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-4"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-7"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-11"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-5"></div>
-                <div class="w-1 bg-bbs-accent rounded-full h-8"></div>
+          <!-- INFO / STATS -->
+          <div class="space-y-6">
+              <div class="bg-bbs-surface/30 backdrop-blur rounded-xl p-4 border border-bbs-border/50">
+                <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1">
+                    <i class="ph-bold ph-info"></i> Info
+                </h3>
+                <div class="space-y-3 text-sm text-slate-400">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                        <span>Member Since</span>
+                        <span id="member-since" class="text-slate-200 font-mono">2026</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Status</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">Respected</span>
+                    </div>
+                </div>
               </div>
-              <div class="flex items-center justify-between">
-                <button class="w-10 h-10 rounded-full bg-bbs-accent hover:bg-blue-600 flex items-center justify-center transition">
-                  ▶
-                </button>
-                <span class="text-sm text-slate-500">0:15</span>
+
+               <!-- TOP FRIENDS (Mock for now) -->
+              <div class="bg-bbs-surface/30 backdrop-blur rounded-xl p-4 border border-bbs-border/50">
+                <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1">
+                    <i class="ph-bold ph-users"></i> Top Friends
+                </h3>
+                <div class="grid grid-cols-4 gap-2">
+                    <div class="aspect-square rounded-full bg-slate-700/50 flex items-center justify-center text-xs">?</div>
+                    <div class="aspect-square rounded-full bg-slate-700/50 flex items-center justify-center text-xs">?</div>
+                    <div class="aspect-square rounded-full bg-slate-700/50 flex items-center justify-center text-xs">?</div>
+                    <div class="aspect-square rounded-full bg-slate-700/50 flex items-center justify-center text-xs">?</div>
+                </div>
               </div>
-            </div>
           </div>
 
-          <!-- CODE WIDGET -->
-          <div class="col-span-2 bg-bbs-surface/30 backdrop-blur rounded-xl border border-bbs-border/50 overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-2 bg-bbs-bg/30 border-b border-bbs-border/30">
-              <span class="text-xs text-slate-500 uppercase tracking-wide">Pinned Sketch</span>
-              <span class="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">Safe Mode</span>
-            </div>
-            <div class="h-48 bg-black flex items-center justify-center">
-              <!-- Placeholder for Three.js/p5.js canvas -->
-              <div class="text-center text-slate-500">
-                <div class="text-4xl mb-2">🌀</div>
-                <p class="text-sm">Generative Spiral v2</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TOP FRIENDS -->
-          <div class="bg-bbs-surface/30 backdrop-blur rounded-xl p-4 border border-bbs-border/50">
-            <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3">Top Friends</h3>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-red-500 flex items-center justify-center text-lg font-semibold mb-1">A</div>
-                <span class="text-xs text-slate-400">Alex</span>
-              </div>
-              <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-lg font-semibold mb-1">S</div>
-                <span class="text-xs text-slate-400">Sam</span>
-              </div>
-              <div class="flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg font-semibold mb-1">J</div>
-                <span class="text-xs text-slate-400">Jo</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-bbs-surface border border-bbs-border rounded-xl w-full max-w-md shadow-2xl overflow-hidden animate-pop">
+            <div class="p-4 border-b border-bbs-border flex justify-between items-center bg-slate-800/50">
+                <h2 class="font-bold text-white flex items-center gap-2">
+                    <i class="ph-bold ph-pencil-simple text-bbs-accent"></i> Edit Profile
+                </h2>
+                <button type="button" class="close-modal text-slate-400 hover:text-white transition">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            <form id="edit-form" class="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center gap-4 bg-slate-800/30 p-3 rounded-lg border border-white/5">
+                    <div class="w-16 h-16 rounded-full bg-slate-700 bg-cover bg-center shrink-0 border-2 border-bbs-border shadow-inner" id="preview-avatar"></div>
+                    <label class="flex-1 cursor-pointer">
+                        <span class="block text-sm font-medium text-slate-300 mb-1">Update Avatar</span>
+                        <input type="file" id="avatar-input" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-bbs-accent/20 file:text-bbs-accent hover:file:bg-bbs-accent/30 transition" />
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Display Name</label>
+                    <input type="text" name="display_name" id="input-name" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition" required maxlength="50" />
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Bio</label>
+                    <textarea name="bio" id="input-bio" rows="3" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent transition resize-none" maxlength="500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Theme</label>
+                        <select name="theme_preset" id="input-theme" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none appearance-none">
+                            <option value="default">Default</option>
+                            <option value="dark">Midnight</option>
+                            <option value="retro">Cyber Retro</option>
+                            <option value="zen">Forest Zen</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-500 font-bold mb-1.5">Accent Color</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="color" name="accent_color" id="input-accent" class="w-full h-[38px] bg-bbs-bg border border-bbs-border rounded-lg cursor-pointer p-1" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-3 border-t border-bbs-border/50">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="is_public" id="input-public" class="rounded bg-bbs-bg border-bbs-border text-bbs-accent focus:ring-offset-0 focus:ring-0 w-4 h-4" />
+                        <span class="text-sm text-slate-300 group-hover:text-white transition">Public Profile</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="show_online_status" id="input-online" class="rounded bg-bbs-bg border-bbs-border text-bbs-accent focus:ring-offset-0 focus:ring-0 w-4 h-4" />
+                        <span class="text-sm text-slate-300 group-hover:text-white transition">Show Online Status</span>
+                    </label>
+                </div>
+
+                 <div class="flex justify-end gap-3 pt-4 border-t border-bbs-border/50 mt-2">
+                    <button type="button" class="close-modal px-4 py-2 text-sm text-slate-400 hover:text-white transition font-medium">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-bbs-accent hover:bg-blue-600 text-white text-sm font-bold rounded-lg transition shadow-glow flex items-center gap-2">
+                        <i class="ph-bold ph-check"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const wallContainer = document.getElementById('wall-container');
+        const loadingEl = document.getElementById('loading');
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-form');
+        
+        // State
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id'); // If null, assume current user
+        let currentUserData = null;
+
+        // Theme Definitions
+        const themes = {
+            'default': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            'dark': 'linear-gradient(to bottom, #000000, #111111)',
+            'retro': 'linear-gradient(45deg, #2b0a3d, #c53c8d)',
+            'zen': 'linear-gradient(to bottom, #1a2f23, #2f4f4f)'
+        };
+
+        async function fetchProfile() {
+            const endpoint = userId ? `/profile?user_id=${userId}` : '/profile';
+            try {
+                const res = await fetch(endpoint);
+                if (res.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                const data = await res.json();
+                
+                if (data.error) {
+                    loadingEl.innerHTML = `<div class="text-red-400 font-bold">${data.error}</div>`;
+                    return;
+                }
+
+                currentUserData = data;
+                renderProfile(data);
+                loadingEl.classList.add('hidden');
+                wallContainer.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                loadingEl.innerHTML = `<div class="text-red-400 font-bold">Failed to load profile (Network Error).</div>`;
+            }
+        }
+
+        function renderProfile(data) {
+            document.title = `${data.display_name}'s Wall`;
+            
+            // Text fields
+            document.getElementById('display-name').textContent = data.display_name;
+            document.getElementById('username-handle').textContent = `@${data.username}`;
+            document.getElementById('bio-text').textContent = data.bio || "No bio yet.";
+            document.getElementById('member-since').textContent = new Date(data.member_since).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+
+            // Avatar
+            const avatarEl = document.getElementById('avatar-container');
+            const initialEl = document.getElementById('avatar-initial');
+            if (data.avatar_path) {
+                avatarEl.style.backgroundImage = `url('${data.avatar_path}')`;
+                initialEl.classList.add('hidden');
+            } else {
+                avatarEl.style.backgroundImage = '';
+                initialEl.classList.remove('hidden');
+                initialEl.textContent = data.display_name.charAt(0).toUpperCase();
+            }
+
+            // Theme & Accent
+            if (themes[data.theme_preset]) {
+                document.getElementById('wall-container').style.background = themes[data.theme_preset];
+            }
+            document.documentElement.style.setProperty('--color-accent', data.accent_color);
+            // Updating Tailwind colors via style tag if needed, but CSS var is easier if setup
+            
+            // Interaction
+            if (data.is_own) {
+                document.getElementById('edit-btn').classList.remove('hidden');
+                document.getElementById('edit-btn').onclick = openEditModal;
+            }
+            
+            if (data.show_online_status) {
+                document.getElementById('online-indicator').classList.remove('hidden');
+            }
+        }
+
+        // --- Edit Logic ---
+
+        function openEditModal() {
+            if (!currentUserData) return;
+            const d = currentUserData;
+            
+            document.getElementById('input-name').value = d.display_name;
+            document.getElementById('input-bio').value = d.bio;
+            document.getElementById('input-theme').value = d.theme_preset;
+            document.getElementById('input-accent').value = d.accent_color;
+            document.getElementById('input-public').checked = d.is_public !== false; // defaults to true
+            document.getElementById('input-online').checked = d.show_online_status !== false;
+
+            // Preview current avatar
+            const prev = document.getElementById('preview-avatar');
+            if (d.avatar_path) prev.style.backgroundImage = `url('${d.avatar_path}')`;
+            else {
+                prev.style.backgroundImage = '';
+                prev.textContent = d.display_name.charAt(0);
+                prev.classList.add('flex', 'items-center', 'justify-center', 'text-xl', 'font-bold', 'text-white');
+            }
+
+            editModal.classList.remove('hidden');
+        }
+
+        document.querySelectorAll('.close-modal').forEach(b => {
+            b.onclick = () => editModal.classList.add('hidden');
+        });
+
+        // Handle Avatar Upload independently or as part of submit?
+        // Let's do instant upload for avatar to simplify
+        document.getElementById('avatar-input').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            const prev = document.getElementById('preview-avatar');
+            prev.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-white"></i>';
+
+            try {
+                const res = await fetch('/profile/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    // Update preview
+                    prev.style.backgroundImage = `url('${data.avatar_path}')`;
+                    prev.innerHTML = '';
+                    // Also update main view live
+                    currentUserData.avatar_path = data.avatar_path;
+                    renderProfile(currentUserData);
+                } else {
+                    alert(data.error || "Upload failed");
+                    prev.innerHTML = '❌';
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Upload error");
+            }
+        };
+
+        editForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(editForm);
+            const payload = Object.fromEntries(formData.entries());
+            
+            // checkbox handling
+            payload.is_public = formData.get('is_public') === 'on';
+            payload.show_online_status = formData.get('show_online_status') === 'on';
+
+            try {
+                const res = await fetch('/profile/update', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    editModal.classList.add('hidden');
+                    fetchProfile(); // Reload
+                } else {
+                    alert(data.error || "Update failed");
+                }
+            } catch (err) {
+                alert("Update error");
+            }
+        };
+
+        // Init
+        fetchProfile();
+
+    </script>
   </body>
 </html>

@@ -1,2 +1,4 @@
 flask
 flask-socketio
+cryptography>=42.0.0
+bleach>=6.0.0

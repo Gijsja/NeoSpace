@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Messages - LocalBBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'bbs-bg': '#0a0f1a',
+              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
+              'bbs-border': 'rgba(71, 85, 105, 0.5)',
+              'bbs-accent': '#60a5fa',
+              'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
+            },
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+            animation: {
+              'fade-in': 'fadeIn 0.2s ease-out',
+              'slide-up': 'slideUp 0.3s ease-out',
+            },
+            keyframes: {
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              slideUp: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+            },
+            boxShadow: {
+              'glow': '0 0 15px rgba(96, 165, 250, 0.5)',
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-bbs-bg text-slate-200 min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex">
+
+    <!-- Sidebar: Conversation List -->
+    <aside class="w-80 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0">
+        <div class="p-4 border-b border-bbs-border flex items-center justify-between">
+            <a href="/ui/views/app.html" class="text-slate-400 hover:text-white transition">
+                <i class="ph-bold ph-arrow-left text-xl"></i>
+            </a>
+            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
+                <i class="ph-bold ph-chats-circle text-bbs-accent"></i> Messages
+            </h1>
+            <button id="new-dm-btn" class="text-bbs-accent hover:text-white transition" title="New Message">
+                <i class="ph-bold ph-pencil-simple-line text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto" id="conversation-list">
+            <div class="p-4 text-center text-slate-500 animate-pulse">Loading...</div>
+        </div>
+    </aside>
+
+    <!-- Main: Active Conversation -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Header -->
+        <header id="chat-header" class="px-5 py-4 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border flex items-center gap-4 shrink-0">
+            <div id="recipient-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-lg font-bold shrink-0">?</div>
+            <div>
+                <h2 id="recipient-name" class="font-bold text-white">Select a conversation</h2>
+                <p id="recipient-status" class="text-xs text-slate-400">or start a new one</p>
+            </div>
+        </header>
+
+        <!-- Messages Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="messages-container">
+            <div class="text-center text-slate-500 py-12">
+                <i class="ph-duotone ph-chat-circle-dots text-6xl mb-4 opacity-30"></i>
+                <p>No messages yet</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="p-4 bg-bbs-surface backdrop-blur-xl border-t border-bbs-border shrink-0">
+            <form id="dm-form" class="flex gap-3">
+                <input type="text" id="dm-input" placeholder="Type a message..." autocomplete="off" 
+                       class="flex-1 px-4 py-2.5 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200 disabled:opacity-50" disabled />
+                <button type="submit" id="send-btn" 
+                        class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg text-white font-semibold transition-all duration-200 shadow-glow active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="ph-bold ph-paper-plane-tilt"></i>
+                </button>
+            </form>
+        </footer>
+    </main>
+
+    <!-- New DM Modal -->
+    <div id="new-dm-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-bbs-surface border border-bbs-border rounded-xl w-full max-w-sm shadow-2xl animate-slide-up">
+            <div class="p-4 border-b border-bbs-border flex justify-between items-center">
+                <h2 class="font-bold text-white flex items-center gap-2">
+                    <i class="ph-bold ph-user-plus text-bbs-accent"></i> New Message
+                </h2>
+                <button type="button" class="close-modal text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <div class="p-4">
+                <label class="block text-xs uppercase text-slate-500 font-bold mb-2">Search User</label>
+                <input type="text" id="user-search" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none" placeholder="Enter username..." />
+                <div id="user-results" class="mt-3 space-y-2 max-h-48 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversation Item Template -->
+    <template id="convo-template">
+        <a href="#" class="convo-item block px-4 py-3 hover:bg-slate-700/30 border-b border-bbs-border/30 transition group" data-user-id="">
+            <div class="flex items-center gap-3">
+                <div class="convo-avatar w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold shrink-0 text-white"></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center">
+                        <span class="convo-name font-semibold text-slate-200 truncate"></span>
+                        <span class="convo-time text-xs text-slate-500"></span>
+                    </div>
+                    <p class="convo-preview text-sm text-slate-400 truncate"></p>
+                </div>
+                <span class="convo-badge hidden w-5 h-5 rounded-full bg-bbs-accent text-xs font-bold flex items-center justify-center text-white"></span>
+            </div>
+        </a>
+    </template>
+
+    <!-- Message Template -->
+    <template id="msg-template">
+        <div class="msg-item flex gap-3 animate-fade-in" data-id="">
+            <div class="msg-avatar w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold shrink-0"></div>
+            <div class="msg-body max-w-[70%]">
+                <div class="msg-bubble px-4 py-2 rounded-2xl bg-slate-700/50"></div>
+                <div class="msg-time text-xs text-slate-500 mt-1 px-2"></div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // DOM
+        const convoList = document.getElementById('conversation-list');
+        const messagesContainer = document.getElementById('messages-container');
+        const dmForm = document.getElementById('dm-form');
+        const dmInput = document.getElementById('dm-input');
+        const sendBtn = document.getElementById('send-btn');
+        const recipientName = document.getElementById('recipient-name');
+        const recipientStatus = document.getElementById('recipient-status');
+        const recipientAvatar = document.getElementById('recipient-avatar');
+        const newDmModal = document.getElementById('new-dm-modal');
+        const userSearch = document.getElementById('user-search');
+        const userResults = document.getElementById('user-results');
+        
+        // Templates
+        const convoTemplate = document.getElementById('convo-template');
+        const msgTemplate = document.getElementById('msg-template');
+
+        // State
+        let activeUserId = null;
+        let pollInterval = null;
+        
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const withUserId = params.get('with');
+
+        // --- API Calls ---
+
+        async function fetchConversations() {
+            try {
+                const res = await fetch('/dm/list');
+                if (res.status === 401) { window.location.href = '/auth/login'; return; }
+                const data = await res.json();
+                renderConversations(data.conversations || []);
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchMessages(userId) {
+            try {
+                const res = await fetch(`/dm/conversation?with_user=${userId}`);
+                if (res.status === 401) { window.location.href = '/auth/login'; return; }
+                const data = await res.json();
+                renderMessages(data.messages || []);
+                
+                // Mark as read
+                if (data.messages && data.messages.length > 0) {
+                    const lastId = data.messages[data.messages.length - 1].id;
+                    await fetch('/dm/read', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ message_id: lastId })
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendMessage(content) {
+            if (!activeUserId || !content.trim()) return;
+            try {
+                const res = await fetch('/dm/send', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ recipient_id: activeUserId, content })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    dmInput.value = '';
+                    fetchMessages(activeUserId);
+                } else {
+                    alert(data.error || 'Send failed');
+                }
+            } catch (e) { console.error(e); alert('Network error'); }
+        }
+
+        async function searchUsers(query) {
+            if (!query.trim()) { userResults.innerHTML = ''; return; }
+            try {
+                const res = await fetch(`/users?search=${encodeURIComponent(query)}&limit=5`);
+                const data = await res.json();
+                userResults.innerHTML = '';
+                (data.users || []).forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'p-2 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 cursor-pointer flex items-center gap-2 transition';
+                    div.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-white">${u.display_name.charAt(0)}</div>
+                        <span class="font-medium">${u.display_name}</span>
+                        <span class="text-slate-500 text-sm">@${u.username}</span>
+                    `;
+                    div.onclick = () => startConversation(u.id, u.display_name);
+                    userResults.appendChild(div);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        // --- Rendering ---
+
+        function renderConversations(convos) {
+            if (convos.length === 0) {
+                convoList.innerHTML = '<div class="p-6 text-center text-slate-500"><i class="ph-duotone ph-chat-circle text-4xl mb-2 opacity-30"></i><p>No conversations yet</p></div>';
+                return;
+            }
+            convoList.innerHTML = '';
+            convos.forEach(c => {
+                const clone = convoTemplate.content.cloneNode(true);
+                const el = clone.querySelector('.convo-item');
+                el.dataset.userId = c.other_user_id;
+                el.onclick = (e) => { e.preventDefault(); selectConversation(c.other_user_id, c.other_display_name || c.other_username); };
+                
+                clone.querySelector('.convo-name').textContent = c.other_display_name || c.other_username;
+                clone.querySelector('.convo-avatar').textContent = (c.other_display_name || c.other_username).charAt(0).toUpperCase();
+                clone.querySelector('.convo-time').textContent = new Date(c.last_message_at).toLocaleDateString();
+                clone.querySelector('.convo-preview').textContent = 'Tap to view';
+                
+                if (c.unread_count > 0) {
+                    const badge = clone.querySelector('.convo-badge');
+                    badge.textContent = c.unread_count;
+                    badge.classList.remove('hidden');
+                }
+                
+                if (c.other_user_id == activeUserId) {
+                    el.classList.add('bg-bbs-accent/10', 'border-l-2', 'border-bbs-accent');
+                }
+                
+                convoList.appendChild(clone);
+            });
+        }
+
+        function renderMessages(msgs) {
+            if (msgs.length === 0) {
+                messagesContainer.innerHTML = '<div class="text-center text-slate-500 py-12"><i class="ph-duotone ph-chat-circle-dots text-6xl mb-4 opacity-30"></i><p>Start the conversation!</p></div>';
+                return;
+            }
+            messagesContainer.innerHTML = '';
+            msgs.forEach(m => {
+                const clone = msgTemplate.content.cloneNode(true);
+                const el = clone.querySelector('.msg-item');
+                el.dataset.id = m.id;
+                
+                const bubble = clone.querySelector('.msg-bubble');
+                bubble.textContent = m.content;
+                
+                if (m.is_mine) {
+                    el.classList.add('flex-row-reverse');
+                    bubble.classList.remove('bg-slate-700/50');
+                    bubble.classList.add('bg-bbs-accent/30', 'rounded-br-sm');
+                    clone.querySelector('.msg-avatar').classList.add('hidden');
+                } else {
+                    bubble.classList.add('rounded-bl-sm');
+                    clone.querySelector('.msg-avatar').textContent = '?';
+                }
+                
+                clone.querySelector('.msg-time').textContent = new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                messagesContainer.appendChild(clone);
+            });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // --- Actions ---
+
+        function selectConversation(userId, displayName) {
+            activeUserId = userId;
+            recipientName.textContent = displayName;
+            recipientStatus.textContent = 'Encrypted conversation';
+            recipientAvatar.textContent = displayName.charAt(0).toUpperCase();
+            
+            dmInput.disabled = false;
+            sendBtn.disabled = false;
+            
+            // Update URL without reload
+            history.replaceState(null, '', `?with=${userId}`);
+            
+            fetchMessages(userId);
+            fetchConversations(); // Refresh sidebar to update active state
+            
+            // Start polling for new messages
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(() => fetchMessages(userId), 5000);
+        }
+
+        function startConversation(userId, displayName) {
+            newDmModal.classList.add('hidden');
+            userSearch.value = '';
+            userResults.innerHTML = '';
+            selectConversation(userId, displayName);
+        }
+
+        // --- Events ---
+
+        dmForm.onsubmit = (e) => {
+            e.preventDefault();
+            sendMessage(dmInput.value);
+        };
+
+        document.getElementById('new-dm-btn').onclick = () => newDmModal.classList.remove('hidden');
+        document.querySelectorAll('.close-modal').forEach(b => b.onclick = () => newDmModal.classList.add('hidden'));
+
+        let searchDebounce;
+        userSearch.oninput = () => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => searchUsers(userSearch.value), 300);
+        };
+
+        // --- Init ---
+        fetchConversations();
+        
+        if (withUserId) {
+            // Fetch user info and start convo
+            fetch(`/users/lookup?username=`).catch(() => {}); // Just to trigger auth check
+            // For now, just select with ID (we'd need a lookup endpoint for name)
+            selectConversation(withUserId, `User #${withUserId}`);
+        }
+    </script>
+</body>
+</html>

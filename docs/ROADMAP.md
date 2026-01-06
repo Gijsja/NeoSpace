@@ -62,15 +62,15 @@ All goals completed. ✅
 
 ### Sprint #6: User Profiles & Social Wall
 
-- [ ] **Profiles Table**: Bio, avatar, custom CSS storage
-- [ ] **Profile Page**: Customizable wall (MySpace 2.0 style)
-- [ ] **Direct Messages**: Private 1:1 chat with encryption at rest
-- [ ] **User Directory**: Browse/search other users
+- [x] **Profiles Table**: Bio, avatar, custom CSS storage
+- [x] **Profile Page**: Customizable wall (MySpace 2.0 style)
+- [x] **Direct Messages**: Private 1:1 chat with encryption at rest
+- [x] **User Directory**: Browse/search other users
 
 ### Sprint #7: Review, Views & Polish
 
 - [ ] **Wall View**: Finish `wall.html` with sticker drag-drop
-- [ ] **Code Editor**: Wire up Monaco/CodeMirror integration
+- [x] **Code Editor**: Wire up Monaco/CodeMirror integration → Sandboxed Playground
 - [ ] **Internals View**: Real connection stats in `internals.html`
 - [ ] **UI Polish**: Animations, transitions, mobile responsive
 - [ ] **Accessibility**: ARIA labels, keyboard navigation
