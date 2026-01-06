@@ -22,21 +22,23 @@ We are transforming LocalBBS from a chat app into a **Creative Communication Ope
 - The Sandbox UI (Editor & Runner)
 - Verification (Persistence & Safety)
 
-## Current Sprint: #9 (Sonic Identity)
+### Sprint #9 (SHIPPED ✅)
 
-### Focus: Voice Intros & Audio Visualization
+**Theme**: Sonic Identity
 
 **Goal**: Allow users to record and display a "Voice Intro" on their profile with a rich waveform visualization.
 
-- [ ] **Database & Backend**:
-  - [ ] Add `voice_intro` and `voice_waveform` columns to `profiles`.
-  - [ ] create `/profile/voice` upload endpoint.
-- [ ] **UI: Recording**:
-  - [ ] Create `voice-recorder` component.
-  - [ ] Implement `MediaRecorder` logic + real-time canvas visualizer.
-- [ ] **UI: Playback**:
-  - [ ] Add "Voice Card" to `wall.html`.
-  - [ ] Interactive waveform player (click to seek).
+- [x] **Database & Backend**:
+  - [x] Add `voice_intro` and `voice_waveform` columns to `profiles`.
+  - [x] create `/profile/voice` upload endpoint.
+- [x] **UI: Recording**:
+  - [x] Create `voice-recorder` component.
+  - [x] Implement `MediaRecorder` logic + real-time canvas visualizer.
+- [x] **UI: Playback**:
+  - [x] Add "Voice Card" to `wall.html`.
+  - [x] Interactive waveform player (click to seek).
+
+## Upcoming
 
 ### Sprint #10: Unified Desktop (The Dashboard)
 

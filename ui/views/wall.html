@@ -49,6 +49,7 @@
             window.addEventListener( 'touchmove', function() {}, {passive: false});
         }
     </script>
+    <script src="/ui/js/voice.js"></script>
     <script src="/ui/js/wall.js"></script>
   </head>
   <body class="bg-bbs-bg text-slate-200 min-h-screen font-sans" id="body-el">
@@ -94,6 +95,11 @@
           <button id="edit-btn" class="ml-auto px-4 py-2 bg-bbs-accent hover:bg-blue-600 rounded-lg text-sm font-medium transition shadow-glow hidden flex items-center gap-2 shrink-0">
             <i class="ph-bold ph-pencil-simple"></i> Edit Wall
           </button>
+        </div>
+
+        <!-- Voice Intro Player (Dynamic) -->
+        <div id="voice-intro-section" class="mb-4 hidden">
+             <!-- Injected by VoicePlayer -->
         </div>
 
         <!-- Bio -->
@@ -173,12 +179,32 @@
                 </button>
             </div>
             <form id="edit-form" class="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                
+                <!-- Avatar -->
                 <div class="flex items-center gap-4 bg-slate-800/30 p-3 rounded-lg border border-white/5">
                     <div class="w-16 h-16 rounded-full bg-slate-700 bg-cover bg-center shrink-0 border-2 border-bbs-border shadow-inner" id="preview-avatar"></div>
                     <label class="flex-1 cursor-pointer">
                         <span class="block text-sm font-medium text-slate-300 mb-1">Update Avatar</span>
                         <input type="file" id="avatar-input" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-bbs-accent/20 file:text-bbs-accent hover:file:bg-bbs-accent/30 transition" />
                     </label>
+                </div>
+
+                <!-- Voice Intro Recorder -->
+                <div class="bg-slate-800/30 p-3 rounded-lg border border-white/5">
+                    <label class="block text-xs uppercase text-slate-500 font-bold mb-2">Voice Intro</label>
+                    <div class="flex gap-2 items-center mb-2">
+                        <button type="button" id="record-btn" class="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded flex items-center gap-1 transition">
+                            <i class="ph-bold ph-microphone"></i> Record
+                        </button>
+                        <button type="button" id="stop-btn" class="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white text-xs font-bold rounded flex items-center gap-1 transition hidden">
+                            <i class="ph-bold ph-stop"></i> Stop
+                        </button>
+                    </div>
+                    <canvas id="recorder-canvas" width="200" height="40" class="w-full h-10 bg-slate-900 rounded mb-2 border border-white/5"></canvas>
+                    <button type="button" id="upload-voice-btn" class="w-full py-1.5 bg-bbs-accent hover:bg-blue-600 text-white text-xs font-bold rounded disabled:opacity-50 disabled:cursor-not-allowed transition" disabled>
+                        Upload Selection
+                    </button>
+                    <p id="voice-status" class="text-[10px] text-slate-500 mt-1 text-center h-4"></p>
                 </div>
 
                 <div>
@@ -242,6 +268,7 @@
         const userId = urlParams.get('user_id'); // If null, assume current user
         let currentUserData = null;
         let stickerManager = null;
+        let voiceRecorder = null; // VoiceRecorder instance
 
         // Theme Definitions
         const themes = {
@@ -315,12 +342,27 @@
                 initialEl.textContent = data.display_name.charAt(0).toUpperCase();
             }
 
+            // Voice Intro
+            const voiceSection = document.getElementById('voice-intro-section');
+            if (data.voice_intro_path) {
+                voiceSection.classList.remove('hidden');
+                // Parse waveform JSON safely
+                let waveform = [];
+                try {
+                    waveform = JSON.parse(data.voice_waveform_json || '[]');
+                } catch(e) {}
+                
+                new VoicePlayer('voice-intro-section', data.voice_intro_path, waveform);
+            } else {
+                voiceSection.classList.add('hidden');
+                voiceSection.innerHTML = ''; // Helper to clear if removed
+            }
+
             // Theme & Accent
             if (themes[data.theme_preset]) {
                 document.getElementById('wall-container').style.background = themes[data.theme_preset];
             }
             document.documentElement.style.setProperty('--color-accent', data.accent_color);
-            // Updating Tailwind colors via style tag if needed, but CSS var is easier if setup
             
             // Interaction
             if (data.is_own) {
@@ -354,13 +396,88 @@
                 prev.textContent = d.display_name.charAt(0);
                 prev.classList.add('flex', 'items-center', 'justify-center', 'text-xl', 'font-bold', 'text-white');
             }
+            
+            // Reset Voice UI
+            document.getElementById('voice-status').textContent = '';
+            document.getElementById('upload-voice-btn').disabled = true;
 
             editModal.classList.remove('hidden');
         }
 
         document.querySelectorAll('.close-modal').forEach(b => {
-            b.onclick = () => editModal.classList.add('hidden');
+            b.onclick = () => {
+                editModal.classList.add('hidden');
+                if (voiceRecorder) voiceRecorder.stop(); // Ensure recording stops if modal closed
+            };
         });
+
+        // --- Voice Recorder Logic ---
+        let voiceBlob = null;
+        let voiceWaveform = null;
+        
+        const recordBtn = document.getElementById('record-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const uploadVoiceBtn = document.getElementById('upload-voice-btn');
+        const voiceStatus = document.getElementById('voice-status');
+        
+        recordBtn.onclick = async () => {
+            if (!voiceRecorder) {
+                voiceRecorder = new VoiceRecorder('recorder-canvas');
+            }
+            
+            try {
+                await voiceRecorder.start();
+                recordBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                voiceStatus.textContent = "Recording...";
+                uploadVoiceBtn.disabled = true;
+            } catch (err) {
+                voiceStatus.textContent = "Mic access denied.";
+            }
+        };
+        
+        stopBtn.onclick = async () => {
+             const result = await voiceRecorder.stop();
+             if (result) {
+                 voiceBlob = result.blob;
+                 voiceWaveform = result.waveform;
+                 
+                 recordBtn.classList.remove('hidden');
+                 stopBtn.classList.add('hidden');
+                 voiceStatus.textContent = "Recording captured. Ready to upload.";
+                 uploadVoiceBtn.disabled = false;
+             }
+        };
+        
+        uploadVoiceBtn.onclick = async () => {
+             if (!voiceBlob) return;
+             
+             voiceStatus.textContent = "Uploading...";
+             
+             const formData = new FormData();
+             formData.append('voice', voiceBlob);
+             formData.append('waveform', JSON.stringify(voiceWaveform));
+             
+             try {
+                 const res = await fetch('/profile/voice/upload', {
+                     method: 'POST',
+                     body: formData
+                 });
+                 const data = await res.json();
+                 
+                 if (data.ok) {
+                     voiceStatus.textContent = "Uploaded successfully!";
+                     voiceStatus.classList.add('text-emerald-400');
+                     currentUserData.voice_intro_path = data.voice_path;
+                     currentUserData.voice_waveform_json = JSON.stringify(voiceWaveform);
+                     renderProfile(currentUserData); // Update bg loop
+                 } else {
+                     voiceStatus.textContent = "Upload failed.";
+                 }
+             } catch(e) {
+                 voiceStatus.textContent = "Error uploading.";
+             }
+        };
 
         // Handle Avatar Upload independently or as part of submit?
         // Let's do instant upload for avatar to simplify

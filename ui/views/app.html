@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LocalBBS</title>
@@ -8,9 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/ui/css/styles.css" />
-    <!-- Phosphor Icons CDN -->
+    
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <script>
@@ -20,377 +19,288 @@
             colors: {
               'bbs-bg': '#0a0f1a',
               'bbs-surface': 'rgba(30, 41, 59, 0.8)',
-              'bbs-surface-solid': '#1e293b',
-              'bbs-border': 'rgba(71, 85, 105, 0.5)',
               'bbs-accent': '#60a5fa',
-              'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
-              'bbs-success': '#34d399',
-              'bbs-warning': '#fbbf24',
-              'bbs-danger': '#f87171',
-            },
-            fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-              mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-            },
-            animation: {
-              'fade-in-up': 'fadeInUp 0.3s ease-out',
-              'pop': 'pop 0.2s ease-out',
-              'wiggle': 'wiggle 0.3s ease-in-out',
-              'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-            },
-            keyframes: {
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              pop: {
-                '0%': { transform: 'scale(0.95)' },
-                '50%': { transform: 'scale(1.02)' },
-                '100%': { transform: 'scale(1)' },
-              },
-              wiggle: {
-                '0%, 100%': { transform: 'rotate(-1deg)' },
-                '50%': { transform: 'rotate(1deg)' },
-              },
-              glowPulse: {
-                '0%, 100%': { boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' },
-                '50%': { boxShadow: '0 0 20px rgba(96, 165, 250, 0.6)' },
-              },
-            },
-            boxShadow: {
-              'glow': '0 0 15px rgba(96, 165, 250, 0.5)',
-              'glow-lg': '0 0 30px rgba(96, 165, 250, 0.6)',
-              'inner-glow': 'inset 0 0 20px rgba(96, 165, 250, 0.1)',
-            },
+            }
           }
         }
       }
     </script>
-    <script src="/socket.io/socket.io.js"></script>
-  </head>
-  <body class="bg-bbs-bg text-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen">
-    <!-- Toast container -->
-    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
-    <!-- Three-pane dashboard -->
-    <div class="flex h-screen">
-      
-      <!-- LEFT SIDEBAR: Rooms & Navigation -->
-      <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:w-56 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
-        <div class="p-4 border-b border-bbs-border flex justify-between items-center">
-          <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
-            <i class="ph-bold ph-broadcast text-bbs-accent"></i> LocalBBS
-          </h1>
-          <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white" aria-label="Close sidebar">
-            <i class="ph ph-x text-lg"></i>
-          </button>
-        </div>
-        <nav class="flex-1 overflow-y-auto p-2">
-          <div class="mb-4">
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
-              <i class="ph ph-hash"></i> Channels
-            </h2>
-            <ul id="channel-list" class="space-y-1">
-              <li><a href="#" data-room="general" class="room-link active flex items-center gap-2 px-3 py-2 rounded-lg bg-bbs-accent/20 text-bbs-accent text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-95">
-                <i class="ph ph-hash-straight"></i> general
-              </a></li>
-              <li><a href="#" data-room="random" class="room-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
-                <i class="ph ph-hash-straight"></i> random
-              </a></li>
-              <li><a href="#" data-room="generative-art" class="room-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
-                <i class="ph ph-hash-straight"></i> generative-art
-              </a></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
-              <i class="ph ph-chats-circle"></i> Direct Messages
-            </h2>
-            <ul id="dm-list" class="space-y-1">
-              <li><a href="/ui/views/messages.html" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
-                <i class="ph ph-chat-teardrop-dots text-bbs-accent"></i> Open Messages
-              </a></li>
-            </ul>
-          </div>
-          <div class="mt-4">
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2 flex items-center gap-1">
-              <i class="ph ph-users-three"></i> Community
-            </h2>
-            <ul class="space-y-1">
-              <li><a href="/ui/views/directory.html" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 text-slate-400 text-sm transition-all duration-200 hover:scale-[1.02] hover:text-slate-200 active:scale-95">
-                <i class="ph ph-address-book"></i> User Directory
-              </a></li>
-            </ul>
-          </div>
-        </nav>
-        <div class="p-3 border-t border-bbs-border">
-          <button id="btn-create-room" class="w-full px-3 py-2.5 text-sm bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg text-white font-semibold transition-all duration-200 shadow-glow hover:shadow-glow-lg active:scale-95 flex items-center justify-center gap-2">
-            <i class="ph-bold ph-plus"></i> Create Room
-          </button>
-        </div>
-      </aside>
+        /* Message Bubbles */
+        .message.own { flex-direction: row-reverse; }
+        .message.own .bubble {
+            background-color: #3b82f6; 
+            color: white;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 1rem;
+        }
+        .message:not(.own) .bubble {
+            background-color: #1e293b; 
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+        .message.own .meta-info { align-items: flex-end; }
+        .message:not(.own) .meta-info { align-items: flex-start; }
 
-      <!-- CENTER: Main Content Area -->
-      <main class="flex-1 flex flex-col min-w-0">
-        <!-- Header -->
-        <header class="flex items-center justify-between px-3 md:px-5 py-3 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border shrink-0">
-          <div class="flex items-center gap-3">
-             <button id="open-sidebar" class="md:hidden text-slate-400 hover:text-white p-1" aria-label="Open sidebar">
-                <i class="ph ph-list text-xl"></i>
-             </button>
-            <span id="current-room-name" class="text-slate-200 font-semibold text-lg flex items-center gap-2 truncate max-w-[150px] md:max-w-none">
-              <i class="ph ph-hash-straight text-bbs-accent"></i> general
-            </span>
-            <span class="unread-badge hidden bg-bbs-danger text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pop" id="unread-badge">0</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="relative group">
-              <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
-              <input type="search" id="search-input" placeholder="Search messages..." class="w-48 pl-9 pr-8 py-2 text-sm bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
-              <button type="button" class="search-clear absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden transition-colors" id="search-clear" aria-label="Clear search">
-                <i class="ph ph-x"></i>
-              </button>
+        /* Editing State */
+        .message.editing .inline-editor { display: block; }
+        .message.editing .message-content { display: none; }
+
+        /* Connection Status */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; transition: background-color 0.3s; }
+        .status-dot.connected { background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .status-dot.disconnected { background-color: #ef4444; }
+        .status-dot.reconnecting { background-color: #f59e0b; animation: pulse 1s infinite; }
+
+        /* Empty State */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.5; height: 100%; min-height: 200px; }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* Avatar Colors Fallback */
+        .user-color-0 { background-color: #ef4444; }
+        .user-color-1 { background-color: #f97316; }
+        .user-color-2 { background-color: #f59e0b; }
+        .user-color-3 { background-color: #10b981; }
+        .user-color-4 { background-color: #06b6d4; }
+        .user-color-5 { background-color: #3b82f6; }
+        .user-color-6 { background-color: #8b5cf6; }
+        .user-color-7 { background-color: #ec4899; }
+    </style>
+</head>
+<body class="h-screen flex flex-col lg:flex-row items-center justify-center bg-[#0a0f1a] text-slate-200 font-sans overflow-hidden">
+    
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- LEFT PANEL (Profile & Nav) -->
+    <div class="flex lg:flex-col items-center w-full lg:w-1/3 bg-[#0f172a] border-r border-slate-800 lg:h-full p-8 shadow-2xl z-20 relative">
+        <!-- Avatar Section -->
+        <div class="relative group shrink-0">
+            <div class="w-24 h-24 lg:w-32 lg:h-32 rounded-full mb-4 ring-4 ring-slate-800 shadow-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-4xl lg:text-5xl font-bold text-white overflow-hidden bg-cover bg-center" id="profile-avatar-large">
+                <span id="profile-initial">U</span>
             </div>
-            <div class="flex items-center gap-2 text-sm text-slate-400 bg-slate-800/30 px-3 py-1.5 rounded-full">
-              <span class="w-2 h-2 rounded-full bg-slate-500 transition-colors" id="status-dot"></span>
-              <span id="status-text">Connecting...</span>
+             <a href="/ui/views/wall.html" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition text-xs font-bold text-white uppercase tracking-widest cursor-pointer">
+                View Wall
+             </a>
+        </div>
+
+        <div class="text-white text-center w-full flex-1 flex flex-col items-center">
+            <p class="text-3xl lg:text-4xl font-bold mb-1">Hi!</p>
+            <p class="text-lg lg:text-xl mb-6 text-slate-300">I'm <span class="font-bold text-blue-400" id="sidebar-username">User</span></p>
+            
+            <div class="bg-slate-800/50 rounded-xl p-4 mb-auto text-left w-full max-w-sm border border-slate-700/50">
+                 <p class="text-xs text-slate-400 mb-2 uppercase tracking-wide font-bold flex justify-between items-center">
+                    Channels
+                    <button id="btn-create-room" class="text-blue-400 hover:text-white transition p-1"><i class="ph-bold ph-plus"></i></button>
+                 </p>
+                 <nav class="space-y-1 max-h-48 overflow-y-auto pr-2 custom-scroll mb-4" id="channel-list">
+                      <a href="#" data-room="general" class="room-link block px-3 py-2 rounded hover:bg-slate-700/50 text-slate-300 transition flex items-center gap-2">
+                        <i class="ph-bold ph-hash text-blue-400"></i> general
+                      </a>
+                      <a href="#" data-room="random" class="room-link block px-3 py-2 rounded hover:bg-slate-700/50 text-slate-400 transition flex items-center gap-2">
+                        <i class="ph-bold ph-hash"></i> random
+                      </a>
+                 </nav>
+                 
+                  <p class="text-xs text-slate-400 mb-2 uppercase tracking-wide font-bold border-t border-slate-700/50 pt-2">Menu</p>
+                  <nav class="space-y-1">
+                      <a href="/ui/views/directory.html" class="block px-3 py-2 rounded hover:bg-slate-700/50 text-slate-400 transition flex items-center gap-2 group">
+                        <i class="ph-bold ph-users text-slate-500 group-hover:text-blue-400"></i> Directory
+                      </a>
+                      <a href="/ui/views/playground.html" class="block px-3 py-2 rounded hover:bg-slate-700/50 text-slate-400 transition flex items-center gap-2 group">
+                        <i class="ph-bold ph-code text-slate-500 group-hover:text-green-400"></i> Sandbox
+                      </a>
+                  </nav>
             </div>
-            <a href="/auth/logout" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-bbs-danger transition-all duration-200 hover:scale-105 active:scale-95">
-              <i class="ph ph-sign-out"></i> Logout
-            </a>
-          </div>
-        </header>
-
-        <!-- Messages area -->
-        <div class="flex-1 overflow-y-auto p-4" id="messages-scroll" role="log" aria-label="Chat messages">
-          <div class="messages-container space-y-2" id="messages"></div>
+            
+            <p class="text-xs text-slate-500 italic mt-4 hidden lg:block">"Creativity is the greatest rebellion."</p>
         </div>
-
-        <!-- Drag & Drop Overlay -->
-        <div id="drag-overlay" class="absolute inset-0 bg-bbs-bg/90 z-50 hidden flex flex-col items-center justify-center border-2 border-dashed border-bbs-accent m-4 rounded-xl backdrop-blur-sm pointer-events-none">
-          <div class="text-6xl mb-4">📂</div>
-          <h3 class="text-2xl font-bold text-white mb-2">Drop it like it's hot</h3>
-          <p class="text-slate-400">Upload to chat</p>
-        </div>
-
-        <!-- Input area -->
-        <footer class="p-4 bg-bbs-surface border-t border-bbs-border shrink-0 relative">
-          <!-- Emoji Picker Container -->
-          <div id="emoji-picker-container" class="absolute bottom-full left-4 mb-2 hidden z-50 shadow-2xl rounded-lg overflow-hidden border border-bbs-border">
-            <emoji-picker class="dark"></emoji-picker>
-          </div>
-
-          <!-- Typing indicator -->
-          <div id="typing-indicator" class="hidden text-sm text-slate-500 mb-2 flex items-center gap-2">
-            <span class="typing-dots flex gap-1">
-              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
-              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
-              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
-            </span>
-            <span id="typing-users">Someone is typing...</span>
-          </div>
-          <form class="flex gap-3" id="message-form">
-            <input type="file" id="file-input" class="hidden" accept="image/*" />
-            <button type="button" id="emoji-btn" class="p-2.5 text-slate-400 hover:text-yellow-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Insert Emoji" aria-label="Insert Emoji">
-              <i class="ph ph-smiley text-xl"></i>
-            </button>
-            <button type="button" id="upload-btn" class="p-2.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Upload Image" aria-label="Upload Image">
-              <i class="ph ph-image text-xl"></i>
-            </button>
-            <input type="text" id="input" placeholder="Type a message or drag & drop an image…" autocomplete="off" class="flex-1 px-4 py-2.5 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
-            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg text-white font-semibold transition-all duration-200 shadow-glow hover:shadow-glow-lg active:scale-95 flex items-center gap-2" id="send-btn">
-              <i class="ph-bold ph-paper-plane-tilt"></i> Send
-            </button>
-          </form>
-        </footer>
-      </main>
-
-      <!-- RIGHT SIDEBAR: Context Panel -->
-      <aside id="context-panel" class="hidden lg:flex w-72 bg-bbs-surface backdrop-blur-xl border-l border-bbs-border flex-col shrink-0 shadow-inner-glow">
-        <div class="p-4 border-b border-bbs-border">
-          <h2 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
-            <i class="ph ph-user-circle"></i> Your Profile
-          </h2>
-        </div>
-        <div class="p-4 flex flex-col items-center">
-          <!-- Mini Profile Card -->
-          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center text-3xl font-bold mb-3 shadow-glow ring-2 ring-bbs-accent/30 animate-glow-pulse">U</div>
-          <div class="text-center mb-5">
-            <h3 class="font-bold text-lg" id="profile-name">Username</h3>
-            <p class="text-sm text-slate-400 flex items-center justify-center gap-1">
-              <i class="ph ph-star text-yellow-400"></i> Local Creator
-            </p>
-          </div>
-          <!-- Mode Toggles -->
-          <div class="w-full space-y-2.5">
-            <button id="btn-code-mode" class="w-full px-4 py-2.5 text-sm bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/50 rounded-lg text-emerald-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
-              <i class="ph-bold ph-lightning"></i> Code Mode
-            </button>
-            <button id="btn-wall" class="w-full px-4 py-2.5 text-sm bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/50 rounded-lg text-purple-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
-              <i class="ph-bold ph-house"></i> My Wall
-            </button>
-            <button id="btn-internals" class="w-full px-4 py-2.5 text-sm bg-amber-600/20 hover:bg-amber-600/30 border border-amber-600/50 rounded-lg text-amber-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
-              <i class="ph-bold ph-gear-six"></i> System Internals
-            </button>
-            <button id="btn-directory" class="w-full px-4 py-2.5 text-sm bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/50 rounded-lg text-blue-400 font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-lg active:scale-95">
-              <i class="ph-bold ph-users-three"></i> Directory
-            </button>
-          </div>
-        </div>
-        <!-- Quick Stats -->
-        <div class="mt-auto p-4 border-t border-bbs-border">
-          <div class="text-xs text-slate-500 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1"><i class="ph ph-chat-dots"></i> Messages</span>
-              <span class="text-slate-300 font-semibold bg-slate-700/50 px-2 py-0.5 rounded">42</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1"><i class="ph ph-users"></i> Online</span>
-              <span class="text-emerald-400 font-semibold flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 3 users
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
-    <!-- Message template (for safe DOM creation) -->
-    <template id="message-template">
-      <article class="message group bg-bbs-surface hover:bg-slate-700/50 rounded-lg p-3 flex gap-3 transition" data-id="">
-        <div class="message-avatar w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm text-white shrink-0"></div>
-        <div class="message-body flex-1 min-w-0">
-          <div class="message-header flex items-baseline gap-2 mb-1">
-            <span class="message-user font-semibold text-slate-200"></span>
-            <span class="message-time text-xs text-slate-500"></span>
-            <span class="message-edited text-xs text-slate-500 italic hidden">(edited)</span>
-          </div>
-          <div class="message-content text-slate-300"></div>
-          <div class="inline-editor hidden mt-2">
-            <input type="text" class="edit-input w-full px-3 py-1.5 bg-bbs-bg border border-bbs-accent rounded text-sm focus:outline-none" placeholder="Edit message..." />
-            <div class="inline-editor-actions flex gap-2 mt-2">
-              <button type="button" class="btn-save px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded text-white transition">Save</button>
-              <button type="button" class="btn-cancel px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 rounded text-slate-200 transition">Cancel</button>
-            </div>
-          </div>
+    <!-- RIGHT PANEL (Chat) -->
+    <div class="h-full bg-[#0a0f1a] flex-1 w-full flex flex-col items-center relative">
+        
+        <!-- Header Overlay -->
+        <div class="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center bg-gradient-to-b from-[#0a0f1a] to-transparent pointer-events-none">
+             <div class="pointer-events-auto bg-slate-800/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-700 text-sm font-medium text-slate-300 shadow-lg flex items-center gap-2">
+                <div id="status-dot" class="status-dot connected"></div>
+                <span id="current-room-name"># general</span>
+                <span id="status-text" class="text-xs text-slate-500 hidden">Connected</span>
+             </div>
+             <div class="pointer-events-auto flex items-center gap-2">
+                 <div id="unread-badge" class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-glow hidden"></div>
+                 <a href="/auth/logout" class="text-xs text-slate-500 hover:text-red-400 transition uppercase font-bold tracking-wide px-3 py-1 bg-slate-800/50 rounded-full hover:bg-slate-800">Logout</a>
+             </div>
         </div>
-        <div class="message-actions hidden group-hover:flex gap-1 shrink-0">
-          <button type="button" class="btn-edit px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition">Edit</button>
-          <button type="button" class="btn-delete px-2 py-1 text-xs bg-red-600/20 hover:bg-red-600 border border-red-600/50 rounded text-red-400 hover:text-white transition">Delete</button>
+
+        <!-- Messages Area -->
+        <div class="w-full flex-grow overflow-y-auto px-4 lg:px-16 pt-20 pb-4 custom-scroll relative" id="messages-scroll">
+            <div id="messages" class="flex flex-col w-full text-white min-h-0 gap-4 max-w-5xl mx-auto">
+                 <!-- Messages injected here -->
+            </div>
+            
+             <!-- Drag Overlay -->
+            <div id="drag-overlay" class="absolute inset-0 bg-black/80 z-50 hidden flex flex-col items-center justify-center backdrop-blur-sm pointer-events-none">
+                <div class="text-6xl mb-4 animate-bounce">📂</div>
+                <h3 class="text-2xl font-bold text-white">Drop File</h3>
+            </div>
+        </div>
+
+        <!-- Footer Area -->
+        <div class="w-full bg-[#0f172a]/80 border-t border-slate-800 py-6 flex justify-center shrink-0 backdrop-blur-xl relative z-20">
+            <div class="w-full md:w-4/5 lg:w-3/4 flex flex-col px-4 max-w-4xl">
+                
+                <!-- Quick Actions -->
+                <div class="flex justify-center mb-4 gap-3 text-white">
+                    <button id="btn-wall-footer" class="bg-slate-700/50 hover:bg-slate-600 text-slate-300 font-bold py-1.5 px-4 rounded-lg transition border border-slate-600/30 flex items-center gap-2 text-xs uppercase tracking-wide">
+                        <i class="ph-bold ph-house"></i> Wall
+                    </button>
+                    <button id="btn-internals" class="bg-slate-700/50 hover:bg-slate-600 text-slate-300 font-bold py-1.5 px-4 rounded-lg transition border border-slate-600/30 flex items-center gap-2 text-xs uppercase tracking-wide">
+                        <i class="ph-bold ph-cpu"></i> System
+                    </button>
+                </div>
+
+                <!-- Input Form -->
+                <form id="message-form" class="mb-0 relative group">
+                    <!-- Typing Indicator -->
+                    <div id="typing-indicator" class="hidden absolute bottom-full left-0 mb-2 pl-4 text-xs text-slate-500 font-mono flex items-center gap-1">
+                         <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
+                         <span id="typing-users">Someone is typing...</span>
+                    </div>
+
+                    <div class="flex items-center bg-slate-800 border-b-2 border-blue-500 transition-colors focus-within:border-blue-400 rounded-t-lg py-2 px-4 shadow-lg">
+                        <!-- Emoji Btn -->
+                        <button type="button" id="emoji-btn" class="text-slate-400 hover:text-yellow-400 transition mr-2 text-xl p-1">
+                            <i class="ph-bold ph-smiley"></i>
+                        </button>
+                         <!-- Upload Btn -->
+                        <button type="button" id="upload-btn" class="text-slate-400 hover:text-emerald-400 transition mr-3 text-xl p-1">
+                            <i class="ph-bold ph-image"></i>
+                        </button>
+
+                        <input id="input" class="appearance-none bg-transparent border-none w-full mr-3 py-2 px-2 leading-tight focus:outline-none text-white placeholder-slate-500 font-medium" type="text" placeholder="Type a message..." autocomplete="off">
+                        
+                        <button id="send-btn" type="submit" class="flex-shrink-0 bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600 text-sm font-bold text-white py-1.5 px-6 rounded-lg transition transform hover:scale-105 active:scale-95 shadow-glow">
+                            Send
+                        </button>
+                    </div>
+                     <input type="file" id="file-input" class="hidden" accept="image/*" />
+                     
+                     <!-- Pickers Overlay -->
+                     <div id="emoji-picker-container" class="hidden absolute bottom-full left-0 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden border border-slate-700">
+                        <emoji-picker class="dark"></emoji-picker>
+                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="message-template">
+      <article class="message flex w-full items-end mb-2 group animate-fade-in-up" data-id="">
+        <div class="message-avatar w-10 h-10 rounded-full mx-3 mb-1 bg-slate-700 flex items-center justify-center font-bold text-white shrink-0 shadow-lg text-sm select-none"></div>
+        <div class="flex flex-col max-w-[85%] meta-info">
+             <div class="flex items-baseline gap-2 mb-1 px-1 opacity-0 group-hover:opacity-100 transition duration-300 select-none">
+                <span class="message-user font-bold text-slate-400 text-[10px] uppercase tracking-wide"></span>
+                <span class="message-time text-[10px] text-slate-600 font-mono"></span>
+             </div>
+             <div class="bubble rounded-2xl p-3 shadow-md text-sm md:text-base leading-relaxed break-words relative">
+                <div class="message-content"></div>
+                <div class="inline-editor hidden mt-2 min-w-[200px]">
+                    <input type="text" class="edit-input w-full px-2 py-1 bg-black/20 rounded text-sm text-white border border-white/10 mb-2 focus:outline-none focus:border-white/30" placeholder="Edit...">
+                    <div class="flex gap-2">
+                        <button class="btn-save text-xs bg-black/20 hover:bg-black/40 px-2 py-1 rounded">Save</button>
+                        <button class="btn-cancel text-xs hover:text-red-300 px-2 py-1">Cancel</button>
+                    </div>
+                </div>
+                 <div class="message-actions absolute -top-8 right-0 bg-slate-800 rounded-lg shadow-xl border border-slate-700 hidden group-hover:flex overflow-hidden">
+                    <button class="btn-edit px-3 py-1 text-xs hover:bg-blue-500 hover:text-white text-slate-400 transition"><i class="ph-bold ph-pencil"></i></button>
+                    <button class="btn-delete px-3 py-1 text-xs hover:bg-red-500 hover:text-white text-slate-400 transition"><i class="ph-bold ph-trash"></i></button>
+                 </div>
+             </div>
+              <div class="message-edited text-[10px] text-slate-500 mt-1 italic hidden ml-1">edited</div>
         </div>
       </article>
     </template>
-
-    <!-- Confirmation modal -->
-    <div class="modal-overlay hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50" id="confirm-modal" role="dialog" aria-modal="true">
-      <div class="modal bg-bbs-surface rounded-lg p-6 w-80 shadow-xl">
-        <h2 class="text-lg font-semibold mb-3" id="modal-title">Delete Message</h2>
-        <p class="text-slate-400 mb-6">Are you sure you want to delete this message? This cannot be undone.</p>
-        <div class="flex gap-2 justify-end">
-          <button type="button" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-slate-200 transition" id="modal-cancel">Cancel</button>
-          <button type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white transition" id="modal-confirm">Delete</button>
+    
+    <!-- Confirm Modal -->
+    <div class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm" id="confirm-modal">
+        <div class="bg-slate-800 rounded-2xl p-6 w-80 shadow-2xl border border-slate-700 transform transition-all scale-100">
+            <h2 class="text-xl font-bold text-white mb-2">Delete Message?</h2>
+            <p class="text-slate-400 mb-6 text-sm">Real talk? This is permanent.</p>
+            <div class="flex gap-3 justify-end">
+                <button id="modal-cancel" class="px-4 py-2 text-slate-300 hover:text-white text-sm font-bold">Cancel</button>
+                <button id="modal-confirm" class="px-6 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-white text-sm font-bold shadow-glow transition">Boom</button>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Scroll to bottom button -->
-    <button type="button" class="scroll-bottom-btn fixed bottom-24 right-80 w-10 h-10 rounded-full bg-bbs-accent hover:bg-blue-600 text-white flex items-center justify-center shadow-lg opacity-0 pointer-events-none transition z-40" id="scroll-bottom">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </button>
+    <!-- Hidden Elements needed by JS -->
+    <div id="scroll-bottom" class="hidden"></div>
+    <div id="search-input" class="hidden"></div>
+    <div id="search-clear" class="hidden"></div>
 
-    <!-- Navigation Script -->
-    <script>
-      // Current room state
-      let currentRoom = 'general';
-      
-      // Room selection
-      document.querySelectorAll('.room-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const room = link.dataset.room;
-          if (room === currentRoom) return;
-          
-          // Update visual state
-          document.querySelectorAll('.room-link').forEach(l => {
-            l.classList.remove('active', 'bg-bbs-accent/20', 'text-bbs-accent');
-            l.classList.add('text-slate-400');
-          });
-          link.classList.add('active', 'bg-bbs-accent/20', 'text-bbs-accent');
-          link.classList.remove('text-slate-400');
-          
-          // Update header
-          const prefix = room.startsWith('dm-') ? '' : '# ';
-          const displayName = room.startsWith('dm-') ? room.replace('dm-', '') : room;
-          document.getElementById('current-room-name').textContent = prefix + displayName;
-          
-          // Update current room and clear messages (placeholder for real room switching)
-          currentRoom = room;
-          document.getElementById('messages').innerHTML = '';
-          console.log('Switched to room:', room);
-          
-          // TODO: In real implementation, emit socket event to join room
-          // socket.emit('join_room', { room });
-        });
-      });
-      
-      // Mode Toggle Navigation
-      document.getElementById('btn-code-mode').addEventListener('click', () => {
-        window.location.href = '/ui/views/playground.html';
-      });
-      document.getElementById('btn-wall').addEventListener('click', () => {
-        window.location.href = '/ui/views/wall.html';
-      });
-      document.getElementById('btn-internals').addEventListener('click', () => {
-        window.location.href = '/ui/views/internals.html';
-      });
-      document.getElementById('btn-directory').addEventListener('click', () => {
-        window.location.href = '/ui/views/directory.html';
-      });
-      
-          // Fetch current user info
-        fetch('/auth/me')
-        .then(res => res.json())
-        .then(data => {
-            if (data.logged_in) {
-                document.getElementById('profile-name').textContent = data.username;
-                localStorage.setItem('localbbs_username', data.username); // Keep for legacy socket glue
-                // Update avatar color
-                const avatar = document.querySelector('.rounded-full.bg-gradient-to-br');
-                if (data.avatar_color) {
-                     // Could map class color here, for now simpler logic
-                     avatar.textContent = data.username.charAt(0).toUpperCase();
-                }
-            } else {
-                window.location.href = '/auth/login';
-            }
-        });
-
-      // Mobile Menu Logic
-      const sidebar = document.getElementById('sidebar');
-      const openBtn = document.getElementById('open-sidebar');
-      const closeBtn = document.getElementById('close-sidebar');
-
-      openBtn.addEventListener('click', () => {
-        sidebar.classList.remove('-translate-x-full');
-      });
-
-      closeBtn.addEventListener('click', () => {
-        sidebar.classList.add('-translate-x-full');
-      });
-      // Close on link click (mobile)
-      sidebar.querySelectorAll('a').forEach(l => {
-         l.addEventListener('click', () => {
-            if (window.innerWidth < 768) { // md breakpoint
-                sidebar.classList.add('-translate-x-full');
-            }
-         });
-      });
-
-    </script>
-
+    <!-- Scripts -->
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-    <script src="/ui/js/socket_glue.js?v=2" defer></script>
-  </body>
+    <script src="/ui/js/socket_glue.js?v=3"></script>
+    <script>
+        // UI Glue Logic
+        const largeAvatar = document.getElementById('profile-avatar-large');
+        const initial = document.getElementById('profile-initial');
+        const headerName = document.getElementById('sidebar-username');
+        const headerRoom = document.getElementById('current-room-name');
+        
+        async function initUI() {
+             try {
+                 const res = await fetch('/auth/me');
+                 const data = await res.json();
+                 if(data.logged_in) {
+                     headerName.textContent = data.username;
+                     initial.textContent = data.username.charAt(0).toUpperCase();
+                     
+                     // Fetch profile for avatar
+                     const pRes = await fetch(`/profile?user_id=${data.id}`);
+                     const p = await pRes.json();
+                     if(p.avatar_path) {
+                         largeAvatar.style.backgroundImage = `url('${p.avatar_path}')`;
+                         initial.classList.add('hidden');
+                     }
+                 } else {
+                     window.location = '/auth/login';
+                 }
+             } catch(e) {
+                 console.error("Auth check failed", e);
+             }
+        }
+        initUI();
+        
+        // Navigation Logic
+        document.querySelectorAll('.room-link').forEach(l => {
+            l.addEventListener('click', (e) => {
+                e.preventDefault();
+                const room = l.dataset.room;
+                headerRoom.textContent = '# ' + room;
+                
+                 // Update visual active state
+                document.querySelectorAll('.room-link').forEach(link => {
+                     link.classList.remove('text-blue-400', 'bg-slate-700/50');
+                     link.classList.add('text-slate-300');
+                     link.querySelector('i').classList.remove('text-blue-400');
+                     link.querySelector('i').classList.add('text-slate-500');
+                });
+                l.classList.add('text-blue-400', 'bg-slate-700/50');
+                l.classList.remove('text-slate-300');
+                l.querySelector('i').classList.add('text-blue-400');
+                l.querySelector('i').classList.remove('text-slate-500');
+            });
+        });
+
+        document.getElementById('btn-wall-footer').addEventListener('click', () => window.location = '/ui/views/wall.html');
+        document.getElementById('btn-internals').addEventListener('click', () => window.location = '/ui/views/internals.html');
+    </script>
+</body>
 </html>

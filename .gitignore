@@ -6,3 +6,7 @@ __pycache__/
 *-wal
 *-shm
 .env
+static/uploads/*
+static/avatars/*
+static/voice_intros/*
+!static/voice_intros/.gitkeep
