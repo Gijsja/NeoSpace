@@ -5,6 +5,7 @@ Pin/unpin scripts to user profile walls.
 
 import sqlite3
 from db import execute_with_retry
+from flask import request, g, jsonify
 
 
 def pin_script(user_id, script_id, display_order):
@@ -164,3 +165,45 @@ def get_pinned_scripts(profile_id):
     )
     
     return [dict(row) for row in rows] if rows else []
+
+
+# =============================================================================
+# View Handlers (Flask)
+# =============================================================================
+
+def pin_script_view():
+    data = request.get_json()
+    script_id = data.get("script_id")
+    display_order = data.get("display_order", 0)
+    
+    if not script_id:
+        return jsonify(error="script_id required"), 400
+        
+    result = pin_script(g.user["id"], script_id, display_order)
+    if result["ok"]:
+        return jsonify(ok=True)
+    return jsonify(error=result.get("error")), 400
+
+
+def unpin_script_view():
+    data = request.get_json()
+    script_id = data.get("script_id")
+    
+    if not script_id:
+        return jsonify(error="script_id required"), 400
+        
+    result = unpin_script(g.user["id"], script_id)
+    if result["ok"]:
+        return jsonify(ok=True)
+    return jsonify(error=result.get("error")), 400
+
+
+def reorder_pins_view():
+    data = request.get_json()
+    script_ids = data.get("script_ids", [])
+    
+    result = reorder_pins(g.user["id"], script_ids)
+    if result["ok"]:
+        return jsonify(ok=True)
+    return jsonify(error=result.get("error")), 400
+

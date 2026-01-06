@@ -19,6 +19,9 @@ def create_app(test_config=None):
 
     from auth import auth_bp, login_required
     app.register_blueprint(auth_bp)
+    
+    from routes.profiles import bp as profiles_bp
+    app.register_blueprint(profiles_bp)
 
     @app.route("/")
     def index():
@@ -56,6 +59,10 @@ def create_app(test_config=None):
     def serve_voice_intros(filename):
         return send_from_directory("static/voice_intros", filename)
 
+    @app.route("/ui/prototypes/<path:filename>")
+    def serve_prototypes(filename):
+        return send_from_directory("ui/prototypes", filename)
+
     @app.before_request
     def load_user():
         user_id = session.get('user_id')
@@ -84,96 +91,22 @@ def create_app(test_config=None):
     app.add_url_rule("/backfill", "backfill", backfill_messages)  # Read-only, can remain public
     app.add_url_rule("/unread", "unread", unread_count)  # Read-only
 
-    # =============================================
-    # SPRINT 6: PROFILES
-    # =============================================
-    from mutations.profile import get_profile, update_profile, upload_avatar, upload_voice_intro
-    app.add_url_rule("/profile", "get_profile", get_profile, methods=["GET"])
-    app.add_url_rule("/profile/update", "update_profile", login_required(update_profile), methods=["POST"])
-    app.add_url_rule("/profile/avatar", "upload_avatar", login_required(upload_avatar), methods=["POST"])
-    app.add_url_rule("/profile/voice/upload", "upload_voice_intro", login_required(upload_voice_intro), methods=["POST"])
 
-    # =============================================
-    # SPRINT 7: PROFILE STICKERS
-    # =============================================
-    from mutations.profile import add_sticker, update_sticker, remove_sticker
-    app.add_url_rule("/profile/sticker/add", "add_sticker", login_required(add_sticker), methods=["POST"])
-    app.add_url_rule("/profile/sticker/update", "update_sticker", login_required(update_sticker), methods=["POST"])
-    app.add_url_rule("/profile/sticker/remove", "remove_sticker", login_required(remove_sticker), methods=["POST"])
 
     # =============================================
     # SPRINT 6: DIRECT MESSAGES
     # =============================================
     from mutations.dm import send_dm, get_conversation, mark_dm_read, delete_dm, list_conversations
-    app.add_url_rule("/dm/send", "send_dm", login_required(send_dm), methods=["POST"])
-    app.add_url_rule("/dm/conversation", "get_conversation", login_required(get_conversation), methods=["GET"])
-    app.add_url_rule("/dm/read", "mark_dm_read", login_required(mark_dm_read), methods=["POST"])
-    app.add_url_rule("/dm/delete", "delete_dm", login_required(delete_dm), methods=["POST"])
-    app.add_url_rule("/dm/list", "list_conversations", login_required(list_conversations), methods=["GET"])
+    from routes.scripts import bp as scripts_bp
+    app.register_blueprint(scripts_bp)
 
-    # =============================================
-    # SPRINT 6: USER DIRECTORY
-    # =============================================
-    from queries.directory import list_users, get_user_by_username
-    app.add_url_rule("/users", "list_users", login_required(list_users), methods=["GET"])
-    app.add_url_rule("/users/lookup", "get_user_by_username", login_required(get_user_by_username), methods=["GET"])
+    from routes.messages import bp as messages_bp
+    app.register_blueprint(messages_bp)
 
-    # =============================================
-    # SPRINT 8: THE SANDBOX
-    # =============================================
-    from mutations.scripts import save_script, list_scripts, get_script, delete_script
-    app.add_url_rule("/scripts/save", "save_script", login_required(save_script), methods=["POST"])
-    app.add_url_rule("/scripts/list", "list_scripts", login_required(list_scripts), methods=["GET"])
-    app.add_url_rule("/scripts/get", "get_script", get_script, methods=["GET"]) # Public read allowed
-    app.add_url_rule("/scripts/delete", "delete_script", login_required(delete_script), methods=["POST"])
+    from routes.directory import bp as directory_bp
+    app.register_blueprint(directory_bp)
 
-    # =============================================
-    # POST CODE ON PROFILES: PINNED SCRIPTS
-    # =============================================
-    from mutations.profile_scripts import pin_script, unpin_script, reorder_pins
-    
-    @app.route("/profile/scripts/pin", methods=["POST"])
-    @login_required
-    def pin_script_route():
-        from flask import jsonify
-        data = request.get_json()
-        script_id = data.get("script_id")
-        display_order = data.get("display_order", 0)
-        
-        if not script_id:
-            return jsonify(error="script_id required"), 400
-            
-        result = pin_script(g.user["id"], script_id, display_order)
-        if result["ok"]:
-            return jsonify(ok=True)
-        return jsonify(error=result.get("error")), 400
-    
-    @app.route("/profile/scripts/unpin", methods=["POST"])
-    @login_required
-    def unpin_script_route():
-        from flask import jsonify
-        data = request.get_json()
-        script_id = data.get("script_id")
-        
-        if not script_id:
-            return jsonify(error="script_id required"), 400
-            
-        result = unpin_script(g.user["id"], script_id)
-        if result["ok"]:
-            return jsonify(ok=True)
-        return jsonify(error=result.get("error")), 400
-    
-    @app.route("/profile/scripts/reorder", methods=["POST"])
-    @login_required
-    def reorder_pins_route():
-        from flask import jsonify
-        data = request.get_json()
-        script_ids = data.get("script_ids", [])
-        
-        result = reorder_pins(g.user["id"], script_ids)
-        if result["ok"]:
-            return jsonify(ok=True)
-        return jsonify(error=result.get("error")), 400
+
 
 
 

@@ -8,12 +8,18 @@ This system deliberately trades convenience for reliability. Every design decisi
 
 ## The NeoSpace Manifesto
 
-We are building an **Anti-Social Network**.
+---
+
+## The NeoSpace Manifesto
+
+**"The Anti-Social Network"**
 
 1.  **Anti-algorithm**: No recommendations, only exploration. Discovery is active, not passive.
 2.  **User Ownership**: Your data is yours. Profile customization is raw (HTML/CSS), not just a form.
 3.  **Chaos as Feature**: Embrace the messiness of human connection. If it breaks, it's art.
 4.  **Social Without Performance**: No likes, no counts, just vibes. Connection > Validation.
+
+---
 
 ---
 
@@ -31,22 +37,20 @@ Violating any invariant is a critical bug.
 
 ---
 
-## Frozen Core (Stability Guarantee)
+---
 
-The backend core semantics are "frozen" to ensure stability.
+## Agile Process (Sprints & Milestones)
 
-### What is Frozen?
+We operate in iterative **Sprints**. We build on **The Bedrock** (E1) which provides a stable foundation for experimentation.
 
-- **Database Schema**: The fundamental shape of `messages`.
-- **Socket Payloads**: The structure of `message` and `backfill` events.
-- **Business Logic**: Ownership checks, soft-delete behavior.
+### Process
 
-### Making Changes
+1.  **Sprints**: 1-2 week cycles with a specific theme (e.g., "Identity", "Sonic").
+2.  **Milestones**: Major feature clusters (e.g., "Unified Desktop").
+3.  **Quick Wins**: Low-effort, high-impact tasks prioritized between sprints.
 
-Changes to the frozen core require a new **Epoch** (e.g., E2 -> E3). This requires:
+---
 
-1. A clear migration plan.
-2. Backward compatibility strategy.
-3. Full test suite update.
+### Invariant Checks
 
-_Formerly `CORE_INVARIANTS.md` and `CORE_FROZEN.md`_
+Violating an invariant is a critical bug. Always prioritize correctness over new features.

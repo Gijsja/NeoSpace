@@ -1,66 +1,26 @@
-# Quick Wins from Corporate Docs
+# Quick Wins & Cleanup List
 
-_Low-effort, high-impact items for SBBS (NeoSpace deferred)_
+## 🧹 Housekeeping (Immediate)
 
----
+- [x] **Sync Reality**: `ROADMAP.md` is already correct. Checked. <!-- id: 0 -->
+- [x] **Kill the Zombies**: Deleted `startlocal.py`. <!-- id: 1 -->
+- [x] **Freeze Dependencies**: Ran `pip freeze`. <!-- id: 2 -->
+- [x] **Favicon**: Added to `app.html` and `wall.html`. <!-- id: 3 -->
 
-## 🎯 Sprint 11 Quick Wins
+## 🏗 Code Refactor
 
-### 1. Audio Anthem (1-2 days)
+- [x] **Refactor `app.py`**: Moved routes to `mutations/profile_scripts.py`. <!-- id: 4 -->
 
-**Source**: Wall System Spec (Doc 02)
+## 📝 Documentation
 
-Profile background music that auto-plays on wall visit.
+- [x] **Adopt the Manifesto**: Updated `docs/PRINCIPLES.md`. <!-- id: 5 -->
+- [x] **Archive "Corporate"**: Moved to `docs/archive/`. <!-- id: 6 -->
 
-| Task                                | Effort |
-| ----------------------------------- | ------ |
-| Add `anthem_url` column to profiles | 30 min |
-| Add URL input to profile edit modal | 1 hr   |
-| Add `<audio>` element to wall.html  | 1 hr   |
-| Auto-play with mute toggle          | 2 hr   |
+## 🎨 UX Polish
 
----
+- [x] **Meta Tags**: Added description to `app.html`. <!-- id: 7 -->
+- [x] **Title Fix**: Updated `desktop.html`. <!-- id: 8 -->
 
-### 2. Product Vision in Docs (30 min)
+## 🚀 Sprint 11 Extensions
 
-**Source**: Product Vision (Doc 01)
-
-Add "NeoSpace Principles" section to PRINCIPLES.md:
-
-- Anti-algorithm
-- User ownership
-- Chaos as feature
-- Social without performance
-
----
-
-### 3. Guestbook Collage Mode (2-3 days)
-
-**Source**: Wall System Spec (Doc 02)
-
-Enhance sticker board to accept visitor-submitted images.
-
-| Task                                 | Effort |
-| ------------------------------------ | ------ |
-| Add image upload to sticker form     | 2 hr   |
-| Store image as base64 or file upload | 2 hr   |
-| Display image stickers on wall       | 2 hr   |
-| Rate limiting (prevent spam)         | 1 hr   |
-
----
-
-## ⏳ Deferred (Not Quick Wins)
-
-| Item            | Why Deferred                  |
-| --------------- | ----------------------------- |
-| Infinite Canvas | Separate NeoSpace project     |
-| Social Orbits   | Complex schema, medium effort |
-| Custom Renderer | NeoSpace scope only           |
-
----
-
-## Priority Order
-
-1. **Audio Anthem** ← Most novel, users will love it
-2. **Vision to Docs** ← 30 min, foundational
-3. **Image Stickers** ← Extends existing system
+- [x] **Guestbook Collage**: (From Spec 02) Logic exists in `mutations/profile.py` and `wall.js`. Verified `add_sticker` handles images and `StickerManager` supports drag-and-drop. <!-- id: 9 -->

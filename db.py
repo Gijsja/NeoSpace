@@ -112,9 +112,10 @@ CREATE INDEX IF NOT EXISTS idx_dm_sender ON direct_messages(sender_id);
 
 -- Sprint 7: Wall Stickers
 CREATE TABLE IF NOT EXISTS profile_stickers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY, -- using UUID from frontend or backend
     profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    sticker_type TEXT NOT NULL, -- Emoji char or image path
+    sticker_type TEXT, -- Emoji char or 'image'
+    image_path TEXT,   -- Path to uploaded image (Sprint 11)
     x_pos REAL NOT NULL,
     y_pos REAL NOT NULL,
     rotation REAL DEFAULT 0,

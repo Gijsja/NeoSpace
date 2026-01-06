@@ -26,12 +26,12 @@ This system deliberately trades convenience for reliability. Every design decisi
 
 The system is split into two distinct layers:
 
-| Layer  | Name | Status    | Scope                                               |
-| ------ | ---- | --------- | --------------------------------------------------- |
-| **E1** | Core | 🔒 Frozen | Backend semantics, database schema, socket payloads |
-| **E2** | UX   | 🔄 Active | Layout, accessibility, interaction polish           |
+| Layer  | Name        | Status    | Scope                                               |
+| ------ | ----------- | --------- | --------------------------------------------------- |
+| **E1** | The Bedrock | 🛡️ Stable | Backend semantics, database schema, socket payloads |
+| **E2** | UX          | 🔄 Active | Layout, accessibility, interaction polish           |
 
-**This separation is non-negotiable.** See [CORE_FROZEN](CORE_FROZEN.md) and [V2_SCOPE](V2_SCOPE.md).
+**This separation ensures reliability.** See `CORE_INVARIANTS.md`.
 
 ## Key Documents
 

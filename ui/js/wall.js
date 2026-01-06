@@ -31,8 +31,21 @@ class StickerManager {
     
     renderSticker(data) {
         const el = document.createElement('div');
-        el.className = 'sticker-item absolute select-none transition-transform drop-shadow-lg text-4xl';
-        el.innerText = data.sticker_type;
+        el.className = 'sticker-item absolute select-none transition-transform drop-shadow-lg';
+        
+        // Sprint 11: Render Image or Emoji
+        if (data.image_path) {
+            // Image Sticker
+            const img = document.createElement('img');
+            img.src = data.image_path;
+            img.className = 'max-w-[150px] max-h-[150px] object-contain pointer-events-none rounded border-2 border-white/20 shadow-xl';
+            el.appendChild(img);
+        } else {
+            // Emoji Sticker
+            el.innerText = data.sticker_type;
+            el.className += ' text-4xl';
+        }
+        
         el.style.left = `${data.x_pos}px`;
         el.style.top = `${data.y_pos}px`;
         el.style.transform = `rotate(${data.rotation}deg) scale(${data.scale})`;
@@ -107,6 +120,19 @@ class StickerManager {
     async handleDrop(e) {
         e.preventDefault();
         
+        // 1. Check for Files (Sprint 11: Image Collage)
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                const rect = this.container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                await this.uploadImageSticker(file, x, y);
+            }
+            return;
+        }
+
+        // 2. Handling existing dragged stickers or text
         const rawData = e.dataTransfer.getData('text/plain');
         if (!rawData) return;
         
@@ -126,6 +152,64 @@ class StickerManager {
             }
         } catch (err) {
             console.error(err);
+        }
+    }
+    
+    async uploadImageSticker(file, x, y) {
+        // Optimistic Preview
+        const tempId = 'temp-img-' + Date.now();
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const newSticker = {
+                id: tempId,
+                sticker_type: 'image',
+                image_path: e.target.result, // Data URL for preview
+                x_pos: x - 50, // Center it roughly
+                y_pos: y - 50,
+                rotation: (Math.random() * 20 - 10).toFixed(0),
+                scale: 1,
+                z_index: 20,
+                placed_by: this.currentUserId,
+                placed_by_username: 'You'
+            };
+            this.stickers.push(newSticker);
+            this.renderSticker(newSticker);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('x', x - 50);
+        formData.append('y', y - 50);
+        formData.append('target_user_id', this.targetUserId);
+
+        try {
+            const res = await fetch('/profile/sticker/add', {
+                method: 'POST',
+                body: formData // No headers, browser sets multipart
+            });
+            const resData = await res.json();
+            
+            if (resData.ok) {
+                 // Update ID and real path
+                const idx = this.stickers.findIndex(s => s.id === tempId);
+                if (idx !== -1) {
+                    this.stickers[idx].id = resData.id;
+                    this.stickers[idx].image_path = resData.image_path;
+                    this.stickers[idx].placed_by_username = resData.placed_by_username;
+                    // Don't re-render immediately to avoid flash, but next load handles it
+                }
+            } else {
+                 console.error("Upload failed", resData.error);
+                 alert("Failed to upload image: " + resData.error);
+                 // Cleanup
+                 this.stickers = this.stickers.filter(s => s.id !== tempId);
+                 this.renderAll();
+            }
+        } catch(e) {
+            console.error("Upload error", e);
         }
     }
     

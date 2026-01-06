@@ -5,8 +5,10 @@ Handles profile creation, updates, and avatar uploads.
 
 import re
 import os
-import hashlib
-from flask import request, g, jsonify, current_app
+import json
+import uuid
+import random
+from flask import request, jsonify, g, current_app
 from werkzeug.utils import secure_filename
 from db import get_db
 import html
@@ -95,7 +97,7 @@ def get_profile():
     stickers = []
     if row["profile_id"]:
         sticker_rows = db.execute(
-            """SELECT s.id, s.sticker_type, s.x_pos, s.y_pos, s.rotation, s.scale, s.z_index, 
+            """SELECT s.id, s.sticker_type, s.image_path, s.x_pos, s.y_pos, s.rotation, s.scale, s.z_index, 
                       s.placed_by, u.username as placed_by_username
                FROM profile_stickers s
                LEFT JOIN users u ON s.placed_by = u.id
@@ -381,46 +383,91 @@ def create_default_profile(user_id: int, username: str):
 # =============================================
 
 def add_sticker():
-    """Add a sticker to a user's profile (Guestbook)."""
+    """Add a sticker to a user's profile (Guestbook or Image Collage)."""
     if g.user is None:
         return jsonify(error="Authentication required"), 401
     
-    data = request.get_json()
-    sticker_type = data.get("sticker_type")
-    target_user_id = data.get("target_user_id") # Operations on other walls
-    
-    if not sticker_type:
-        return jsonify(error="sticker_type required"), 400
+    # Handle both JSON and FormData
+    if request.content_type.startswith('multipart/form-data'):
+        # Image Upload
+        sticker_type = 'image'
+        target_user_id = request.form.get("target_user_id")
+        x = request.form.get("x", 0)
+        y = request.form.get("y", 0)
         
+        file = request.files.get('image')
+        if not file:
+            return jsonify(error="No image file provided"), 400
+            
+        # Validate Image
+        if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
+             return jsonify(error="Invalid file type"), 400
+             
+        # Save Image
+        filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
+        upload_dir = os.path.join(current_app.root_path, 'static/uploads/stickers')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Security check: ensure target user exists (implicitly checked by db insert constraint but safer to check profile)
+        
+        filepath = os.path.join(upload_dir, filename)
+        file.save(filepath)
+        image_path = f"/static/uploads/stickers/{filename}"
+        
+    else:
+        # Standard Emoji Sticker
+        data = request.get_json()
+        sticker_type = data.get("sticker_type")
+        target_user_id = data.get("target_user_id")
+        x = data.get("x", 0)
+        y = data.get("y", 0)
+        image_path = None
+        
+        if not sticker_type:
+            return jsonify(error="sticker_type required"), 400
+
     # Basic position validation
     try:
-        x = float(data.get("x", 0))
-        y = float(data.get("y", 0))
+        x = float(x)
+        y = float(y)
     except (ValueError, TypeError):
         return jsonify(error="Invalid coordinates"), 400
         
     db = get_db()
-    current_user_id = g.user["id"]
     
-    # Determine target profile
-    target_uid = target_user_id if target_user_id else current_user_id
-    
-    # Ensure profile exists and get ID
-    profile = db.execute("SELECT id FROM profiles WHERE user_id = ?", (target_uid,)).fetchone()
+    # Find profile ID of target
+    # If target_user_id not provided, assume own profile (or fail?)
+    # Usually we want to post on SOMEONE's wall.
+    if not target_user_id:
+         target_user_id = g.user["id"]
+         
+    profile = db.execute("SELECT id FROM profiles WHERE user_id = ?", (target_user_id,)).fetchone()
     if not profile:
-        return jsonify(error="Profile not found"), 404
+        return jsonify(error="Target profile not found"), 404
         
-    profile_id = profile["id"]
+    # Create Sticker
+    # Generate UUID for ID
+    sid = str(uuid.uuid4())
+    
+    # Random default rotation
+    rotation = float(data.get("rotation", 0)) if request.is_json else random.uniform(-10, 10)
     
     db.execute(
-        """INSERT INTO profile_stickers (profile_id, sticker_type, x_pos, y_pos, placed_by)
-           VALUES (?, ?, ?, ?, ?)""",
-        (profile_id, sticker_type, x, y, current_user_id)
+        """INSERT INTO profile_stickers (
+            id, profile_id, sticker_type, image_path, x_pos, y_pos, rotation, placed_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (sid, profile['id'], sticker_type, image_path, x, y, rotation, g.user['id'])
     )
     db.commit()
     
-    new_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-    return jsonify(ok=True, id=new_id, placed_by=current_user_id, placed_by_username=g.user["username"])
+    # Get username for response
+    # We return the new sticker object so frontend can update the temp one
+    return jsonify(
+        ok=True, 
+        id=sid, 
+        placed_by_username=g.user['username'],
+        image_path=image_path
+    )
 
 
 def update_sticker():
