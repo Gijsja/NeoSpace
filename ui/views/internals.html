@@ -43,6 +43,97 @@
         pointer-events: none;
       }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const socket = io();
+        const logContainer = document.getElementById('log-container');
+        const driftEl = document.getElementById('drift-value');
+        const syncDot = document.getElementById('sync-dot');
+        const syncText = document.getElementById('sync-text');
+        
+        // --- LOG LOGIC ---
+        function appendLog(direction, type, data) {
+            const row = document.createElement('div');
+            const ts = new Date().toISOString().split('T')[1].slice(0, -1); // HH:MM:SS.mmm
+            
+            let color = 'text-slate-400';
+            if (direction === 'IN') color = 'text-cyan-400';
+            if (direction === 'OUT') color = 'text-purple-400';
+            
+            // Format data object
+            let dataStr = JSON.stringify(data);
+            if (dataStr.length > 50) dataStr = dataStr.substring(0, 50) + '...';
+            
+            row.innerHTML = `
+                <span class="text-term-green/50">[${ts}]</span> 
+                <span class="${color}">${direction === 'IN' ? '←IN' : '→OUT'}</span> 
+                <span class="text-slate-400">${type}</span> 
+                <span class="text-term-green">${dataStr}</span>
+            `;
+            
+            logContainer.appendChild(row);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Prune old logs
+            if (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+        
+        // --- SOCKET HOOKS ---
+        // Capture specific events we know about (since socket.io client doesn't expose a global 'all' easily without patching)
+        const EVENTS = ['connect', 'disconnect', 'message', 'typing', 'stop_typing', 'backfill'];
+        
+        EVENTS.forEach(evt => {
+            socket.on(evt, (data) => {
+                appendLog('IN', evt, data || {});
+            });
+        });
+        
+        // Capture outgoing (monkey patch emit)
+        const originalEmit = socket.emit;
+        socket.emit = function(event, ...args) {
+            if (event !== 'latency_check') { // ignore internal noise
+                appendLog('OUT', event, args[0] || {});
+            }
+            return originalEmit.apply(this, arguments);
+        };
+        
+        // --- CONNECTION STATUS ---
+        socket.on('connect', () => {
+             syncDot.className = "w-3 h-3 rounded-full bg-term-green animate-pulse";
+             syncText.textContent = "SYNCED";
+             syncText.className = "text-term-green font-bold";
+        });
+        
+        socket.on('disconnect', () => {
+             syncDot.className = "w-3 h-3 rounded-full bg-red-500 animate-pulse";
+             syncText.textContent = "OFFLINE";
+             syncText.className = "text-red-500 font-bold";
+        });
+        
+        // --- DRIFT / LATENCY CHECK ---
+        // Throttled to 5s to avoid self-DDoS (per Technical Director's screaming)
+        setInterval(() => {
+            if (socket.connected) {
+                const start = Date.now();
+                socket.volatile.emit('latency_check', {ts: start}, () => { 
+                    const rtt = Date.now() - start;
+                    driftEl.textContent = `${rtt}ms (OK)`;
+                    if (rtt > 100) driftEl.className = "text-term-amber";
+                    else driftEl.className = "text-term-green";
+                });
+            }
+        }, 5000);
+        
+        // Manual triggers
+        document.getElementById('btn-reconnect').addEventListener('click', () => {
+            socket.disconnect();
+            setTimeout(() => socket.connect(), 500);
+        });
+      });
+    </script>
   </head>
   <body class="bg-black text-term-green font-mono h-screen flex flex-col overflow-hidden">
     <!-- Header -->
@@ -66,15 +157,9 @@
           Socket Traffic Monitor
         </div>
         <div class="flex-1 overflow-auto p-3 text-xs scanlines relative bg-[#0a0a0f]">
-          <div class="space-y-1">
-            <div><span class="text-term-green/50">[22:14:32.001]</span> <span class="text-cyan-400">←IN</span>  <span class="text-slate-400">connected</span> <span class="text-term-green">{sid: "xK2f..."}</span></div>
-            <div><span class="text-term-green/50">[22:14:32.045]</span> <span class="text-purple-400">→OUT</span> <span class="text-slate-400">request_backfill</span> <span class="text-term-green">{after_id: 0}</span></div>
-            <div><span class="text-term-green/50">[22:14:32.089]</span> <span class="text-cyan-400">←IN</span>  <span class="text-slate-400">backfill</span> <span class="text-term-green">{messages: [...]}</span></div>
-            <div><span class="text-term-green/50">[22:14:35.201]</span> <span class="text-cyan-400">←IN</span>  <span class="text-slate-400">message</span> <span class="text-term-green">{id: 142, user: "Alex", ...}</span></div>
-            <div><span class="text-term-green/50">[22:14:36.892]</span> <span class="text-purple-400">→OUT</span> <span class="text-slate-400">send_message</span> <span class="text-term-green">{body: "Hello!", ...}</span></div>
-            <div><span class="text-term-green/50">[22:14:36.945]</span> <span class="text-cyan-400">←IN</span>  <span class="text-slate-400">message</span> <span class="text-term-green">{id: 143, user: "You", ...}</span></div>
-            <div><span class="text-term-green/50">[22:14:40.112]</span> <span class="text-cyan-400">←IN</span>  <span class="text-slate-400">typing</span> <span class="text-term-green">{user: "Sam"}</span></div>
-            <div class="text-term-green animate-pulse">█</div>
+          <div class="space-y-1 font-mono" id="log-container">
+            <!-- Dynamic logs will appear here -->
+             <div><span class="text-term-green/50">[SYSTEM]</span> <span class="text-term-green">Initializing Connection Doctor...</span></div>
           </div>
         </div>
       </div>
@@ -84,14 +169,14 @@
         <!-- Sync Status -->
         <div class="p-4 border-b border-term-green/20">
           <div class="text-term-green/70 text-xs uppercase tracking-wide mb-3">Sync Status</div>
-          <div class="flex items-center gap-2 mb-3">
-            <span class="w-3 h-3 rounded-full bg-term-green animate-pulse"></span>
-            <span class="text-term-green font-bold">SYNCED</span>
+            <div class="flex items-center gap-2 mb-3">
+            <span id="sync-dot" class="w-3 h-3 rounded-full bg-term-green animate-pulse"></span>
+            <span id="sync-text" class="text-term-green font-bold">Waiting...</span>
           </div>
           <div class="text-xs space-y-1">
-            <div class="flex justify-between"><span class="text-term-green/50">Client State:</span><span>msg_id: 143</span></div>
-            <div class="flex justify-between"><span class="text-term-green/50">Server State:</span><span>msg_id: 143</span></div>
-            <div class="flex justify-between"><span class="text-term-green/50">Drift:</span><span class="text-term-green">0 (OK)</span></div>
+            <div class="flex justify-between"><span class="text-term-green/50">Client State:</span><span>Online</span></div>
+            <div class="flex justify-between"><span class="text-term-green/50">Server State:</span><span>Listening</span></div>
+            <div class="flex justify-between"><span class="text-term-green/50">Drift:</span><span class="text-term-green" id="drift-value">--</span></div>
           </div>
         </div>
 
@@ -114,7 +199,7 @@
             <button class="w-full px-3 py-2 text-sm bg-term-amber/20 hover:bg-term-amber/30 border border-term-amber/50 rounded text-term-amber transition text-left">
               ⚡ Force Backfill
             </button>
-            <button class="w-full px-3 py-2 text-sm bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded text-red-400 transition text-left">
+            <button id="btn-reconnect" class="w-full px-3 py-2 text-sm bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded text-red-400 transition text-left">
               🔄 Reconnect Socket
             </button>
             <button class="w-full px-3 py-2 text-sm bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 transition text-left">

@@ -76,11 +76,14 @@
     <div class="flex h-screen">
       
       <!-- LEFT SIDEBAR: Rooms & Navigation -->
-      <aside id="sidebar" class="w-56 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
-        <div class="p-4 border-b border-bbs-border">
+      <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:w-56 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
+        <div class="p-4 border-b border-bbs-border flex justify-between items-center">
           <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
             <i class="ph-bold ph-broadcast text-bbs-accent"></i> LocalBBS
           </h1>
+          <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white" aria-label="Close sidebar">
+            <i class="ph ph-x text-lg"></i>
+          </button>
         </div>
         <nav class="flex-1 overflow-y-auto p-2">
           <div class="mb-4">
@@ -130,9 +133,12 @@
       <!-- CENTER: Main Content Area -->
       <main class="flex-1 flex flex-col min-w-0">
         <!-- Header -->
-        <header class="flex items-center justify-between px-5 py-3 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border shrink-0">
+        <header class="flex items-center justify-between px-3 md:px-5 py-3 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border shrink-0">
           <div class="flex items-center gap-3">
-            <span id="current-room-name" class="text-slate-200 font-semibold text-lg flex items-center gap-2">
+             <button id="open-sidebar" class="md:hidden text-slate-400 hover:text-white p-1" aria-label="Open sidebar">
+                <i class="ph ph-list text-xl"></i>
+             </button>
+            <span id="current-room-name" class="text-slate-200 font-semibold text-lg flex items-center gap-2 truncate max-w-[150px] md:max-w-none">
               <i class="ph ph-hash-straight text-bbs-accent"></i> general
             </span>
             <span class="unread-badge hidden bg-bbs-danger text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pop" id="unread-badge">0</span>
@@ -141,7 +147,7 @@
             <div class="relative group">
               <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
               <input type="search" id="search-input" placeholder="Search messages..." class="w-48 pl-9 pr-8 py-2 text-sm bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
-              <button type="button" class="search-clear absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden transition-colors" id="search-clear">
+              <button type="button" class="search-clear absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 hidden transition-colors" id="search-clear" aria-label="Clear search">
                 <i class="ph ph-x"></i>
               </button>
             </div>
@@ -185,10 +191,10 @@
           </div>
           <form class="flex gap-3" id="message-form">
             <input type="file" id="file-input" class="hidden" accept="image/*" />
-            <button type="button" id="emoji-btn" class="p-2.5 text-slate-400 hover:text-yellow-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Insert Emoji">
+            <button type="button" id="emoji-btn" class="p-2.5 text-slate-400 hover:text-yellow-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Insert Emoji" aria-label="Insert Emoji">
               <i class="ph ph-smiley text-xl"></i>
             </button>
-            <button type="button" id="upload-btn" class="p-2.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Upload Image">
+            <button type="button" id="upload-btn" class="p-2.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95" title="Upload Image" aria-label="Upload Image">
               <i class="ph ph-image text-xl"></i>
             </button>
             <input type="text" id="input" placeholder="Type a message or drag & drop an image…" autocomplete="off" class="flex-1 px-4 py-2.5 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow placeholder-slate-500 transition-all duration-200" />
@@ -200,7 +206,7 @@
       </main>
 
       <!-- RIGHT SIDEBAR: Context Panel -->
-      <aside id="context-panel" class="w-72 bg-bbs-surface backdrop-blur-xl border-l border-bbs-border flex flex-col shrink-0 shadow-inner-glow">
+      <aside id="context-panel" class="hidden lg:flex w-72 bg-bbs-surface backdrop-blur-xl border-l border-bbs-border flex-col shrink-0 shadow-inner-glow">
         <div class="p-4 border-b border-bbs-border">
           <h2 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
             <i class="ph ph-user-circle"></i> Your Profile
@@ -343,8 +349,8 @@
         window.location.href = '/ui/views/directory.html';
       });
       
-      // Fetch current user info
-      fetch('/auth/me')
+          // Fetch current user info
+        fetch('/auth/me')
         .then(res => res.json())
         .then(data => {
             if (data.logged_in) {
@@ -360,6 +366,28 @@
                 window.location.href = '/auth/login';
             }
         });
+
+      // Mobile Menu Logic
+      const sidebar = document.getElementById('sidebar');
+      const openBtn = document.getElementById('open-sidebar');
+      const closeBtn = document.getElementById('close-sidebar');
+
+      openBtn.addEventListener('click', () => {
+        sidebar.classList.remove('-translate-x-full');
+      });
+
+      closeBtn.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+      });
+      // Close on link click (mobile)
+      sidebar.querySelectorAll('a').forEach(l => {
+         l.addEventListener('click', () => {
+            if (window.innerWidth < 768) { // md breakpoint
+                sidebar.classList.add('-translate-x-full');
+            }
+         });
+      });
+
     </script>
 
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>

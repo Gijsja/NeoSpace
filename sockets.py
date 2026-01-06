@@ -76,18 +76,21 @@ def init_sockets(app):
         safe_content = html.escape(content)
         
         # Insert directly (avoiding test_request_context complexity)
+        # Insert directly and return data in one atomic query (SQLite 3.35+)
+        # This eliminates the race condition and 2 extra round-trips
         db = get_db()
-        db.execute(
-            "INSERT INTO messages(user, content) VALUES (?, ?)",
-            (username, safe_content)
-        )
-        db.commit()
-        mid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-        
-        row = db.execute(
-            "SELECT id, user, content, created_at FROM messages WHERE id=?",
-            (mid,)
-        ).fetchone()
+        try:
+            row = db.execute(
+                "INSERT INTO messages(user, content) VALUES (?, ?) RETURNING id, user, content, created_at",
+                (username, safe_content)
+            ).fetchone()
+            db.commit()
+        except Exception as e:
+            # Fallback for older SQLite versions just in case, or error handling
+            db.rollback()
+            print(f"Error inserting message: {e}")
+            emit("error", {"message": "Database error"})
+            return
 
         emit("message", {
             "id": row["id"],
@@ -137,3 +140,11 @@ def init_sockets(app):
         auth_info = authenticated_sockets.get(request.sid)
         if auth_info:
             emit("stop_typing", {"user": auth_info["username"]}, broadcast=True, include_self=False)
+
+    @socketio.on("latency_check")
+    def latency_check(data=None):
+        """
+        Simple pong for client-side latency measurement.
+        Returns the same data back, basically an Ack.
+        """
+        return {"ts": data.get("ts") if data else None}

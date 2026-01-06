@@ -7,10 +7,15 @@ def send_message():
     db = get_db()
     content = html.escape(request.json.get("content",""))
     username = g.user['username'] if g.user else 'anonymous'
-    db.execute("INSERT INTO messages(user,content) VALUES (?,?)", (username, content))
+    
+    # Optimized: Atomic insert and return ID
+    row = db.execute(
+        "INSERT INTO messages(user,content) VALUES (?,?) RETURNING id", 
+        (username, content)
+    ).fetchone()
     db.commit()
-    mid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-    return jsonify(id=mid)
+    
+    return jsonify(id=row['id'])
 
 def edit_message():
     """Edit message content. Requires 'id' and 'content' in JSON body."""

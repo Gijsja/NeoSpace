@@ -37,6 +37,19 @@
         }
       }
     </script>
+    <!-- Mobile Drag & Drop Polyfill -->
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+    <script>
+        // Init polyfill
+        if (typeof MobileDragDrop !== 'undefined') {
+            MobileDragDrop.polyfill({
+                dragImageTranslateOverride: MobileDragDrop.scrollBehaviourDragImageTranslateOverride
+            });
+            // Fix for scroll issues on mobile during drag
+            window.addEventListener( 'touchmove', function() {}, {passive: false});
+        }
+    </script>
+    <script src="/ui/js/wall.js"></script>
   </head>
   <body class="bg-bbs-bg text-slate-200 min-h-screen font-sans" id="body-el">
     <!-- Back navigation -->
@@ -95,16 +108,21 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
           
           <!-- STICKER BOARD -->
-          <div class="col-span-2 bg-bbs-surface/30 backdrop-blur rounded-xl border border-bbs-border/50 min-h-[300px] relative overflow-hidden group">
-            <div class="absolute top-3 left-3 text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                <i class="ph-bold ph-sticker"></i> Sticker Board
+          <div class="col-span-2 bg-bbs-surface/30 backdrop-blur rounded-xl border border-bbs-border/50 min-h-[400px] relative overflow-hidden group" id="sticker-canvas">
+            <!-- Canvas Background / Drop Target -->
+            
+            <div class="absolute top-3 left-3 z-20 flex gap-2">
+                <div class="text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1 bg-black/20 px-2 py-1 rounded backdrop-blur">
+                    <i class="ph-bold ph-sticker"></i> Sticker Board
+                </div>
             </div>
-            <!-- Static Stickers for demo -->
-            <div class="absolute top-12 left-8 text-4xl transform -rotate-12 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">🔥</div>
-            <div class="absolute top-20 right-12 text-3xl transform rotate-6 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">✨</div>
-            <div class="absolute bottom-16 left-1/3 text-4xl transform rotate-3 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">🎨</div>
-            <div class="absolute bottom-8 right-8 text-3xl transform -rotate-6 hover:scale-110 transition cursor-pointer select-none drop-shadow-lg">💜</div>
-            <div class="absolute top-1/2 left-1/2 text-5xl transform -translate-x-1/2 -translate-y-1/2 hover:scale-110 transition cursor-pointer select-none drop-shadow-xl">🚀</div>
+
+            <!-- Stickers Palette (Visible to logged in users) -->
+            <div id="sticker-palette" class="hidden absolute bottom-4 left-4 right-4 bg-bbs-surface/90 border border-bbs-border rounded-xl p-3 backdrop-blur z-30 shadow-2xl overflow-x-auto flex gap-4 scrollbar-hide">
+                <!-- Populated by JS -->
+            </div>
+            
+            <!-- Stickers are appended here by JS -->
           </div>
 
           <!-- INFO / STATS -->
@@ -223,6 +241,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('user_id'); // If null, assume current user
         let currentUserData = null;
+        let stickerManager = null;
 
         // Theme Definitions
         const themes = {
@@ -249,6 +268,24 @@
 
                 currentUserData = data;
                 renderProfile(data);
+                
+                // Init Stickers
+                if (!stickerManager) {
+                    // containerId, isHost, currentUserId, targetUserId
+                    stickerManager = new StickerManager(
+                        'sticker-canvas', 
+                        data.is_own, 
+                        data.viewer_id, 
+                        data.user_id
+                    );
+                    
+                    // Show palette if logged in
+                    if (data.viewer_id) {
+                        setupPalette();
+                    }
+                }
+                stickerManager.setStickers(data.stickers);
+                
                 loadingEl.classList.add('hidden');
                 wallContainer.classList.remove('hidden');
             } catch (err) {
@@ -386,6 +423,42 @@
                 alert("Update error");
             }
         };
+
+        function setupPalette() {
+            const palette = document.getElementById('sticker-palette');
+            palette.classList.remove('hidden');
+            
+            // From global STICKERS_PRESETS in wall.js
+            if (window.STICKERS_PRESETS) {
+                palette.innerHTML = '';
+                window.STICKERS_PRESETS.forEach(char => {
+                    const el = document.createElement('div');
+                    el.className = 'text-3xl hover:scale-125 transition cursor-grab active:cursor-grabbing p-2 shrink-0';
+                    el.innerText = char;
+                    el.draggable = true;
+                    el.ondragstart = (e) => {
+                        // Pass to manager logic if needed, or just let manager handle dragstart globally?
+                        // Actually global dragstart might be tricky if not on canvas.
+                        // Let's attach handler manually here since they are outside canvas
+                        // But wait, manager.handleDragStart listens on elements. Pallete items are new.
+                        // We need a way to hook into the manager's drag start logic for new items.
+                        // Implemented: Manager expects e.target.innerText for new items.
+                    };
+                    // Re-attaching the same handler logic?
+                    el.addEventListener('dragstart', (e) => {
+                       // We need to manually construct the data transfer here
+                       e.dataTransfer.setData('text/plain', JSON.stringify({
+                            type: 'new',
+                            sticker: char,
+                            offsetX: 20, // Center approx
+                            offsetY: 20
+                        }));
+                    });
+                    
+                    palette.appendChild(el);
+                });
+            }
+        }
 
         // Init
         fetchProfile();

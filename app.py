@@ -9,10 +9,13 @@ from queries.unread import unread_count
 import secrets
 import os
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
     # Secure secret key (in production should be env var)
     app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key_DO_NOT_USE_IN_PROD")
+    
+    if test_config:
+        app.config.from_mapping(test_config)
 
     from auth import auth_bp, login_required
     app.register_blueprint(auth_bp)
@@ -42,6 +45,10 @@ def create_app():
     @app.route("/static/avatars/<path:filename>")
     def serve_avatars(filename):
         return send_from_directory("static/avatars", filename)
+
+    @app.route("/static/voice_intros/<path:filename>")
+    def serve_voice_intros(filename):
+        return send_from_directory("static/voice_intros", filename)
 
     @app.before_request
     def load_user():
@@ -74,10 +81,19 @@ def create_app():
     # =============================================
     # SPRINT 6: PROFILES
     # =============================================
-    from mutations.profile import get_profile, update_profile, upload_avatar
+    from mutations.profile import get_profile, update_profile, upload_avatar, upload_voice_intro
     app.add_url_rule("/profile", "get_profile", get_profile, methods=["GET"])
     app.add_url_rule("/profile/update", "update_profile", login_required(update_profile), methods=["POST"])
     app.add_url_rule("/profile/avatar", "upload_avatar", login_required(upload_avatar), methods=["POST"])
+    app.add_url_rule("/profile/voice/upload", "upload_voice_intro", login_required(upload_voice_intro), methods=["POST"])
+
+    # =============================================
+    # SPRINT 7: PROFILE STICKERS
+    # =============================================
+    from mutations.profile import add_sticker, update_sticker, remove_sticker
+    app.add_url_rule("/profile/sticker/add", "add_sticker", login_required(add_sticker), methods=["POST"])
+    app.add_url_rule("/profile/sticker/update", "update_sticker", login_required(update_sticker), methods=["POST"])
+    app.add_url_rule("/profile/sticker/remove", "remove_sticker", login_required(remove_sticker), methods=["POST"])
 
     # =============================================
     # SPRINT 6: DIRECT MESSAGES
@@ -95,6 +111,16 @@ def create_app():
     from queries.directory import list_users, get_user_by_username
     app.add_url_rule("/users", "list_users", login_required(list_users), methods=["GET"])
     app.add_url_rule("/users/lookup", "get_user_by_username", login_required(get_user_by_username), methods=["GET"])
+
+    # =============================================
+    # SPRINT 8: THE SANDBOX
+    # =============================================
+    from mutations.scripts import save_script, list_scripts, get_script, delete_script
+    app.add_url_rule("/scripts/save", "save_script", login_required(save_script), methods=["POST"])
+    app.add_url_rule("/scripts/list", "list_scripts", login_required(list_scripts), methods=["GET"])
+    app.add_url_rule("/scripts/get", "get_script", get_script, methods=["GET"]) # Public read allowed
+    app.add_url_rule("/scripts/delete", "delete_script", login_required(delete_script), methods=["POST"])
+
 
     init_sockets(app)
     return app

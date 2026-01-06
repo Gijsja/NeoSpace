@@ -1,273 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Code Playground - LocalBBS</title>
+    <title>The Sandbox - LocalBBS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/ui/css/styles.css">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              'bbs-bg': '#0a0f1a',
-              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
-              'bbs-border': 'rgba(71, 85, 105, 0.5)',
-              'bbs-accent': '#60a5fa',
+              'bbs-bg': '#0f172a',
+              'bbs-surface': '#1e293b',
+              'bbs-border': '#334155',
+              'bbs-accent': '#3b82f6',
             },
-            fontFamily: { 
-              sans: ['Inter', 'system-ui', 'sans-serif'],
-              mono: ['JetBrains Mono', 'Fira Code', 'monospace']
-            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
           }
         }
       }
     </script>
     <style>
-        .code-editor {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            tab-size: 2;
-        }
+      .cm-editor { height: 100%; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+      .cm-scroller { overflow: auto; }
     </style>
-</head>
-<body class="bg-bbs-bg text-slate-200 min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-
-    <!-- Navigation -->
-    <nav class="bg-bbs-surface backdrop-blur-xl border-b border-bbs-border px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="/ui/views/app.html" class="text-slate-400 hover:text-white transition">
-                <i class="ph-bold ph-arrow-left text-xl"></i>
-            </a>
-            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center gap-2">
-                <i class="ph-bold ph-code text-emerald-400"></i> Code Playground
-            </h1>
+  </head>
+  <body class="bg-bbs-bg text-slate-200 h-screen flex flex-col overflow-hidden">
+    <!-- Header -->
+    <nav class="h-14 border-b border-bbs-border bg-bbs-surface flex items-center justify-between px-4 shrink-0">
+      <div class="flex items-center gap-4">
+        <a href="/ui/views/app.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition">
+           <i class="ph-bold ph-arrow-left"></i> Back
+        </a>
+        <div class="h-6 w-px bg-bbs-border"></div>
+        <div class="flex items-center gap-2">
+            <i class="ph-duotone ph-cube text-bbs-accent text-xl"></i>
+            <h1 class="font-bold text-lg tracking-tight">The Sandbox</h1>
         </div>
-        <div class="flex items-center gap-3">
-            <select id="framework-select" class="bg-slate-800/50 border border-bbs-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-bbs-accent">
-                <option value="p5">p5.js (2D Art)</option>
-                <option value="three">Three.js (3D)</option>
-                <option value="tone">Tone.js (Audio)</option>
-                <option value="vanilla">Vanilla JS</option>
-            </select>
-            <button id="run-btn" class="px-5 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 rounded-lg text-white font-semibold transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                <i class="ph-bold ph-play"></i> Run
-            </button>
-            <button id="stop-btn" class="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 rounded-lg text-red-400 font-medium transition flex items-center gap-2">
-                <i class="ph-bold ph-stop"></i> Stop
-            </button>
+        <div id="script-title" class="text-sm px-3 py-1 rounded bg-black/20 text-slate-300 border border-transparent hover:border-bbs-border focus:outline-none transition" contenteditable="true" spellcheck="false">
+            Untitled Sketch
         </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <span id="save-status" class="text-xs text-slate-500 italic transition-opacity opacity-0">Saved</span>
+        <button id="btn-load" class="flex items-center gap-2 px-3 py-1.5 bg-bbs-surface border border-bbs-border hover:bg-slate-700 rounded text-sm transition font-medium">
+             <i class="ph-bold ph-folder-open"></i> Open
+        </button>
+        <button id="btn-save" class="flex items-center gap-2 px-3 py-1.5 bg-bbs-surface border border-bbs-border hover:bg-slate-700 rounded text-sm transition font-medium">
+             <i class="ph-bold ph-floppy-disk"></i> Save
+        </button>
+        <button id="btn-run" class="flex items-center gap-2 px-4 py-1.5 bg-bbs-accent text-white hover:bg-blue-600 rounded text-sm transition font-bold shadow-glow">
+             <i class="ph-bold ph-play"></i> Run
+        </button>
+      </div>
     </nav>
-
-    <!-- Main Layout -->
-    <div class="flex h-[calc(100vh-68px)]">
-        
-        <!-- Editor Panel -->
-        <div class="w-1/2 border-r border-bbs-border flex flex-col">
-            <div class="px-4 py-2 bg-slate-800/30 border-b border-bbs-border flex items-center justify-between">
-                <span class="text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                    <i class="ph-bold ph-file-js"></i> sketch.js
-                </span>
-                <span class="text-xs text-slate-500" id="char-count">0 chars</span>
+    
+    <!-- Load Modal -->
+    <div id="load-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+        <div class="bg-bbs-surface border border-bbs-border rounded-xl shadow-2xl w-[500px] max-h-[80vh] flex flex-col">
+            <div class="p-4 border-b border-bbs-border flex justify-between items-center">
+                <h3 class="font-bold text-lg">My Scripts</h3>
+                <button id="close-modal" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
             </div>
-            <textarea id="code-editor" class="code-editor flex-1 bg-transparent p-4 resize-none focus:outline-none text-slate-300 placeholder-slate-600" spellcheck="false" placeholder="// Write your code here..."></textarea>
-        </div>
-
-        <!-- Preview Panel -->
-        <div class="w-1/2 flex flex-col bg-black relative">
-            <div class="px-4 py-2 bg-slate-800/30 border-b border-bbs-border flex items-center justify-between">
-                <span class="text-xs text-slate-500 uppercase tracking-wide flex items-center gap-1">
-                    <i class="ph-bold ph-eye"></i> Preview
-                </span>
-                <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-medium flex items-center gap-1">
-                    <i class="ph-bold ph-shield-check"></i> Sandboxed
-                </span>
+            <div class="flex-1 overflow-y-auto p-2 space-y-1" id="script-list">
+                <!-- Scripts injected here -->
+                <div class="p-4 text-center text-slate-500" id="loading-scripts">Loading...</div>
             </div>
-            <div class="flex-1 relative overflow-hidden" id="preview-container">
-                <iframe id="sandbox-frame" class="w-full h-full border-0" sandbox="allow-scripts"></iframe>
-                <div id="preview-overlay" class="absolute inset-0 flex items-center justify-center bg-black/50 text-slate-400">
-                    <div class="text-center">
-                        <i class="ph-duotone ph-play-circle text-6xl mb-2 opacity-50"></i>
-                        <p>Click <strong>Run</strong> to execute</p>
-                    </div>
-                </div>
-            </div>
-            <div id="console-output" class="h-32 bg-slate-900 border-t border-bbs-border overflow-y-auto p-3 font-mono text-xs text-slate-400"></div>
         </div>
     </div>
 
-    <script>
-        const editor = document.getElementById('code-editor');
-        const sandboxFrame = document.getElementById('sandbox-frame');
-        const runBtn = document.getElementById('run-btn');
-        const stopBtn = document.getElementById('stop-btn');
-        const frameworkSelect = document.getElementById('framework-select');
-        const previewOverlay = document.getElementById('preview-overlay');
-        const consoleOutput = document.getElementById('console-output');
-        const charCount = document.getElementById('char-count');
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Editor Params -->
+        <div class="w-1/2 flex flex-col border-r border-bbs-border relative group">
+            <div id="editor-container" class="flex-1 bg-[#0d1117] overflow-hidden"></div>
+            <!-- Settings Overlay -->
+            <div class="absolute bottom-4 right-4 z-10">
+                 <select id="mode-select" class="bg-bbs-surface border border-bbs-border rounded px-2 py-1 text-xs text-slate-300">
+                    <option value="p5">p5.js (Global)</option>
+                    <option value="three">Three.js (Module)</option>
+                    <option value="vanilla">Vanilla JS</option>
+                 </select>
+            </div>
+        </div>
+        
+        <!-- Preview -->
+        <div class="w-1/2 flex flex-col bg-black relative">
+            <iframe id="runner-frame" class="flex-1 w-full h-full border-none bg-white" sandbox="allow-scripts allow-pointer-lock allow-same-origin"></iframe>
+        </div>
+    </main>
 
-        // Framework CDN URLs
-        const frameworkCDN = {
-            'p5': 'https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js',
-            'three': 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
-            'tone': 'https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js',
-            'vanilla': null
-        };
+    <!-- CodeMirror + Logic -->
+    <script type="module">
+        import {EditorView, basicSetup} from "https://esm.sh/codemirror@6.0.1"
+        import {javascript} from "https://esm.sh/@codemirror/lang-javascript@6.0.1"
+        import {oneDark} from "https://esm.sh/@codemirror/theme-one-dark@6.0.1"
+        import {keymap} from "https://esm.sh/@codemirror/view@6.0.1"
+        import {indentWithTab} from "https://esm.sh/@codemirror/commands@6.0.1"
 
-        // Starter templates
-        const templates = {
-            'p5': `function setup() {
-  createCanvas(400, 400);
+        // --- Editor Setup ---
+        const parent = document.getElementById('editor-container');
+        
+        // Initial Template
+        const TEMPLATES = {
+            p5: `function setup() {
+  createCanvas(windowWidth, windowHeight);
   background(20);
 }
 
 function draw() {
-  // Glowing circles
+  fill(0, 10);
+  rect(0, 0, width, height);
+  
+  fill(0, 255, 136);
   noStroke();
-  fill(100, 150, 255, 50);
   circle(mouseX, mouseY, 50);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }`,
-            'three': `const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, 400/400, 0.1, 1000);
+            three: `// Three.js Template
+import * as THREE from 'https://esm.sh/three';
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(400, 400);
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x60a5fa, wireframe: true });
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
-camera.position.z = 3;
+
+camera.position.z = 5;
 
 function animate() {
-  requestAnimationFrame(animate);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  renderer.render(scene, camera);
+	requestAnimationFrame(animate);
+	cube.rotation.x += 0.01;
+	cube.rotation.y += 0.01;
+	renderer.render(scene, camera);
 }
 animate();`,
-            'tone': `const synth = new Tone.Synth().toDestination();
-
-// Play a note on click
-document.body.onclick = () => {
-  synth.triggerAttackRelease("C4", "8n");
-};
-
-document.body.innerHTML = '<div style="color:white;padding:50px;text-align:center;font-family:sans-serif;"><h1>🎵 Click anywhere to play</h1></div>';`,
-            'vanilla': `// Vanilla JavaScript
-const canvas = document.createElement('canvas');
-canvas.width = 400;
-canvas.height = 400;
-document.body.appendChild(canvas);
-const ctx = canvas.getContext('2d');
-
-ctx.fillStyle = '#0a0f1a';
-ctx.fillRect(0, 0, 400, 400);
-
-ctx.font = '24px sans-serif';
-ctx.fillStyle = '#60a5fa';
-ctx.textAlign = 'center';
-ctx.fillText('Hello, LocalBBS!', 200, 200);`
+            vanilla: `document.body.style.background = '#111';
+document.body.style.color = '#0f0';
+document.body.style.fontFamily = 'monospace';
+document.body.innerHTML = '<h1>Hello World</h1>';`
         };
 
-        // Load template on framework change
-        frameworkSelect.onchange = () => {
-            editor.value = templates[frameworkSelect.value] || '';
-            updateCharCount();
-        };
+        let currentScriptId = null;
 
-        // Initial template
-        editor.value = templates['p5'];
-        updateCharCount();
+        const view = new EditorView({
+            doc: TEMPLATES.p5,
+            extensions: [
+                basicSetup,
+                keymap.of([indentWithTab]),
+                javascript(),
+                oneDark,
+                EditorView.updateListener.of((u) => {
+                    if (u.docChanged) {
+                        // Could auto-run or mark dirty
+                        document.getElementById('save-status').style.opacity = '0';
+                    }
+                })
+            ],
+            parent: parent
+        });
 
-        function updateCharCount() {
-            charCount.textContent = `${editor.value.length} chars`;
-        }
-        editor.oninput = updateCharCount;
-
-        function log(msg, type = 'log') {
-            const colors = { log: 'text-slate-400', error: 'text-red-400', warn: 'text-yellow-400' };
-            consoleOutput.innerHTML += `<div class="${colors[type] || 'text-slate-400'}">${msg}</div>`;
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
+        // --- Runner Logic ---
+        const btnRun = document.getElementById('btn-run');
+        const frame = document.getElementById('runner-frame');
+        const modeSelect = document.getElementById('mode-select');
+        const btnSave = document.getElementById('btn-save');
+        const titleEl = document.getElementById('script-title');
+        const saveStatus = document.getElementById('save-status');
 
         function runCode() {
-            const framework = frameworkSelect.value;
-            const userCode = editor.value;
-            const cdnUrl = frameworkCDN[framework];
-
-            // Clear previous
-            consoleOutput.innerHTML = '';
-            previewOverlay.classList.add('hidden');
-            log(`[${new Date().toLocaleTimeString()}] Running ${framework}...`);
-
-            // Build sandboxed HTML
-            const html = `
+            const code = view.state.doc.toString();
+            const mode = modeSelect.value;
+            
+            let html = '';
+            
+            if (mode === 'p5') {
+                html = `
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0f1a; }
-        canvas { display: block; }
-    </style>
-    ${cdnUrl ? `<script src="${cdnUrl}"><\/script>` : ''}
+    <style>body { margin: 0; overflow: hidden; }</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
 </head>
 <body>
     <script>
-        // Capture console for parent
-        const _log = console.log;
-        const _err = console.error;
-        const _warn = console.warn;
-        console.log = (...args) => { parent.postMessage({type:'log', msg: args.join(' ')}, '*'); _log.apply(console, args); };
-        console.error = (...args) => { parent.postMessage({type:'error', msg: args.join(' ')}, '*'); _err.apply(console, args); };
-        console.warn = (...args) => { parent.postMessage({type:'warn', msg: args.join(' ')}, '*'); _warn.apply(console, args); };
-        window.onerror = (msg, src, line) => { parent.postMessage({type:'error', msg: \`\${msg} (line \${line})\`}, '*'); };
-
-        // Kill switch: stop after 30 seconds
-        setTimeout(() => {
-            parent.postMessage({type:'warn', msg: '[Timeout] Execution stopped after 30s'}, '*');
-            window.stop?.();
-        }, 30000);
-
-        try {
-            ${userCode}
-        } catch (e) {
-            console.error(e.message);
-        }
+    try {
+        ${code}
+    } catch (e) {
+        document.body.innerHTML = '<pre style="color:red; padding:10px">' + e.toString() + '</pre>';
+    }
     <\/script>
 </body>
 </html>`;
-
-            sandboxFrame.srcdoc = html;
-        }
-
-        function stopCode() {
-            sandboxFrame.srcdoc = '';
-            previewOverlay.classList.remove('hidden');
-            log('[Stopped]', 'warn');
-        }
-
-        // Listen for console messages from sandbox
-        window.addEventListener('message', (e) => {
-            if (e.data && e.data.type) {
-                log(e.data.msg, e.data.type);
-            }
-        });
-
-        runBtn.onclick = runCode;
-        stopBtn.onclick = stopCode;
-
-        // Keyboard shortcut: Ctrl+Enter to run
-        editor.onkeydown = (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                runCode();
-            }
-        };
-    </script>
+            } else if (mode === 'three') {
+                html = `
+<!DOCTYPE html>
+<html>
+<head><style>body { margin: 0; overflow: hidden; }</style></head>
+<body>
+    <script type="module">
+    try {
+        ${code}
+    } catch (e) {
+        document.body.innerHTML = '<pre style="color:red; padding:10px">' + e.toString() + '</pre>';
+    }
+    <\/script>
 </body>
+</html>`;
+            } else {
+                 html = `<!DOCTYPE html><html><body><script>${code}<\/script></body></html>`;
+            }
+            
+            frame.srcdoc = html;
+        }
+
+        btnRun.addEventListener('click', runCode);
+        
+        // Auto-run on load
+        runCode();
+        
+        // --- Persistence Logic ---
+        btnSave.addEventListener('click', async () => {
+             const title = titleEl.innerText;
+             const content = view.state.doc.toString();
+             const type = modeSelect.value;
+             
+             btnSave.disabled = true;
+             btnSave.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Saving...';
+             
+             try {
+                 const res = await fetch('/scripts/save', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({
+                         id: currentScriptId,
+                         title,
+                         content,
+                         script_type: type
+                     })
+                 });
+                 const data = await res.json();
+                 
+                 if (data.ok) {
+                     currentScriptId = data.id;
+                     saveStatus.textContent = 'Saved';
+                     saveStatus.style.opacity = '1';
+                     
+                     // Update URL to include ID if new
+                     const url = new URL(window.location);
+                     url.searchParams.set('id', data.id);
+                     window.history.replaceState({}, '', url);
+                 } else {
+                     alert('Error saving: ' + data.error);
+                 }
+             } catch(e) {
+                 alert('Network error');
+             } finally {
+                 btnSave.disabled = false;
+                 btnSave.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Save';
+             }
+        });
+        
+        // Listen for mode change to swap templates (if empty or confirmed)
+        modeSelect.addEventListener('change', () => {
+             // For now just swap, in real app maybe warn user?
+             const mode = modeSelect.value;
+             const tpl = TEMPLATES[mode];
+             
+             const transaction = view.state.update({
+                 changes: {from: 0, to: view.state.doc.length, insert: tpl}
+             });
+             view.dispatch(transaction);
+             runCode();
+        });
+        
+        // Load Script from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        async function loadScript(id) {
+             const r = await fetch('/scripts/get?id=' + id);
+             const d = await r.json();
+             if (d.ok) {
+                const s = d.script;
+                currentScriptId = s.id;
+                titleEl.innerText = s.title;
+                modeSelect.value = s.script_type || 'p5';
+                
+                const transaction = view.state.update({
+                     changes: {from: 0, to: view.state.doc.length, insert: s.content}
+                });
+                view.dispatch(transaction);
+                runCode();
+                
+                // Update URL without reload
+                const url = new URL(window.location);
+                url.searchParams.set('id', id);
+                window.history.replaceState({}, '', url);
+             }
+        }
+
+        const loadId = urlParams.get('id');
+        if (loadId) loadScript(loadId);
+
+        // --- Load Modal Logic ---
+        const modal = document.getElementById('load-modal');
+        const btnLoad = document.getElementById('btn-load');
+        const btnCloseModal = document.getElementById('close-modal');
+        const scriptList = document.getElementById('script-list');
+
+        function toggleModal(show) {
+            modal.style.opacity = show ? '1' : '0';
+            modal.style.pointerEvents = show ? 'auto' : 'none';
+            if (show) fetchScripts();
+        }
+
+        btnLoad.addEventListener('click', () => toggleModal(true));
+        btnCloseModal.addEventListener('click', () => toggleModal(false));
+
+        async function fetchScripts() {
+            scriptList.innerHTML = '<div class="p-4 text-center text-slate-500"><i class="ph ph-spinner animate-spin text-xl"></i></div>';
+            try {
+                const res = await fetch('/scripts/list');
+                const data = await res.json();
+                
+                if (data.scripts && data.scripts.length > 0) {
+                    scriptList.innerHTML = '';
+                    data.scripts.forEach(s => {
+                        const el = document.createElement('div');
+                        el.className = "flex items-center justify-between p-3 rounded hover:bg-slate-700/50 cursor-pointer group transition";
+                        el.innerHTML = `
+                            <div>
+                                <div class="font-medium text-slate-200">${s.title}</div>
+                                <div class="text-xs text-slate-500">${s.script_type} • ${new Date(s.last_modified).toLocaleDateString()}</div>
+                            </div>
+                            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+                                <button class="p-1.5 hover:text-red-400 delete-script" data-id="${s.id}" title="Delete"><i class="ph-bold ph-trash"></i></button>
+                            </div>
+                        `;
+                        // Click to load
+                        el.addEventListener('click', (e) => {
+                            if (!e.target.closest('.delete-script')) {
+                                loadScript(s.id);
+                                toggleModal(false);
+                            }
+                        });
+                        // Delete
+                        el.querySelector('.delete-script').addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            if(confirm('Delete script?')) {
+                                await fetch('/scripts/delete', {
+                                    method: 'POST', 
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({id: s.id})
+                                });
+                                fetchScripts(); // Reload list
+                            }
+                        });
+                        scriptList.appendChild(el);
+                    });
+                } else {
+                    scriptList.innerHTML = '<div class="p-8 text-center text-slate-500">No scripts found.<br>Save your first sketch!</div>';
+                }
+            } catch(e) {
+                scriptList.innerHTML = '<div class="p-4 text-center text-red-400">Error loading scripts</div>';
+            }
+        }
+
+    </script>
+  </body>
 </html>

@@ -1,25 +1,54 @@
-# LocalBBS Sprint Tracker
+# LocalBBS "Creative OS" Roadmap
 
-## Current Sprint: #2 (SHIPPED ✅)
+We are transforming LocalBBS from a chat app into a **Creative Communication Operating System**. This roadmap aligns with the "4 Pillars of Innovation" from our design mockups.
 
-**Dates**: Jan 5-6, 2026  
-**Theme**: Chat Functionality Polish
+### Sprint #7 (SHIPPED ✅)
 
-### Sprint Goals
+**Theme**: Identity & Transparency
 
-- [x] Fix message hover actions (group-hover CSS)
-- [x] Make sidebar rooms clickable (visual state sync)
-- [x] Add typing indicators (animated dots + socket events)
-- [x] Test with real WebSocket connection
-- [x] Style refinements
-
-### Shipped
-
-All goals completed. ✅
+- Wall Guestbook (Stickers)
+- System Internals (Connection Doctor)
+- UI Polish & Mobile Responsiveness
 
 ---
 
-## Previous Sprints
+## Future Sprints
+
+### Sprint #8 (SHIPPED ✅)
+
+**Theme**: Creative Sovereignty (The Sandbox)
+
+- Data Layer (Scripts Table & API)
+- The Sandbox UI (Editor & Runner)
+- Verification (Persistence & Safety)
+
+## Current Sprint: #9 (Sonic Identity)
+
+### Focus: Voice Intros & Audio Visualization
+
+**Goal**: Allow users to record and display a "Voice Intro" on their profile with a rich waveform visualization.
+
+- [ ] **Database & Backend**:
+  - [ ] Add `voice_intro` and `voice_waveform` columns to `profiles`.
+  - [ ] create `/profile/voice` upload endpoint.
+- [ ] **UI: Recording**:
+  - [ ] Create `voice-recorder` component.
+  - [ ] Implement `MediaRecorder` logic + real-time canvas visualizer.
+- [ ] **UI: Playback**:
+  - [ ] Add "Voice Card" to `wall.html`.
+  - [ ] Interactive waveform player (click to seek).
+
+### Sprint #10: Unified Desktop (The Dashboard)
+
+**Goal**: The "Mega-View" for power users.
+
+- **Dashboard Layout**: 3-pane view unifing Nav, Chat, and Context.
+- **Mini-Wall**: Compact profile summary in the side panel.
+- **Electron Polish**: Native window controls and system tray.
+
+---
+
+## Legacy Roadmap (Archived)
 
 ### Sprint #1 (SHIPPED ✅)
 
@@ -27,72 +56,41 @@ All goals completed. ✅
 
 - Git init + Tailwind CSS
 - Three-pane dashboard
-- Feature page scaffolds (Wall, Code Editor, Internals)
-- Navigation wiring
+- Feature page scaffolds
 
----
+### Sprint #2 (SHIPPED ✅)
 
-## Sprint #3: Backend Integration & Live Testing (SHIPPED)
+**Theme**: Chat Functionality Polish
 
-**Goal:** Verify WebSocket connectivity, fix server issues, and implement persistent state.
+- Fix message hover actions
+- Sidebar interaction sync
+- Typing indicators
 
-**Shipped Features:**
+### Sprint #3 (SHIPPED ✅)
 
-- [x] **Live WebSocket Connection**: Fixed `socket_glue.js` loading and server binding.
-- [x] **Emoji Picker**: Added `emoji-picker-element` with UI integration.
-- [x] **Persistent Room State**: Remembers last visited room across reloads.
-- [x] **Server Accessibility**: Bound to `0.0.0.0` for full access.
+**Theme**: Backend Integration
 
-### Sprint #4: Data Persistence & File Sharing
+- Live WebSocket Connection
+- Persistent Room State
 
-- [ ] **Message Timestamps**: Add `created_at` to schema, display in UI
-- [ ] **File Uploads**: Drag-and-drop images to chat
-- [ ] **Image Display**: Render uploaded images inline
+### Sprint #4 (SHIPPED ✅)
 
-### Sprint #5: OAuth Login (Google + Apple)
+**Theme**: Data Persistence
 
-- [ ] **Google OAuth**: Cloud Console setup + credentials
-- [ ] **Apple Sign-In**: Developer account + Sign in with Apple setup
-- [ ] **Login Page**: Unified UI with Google & Apple buttons
-- [ ] **OAuth Flow**: `/auth/google` + `/auth/apple` → callbacks → session
-- [ ] **User Creation**: Auto-create user on first login (either provider)
-- [ ] **Account Linking**: Link Google/Apple to same user if email matches
-- [ ] **Session Management**: Secure HTTPOnly cookies, logout endpoint
-- [ ] **Protected Routes**: Require auth for chat/profile
+- Message Timestamps
+- File Uploads
 
-### Sprint #6: User Profiles & Social Wall
+### Sprint #5 (SHIPPED ✅)
 
-- [x] **Profiles Table**: Bio, avatar, custom CSS storage
-- [x] **Profile Page**: Customizable wall (MySpace 2.0 style)
-- [x] **Direct Messages**: Private 1:1 chat with encryption at rest
-- [x] **User Directory**: Browse/search other users
+**Theme**: Authentication
 
-### Sprint #7: Review, Views & Polish
+- Standard User/Pass Auth
+- Session Management
 
-- [ ] **Wall View**: Finish `wall.html` with sticker drag-drop
-- [x] **Code Editor**: Wire up Monaco/CodeMirror integration → Sandboxed Playground
-- [ ] **Internals View**: Real connection stats in `internals.html`
-- [ ] **UI Polish**: Animations, transitions, mobile responsive
-- [ ] **Accessibility**: ARIA labels, keyboard navigation
+### Sprint #6 (SHIPPED ✅)
 
----
+**Theme**: User Profiles
 
-## Backlog
-
-### UI Polish
-
-- [ ] Sticker drag-and-drop on wall
-- [ ] Voice recording for voice intro
-- [ ] Code editor syntax highlighting (CodeMirror/Monaco)
-
-### Backend
-
-- [ ] Multi-room support
-- [ ] User authentication
-- [ ] Persistent user profiles
-
-### Creative Features
-
-- [ ] Three.js/p5.js sandbox execution
-- [ ] Code sharing to chat
-- [ ] Ambient lobby visualization
+- Customizable Profile Wall
+- Direct Messages with Encryption
+- User Directory
