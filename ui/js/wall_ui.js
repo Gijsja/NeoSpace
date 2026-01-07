@@ -146,11 +146,12 @@ function renderProfile(data) {
     // Interaction
     if (data.is_own) {
         // Show edit controls
-        ['edit-avatar-btn', 'edit-profile-btn', 'edit-now-btn'].forEach(id => {
+        ['edit-avatar-btn', 'edit-profile-btn', 'edit-now-btn', 'add-module-btn'].forEach(id => {
             const el = document.getElementById(id);
             if(el) {
                 el.classList.remove('hidden');
-                el.onclick = openEditModal; // For now all open main modal
+                if (id !== 'add-module-btn') el.onclick = openEditModal; 
+                // add-module-btn has its own handler
             }
         });
     }
@@ -160,8 +161,8 @@ function renderProfile(data) {
         if (onlineEl) onlineEl.classList.remove('hidden');
     }
     
-    // Pinned Scripts
-    renderPinnedScripts(data.pinned_scripts);
+    // Modular Wall (Sprint 12)
+    renderWallModules(data.wall_modules);
 }
 
 // --- Edit Logic ---
@@ -460,63 +461,265 @@ function setupPalette() {
 // =============================================
 // PINNED SCRIPTS RENDERING (Masonry)
 // =============================================
-function renderPinnedScripts(scripts) {
-    if (!scripts || scripts.length === 0) {
-        const pinnedSection = document.getElementById('pinned-scripts-section');
-        if (pinnedSection) pinnedSection.classList.add('hidden');
+// =============================================
+// MODULAR WALL RENDERING (Sprint 12)
+// =============================================
+function renderWallModules(modules) {
+    const section = document.getElementById('wall-modules-section');
+    const grid = document.getElementById('wall-modules-grid');
+    
+    if (!modules || modules.length === 0) {
+        if (section) section.classList.add('hidden');
         return;
     }
     
-    const section = document.getElementById('pinned-scripts-section');
-    const grid = document.getElementById('pinned-scripts-grid');
     if (section) section.classList.remove('hidden');
+    
     if (grid) {
         grid.innerHTML = '';
-        
-        // Switch grid to masonry columns via CSS class if not already set
         grid.className = 'columns-1 md:columns-3 gap-6 space-y-6';
         
-        scripts.forEach(script => {
-            const card = document.createElement('div');
+        modules.forEach(mod => {
+            let card = document.createElement('div');
+            card.dataset.moduleId = mod.id;
+            card.dataset.moduleType = mod.module_type;
             
-            // Random aspect ratio for masonry effect (Tall, Square, Wide)
-            // We'll use a pseudo-random determined by script ID so it's stable
-            const heights = ['h-64', 'h-80', 'h-56'];
-            const heightClass = heights[script.id % heights.length];
+            // Common Classes
+            card.className = `glass-panel-interactive rounded-xl overflow-hidden relative group break-inside-avoid transition-all duration-300 hover:shadow-glow-md mb-6 w-full`;
             
-            card.className = `glass-panel-interactive rounded-xl overflow-hidden relative group ${heightClass} break-inside-avoid transition-all duration-300 hover:shadow-glow-md mb-6 w-full`;
-            
-            // HTML structure for immersive card
-            card.innerHTML = `
-                <!-- Header Overlay -->
-                <div class="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
-                    <h4 class="font-bold text-white text-shadow-sm truncate pr-2">${script.title}</h4>
-                    <span class="text-[10px] uppercase font-mono bg-black/50 px-1.5 py-0.5 rounded text-slate-300 border border-white/10 backdrop-blur">${script.script_type}</span>
-                </div>
-
-                <!-- Script Container -->
-                <div class="script-container absolute inset-0 bg-slate-900 z-10">
-                    <!-- Placeholder / Play Trigger -->
-                        <div class="placeholder absolute inset-0 flex items-center justify-center cursor-pointer group-hover:bg-white/5 transition z-20">
-                            <div class="w-12 h-12 rounded-full bg-bbs-accent/20 border border-bbs-accent/50 flex items-center justify-center backdrop-blur group-hover:scale-110 transition shadow-glow">
-                            <i class="ph-fill ph-play text-bbs-accent text-xl"></i>
-                            </div>
-                            <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-slate-400 opacity-0 group-hover:opacity-100 transition">
-                            Click to Run
-                            </div>
+            // --- SCRIPT MODULE ---
+            if (mod.module_type === 'script' && mod.script_details) {
+                const script = mod.script_details;
+                const heights = ['h-64', 'h-80', 'h-56'];
+                const heightClass = heights[mod.id % heights.length];
+                card.classList.add(heightClass);
+                
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+                        <h4 class="font-bold text-white text-shadow-sm truncate pr-2">${script.title}</h4>
+                        <span class="text-[10px] uppercase font-mono bg-black/50 px-1.5 py-0.5 rounded text-slate-300 border border-white/10 backdrop-blur">${script.script_type}</span>
                     </div>
-                </div>
-            `;
+                    <div class="script-container absolute inset-0 bg-slate-900 z-10">
+                        <div class="placeholder absolute inset-0 flex items-center justify-center cursor-pointer group-hover:bg-white/5 transition z-20">
+                             <div class="w-12 h-12 rounded-full bg-bbs-accent/20 border border-bbs-accent/50 flex items-center justify-center backdrop-blur group-hover:scale-110 transition shadow-glow">
+                                <i class="ph-fill ph-play text-bbs-accent text-xl"></i>
+                             </div>
+                             <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-slate-400 opacity-0 group-hover:opacity-100 transition">Click to Run</div>
+                        </div>
+                    </div>
+                `;
+                
+                const placeholder = card.querySelector('.placeholder');
+                placeholder.onclick = (e) => {
+                    e.stopPropagation();
+                    activateScript(card, script); 
+                };
+            }
             
-            const placeholder = card.querySelector('.placeholder');
-            placeholder.onclick = (e) => {
-                e.stopPropagation();
-                activateScript(card, script);
-            };
+            // --- TEXT MODULE ---
+            else if (mod.module_type === 'text') {
+                 card.classList.add('bg-bbs-surface/50');
+                 const content = mod.content.text || "";
+                 
+                 // Parse markdown and sanitize with DOMPurify
+                 let htmlContent = content;
+                 if (typeof marked !== 'undefined') {
+                     htmlContent = marked.parse(content);
+                 }
+                 if (typeof DOMPurify !== 'undefined') {
+                     htmlContent = DOMPurify.sanitize(htmlContent);
+                 }
+                 
+                 card.innerHTML = `
+                    <div class="p-5">
+                        <div class="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed font-mono text-sm break-words module-text-content">
+                            ${htmlContent}
+                        </div>
+                    </div>
+                 `;
+            }
             
-            grid.appendChild(card);
+            // --- IMAGE MODULE ---
+            else if (mod.module_type === 'image') {
+                 card.innerHTML = `
+                    <img src="${mod.content.url}" class="w-full h-auto object-cover" loading="lazy" />
+                 `;
+            }
+            
+            // --- LINK MODULE ---
+            else if (mod.module_type === 'link') {
+                 let hostname = '';
+                 try { hostname = new URL(mod.content.url).hostname; } catch(e) { hostname = mod.content.url; }
+                 card.innerHTML = `
+                    <a href="${mod.content.url}" target="_blank" class="block p-4 bg-slate-900/50 hover:bg-slate-800/50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-slate-700 flex items-center justify-center shrink-0">
+                                <i class="ph-bold ph-link text-slate-400"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-sky-400 truncate">${mod.content.title || hostname}</h4>
+                                <p class="text-xs text-slate-500 truncate">${mod.content.url}</p>
+                            </div>
+                        </div>
+                    </a>
+                 `;
+            }
+
+            // --- AUDIO MODULE ---
+            else if (mod.module_type === 'audio') {
+                const title = mod.content.title || "Audio Track";
+                card.innerHTML = `
+                    <div class="p-4 flex flex-col gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                                <i class="ph-fill ph-music-notes text-xl"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-slate-200 text-sm truncate">${title}</h4>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-wider">Audio</p>
+                            </div>
+                        </div>
+                        <audio controls src="${mod.content.url}" class="w-full h-8 mt-1 rounded opacity-80 hover:opacity-100 transition"></audio>
+                    </div>
+                `;
+            }
+            
+            // --- ADD EDIT/DELETE MENU FOR OWNER ---
+            if (card.innerHTML && currentUserData && currentUserData.is_own) {
+                const menuBtn = document.createElement('button');
+                menuBtn.className = 'module-menu-btn absolute top-2 right-2 z-40 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur';
+                menuBtn.innerHTML = '<i class="ph-bold ph-dots-three-vertical"></i>';
+                menuBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showModuleMenu(mod, menuBtn);
+                };
+                card.appendChild(menuBtn);
+            }
+            
+            if (card.innerHTML) grid.appendChild(card);
         });
+        
+        // Apply syntax highlighting
+        if (typeof hljs !== 'undefined') {
+            grid.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
     }
+}
+
+// --- MODULE MENU (Edit/Delete) ---
+let activeModuleMenu = null;
+
+function showModuleMenu(mod, anchorBtn) {
+    // Close existing menu
+    if (activeModuleMenu) {
+        activeModuleMenu.remove();
+        activeModuleMenu = null;
+    }
+    
+    const menu = document.createElement('div');
+    menu.className = 'module-context-menu absolute z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[120px] animate-pop';
+    menu.innerHTML = `
+        <button class="edit-module-btn w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 flex items-center gap-2 transition">
+            <i class="ph-bold ph-pencil-simple"></i> Edit
+        </button>
+        <button class="delete-module-btn w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 flex items-center gap-2 transition">
+            <i class="ph-bold ph-trash"></i> Delete
+        </button>
+    `;
+    
+    // Position below anchor
+    const rect = anchorBtn.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = `${rect.bottom + 4}px`;
+    menu.style.right = `${window.innerWidth - rect.right}px`;
+    
+    document.body.appendChild(menu);
+    activeModuleMenu = menu;
+    
+    // Edit action
+    menu.querySelector('.edit-module-btn').onclick = () => {
+        menu.remove();
+        activeModuleMenu = null;
+        openEditModuleModal(mod);
+    };
+    
+    // Delete action
+    menu.querySelector('.delete-module-btn').onclick = async () => {
+        menu.remove();
+        activeModuleMenu = null;
+        if (confirm('Delete this module?')) {
+            await deleteModule(mod.id);
+        }
+    };
+    
+    // Close on outside click
+    const closeHandler = (e) => {
+        if (!menu.contains(e.target) && e.target !== anchorBtn) {
+            menu.remove();
+            activeModuleMenu = null;
+            document.removeEventListener('click', closeHandler);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeHandler), 0);
+}
+
+async function deleteModule(moduleId) {
+    try {
+        const res = await fetch('/wall/post/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: moduleId })
+        });
+        const data = await res.json();
+        if (data.ok) {
+            fetchProfile(); // Reload
+        } else {
+            alert(data.error || 'Delete failed');
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Network error');
+    }
+}
+
+function openEditModuleModal(mod) {
+    // Reuse the Add Module modal but in edit mode
+    const modal = document.getElementById('add-module-modal');
+    const form = document.getElementById('add-module-form');
+    if (!modal || !form) return;
+    
+    // Set type
+    const typeInput = document.getElementById('new-module-type');
+    typeInput.value = mod.module_type;
+    
+    // Activate correct type button
+    document.querySelectorAll('.module-type-btn').forEach(btn => {
+        if (btn.dataset.type === mod.module_type) btn.click();
+    });
+    
+    // Fill fields based on type
+    if (mod.module_type === 'text') {
+        form.querySelector('[name="text_content"]').value = mod.content.text || '';
+    } else if (mod.module_type === 'image') {
+        form.querySelector('[name="image_url"]').value = mod.content.url || '';
+    } else if (mod.module_type === 'link') {
+        form.querySelector('[name="link_url"]').value = mod.content.url || '';
+        form.querySelector('[name="link_title"]').value = mod.content.title || '';
+    } else if (mod.module_type === 'audio') {
+        form.querySelector('[name="audio_url"]').value = mod.content.url || '';
+        form.querySelector('[name="audio_title"]').value = mod.content.title || '';
+    }
+    
+    // Mark as edit mode
+    form.dataset.editId = mod.id;
+    
+    // Update submit button text
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="ph-bold ph-check"></i> Save Changes';
+    
+    modal.classList.remove('hidden');
 }
 
 async function activateScript(card, script) {
@@ -638,5 +841,122 @@ if (scriptPreviewModal && closePreviewBtn) {
     };
 }
 
+// =============================================
+// ADD MODULE LOGIC (Sprint 12)
+// =============================================
+const addModuleBtn = document.getElementById('add-module-btn');
+const addModuleModal = document.getElementById('add-module-modal');
+const addModuleForm = document.getElementById('add-module-form');
+const moduleTypeBtns = document.querySelectorAll('.module-type-btn');
+
+if (addModuleBtn) {
+    addModuleBtn.onclick = () => {
+        if (!addModuleModal) return;
+        addModuleModal.classList.remove('hidden');
+    };
+}
+
+// Show Add Btn if own profile
+// This check should be in renderProfile really, but we can double check here or just rely on renderProfile unhiding it if we add logic there.
+// Actually, let's update renderProfile to show this button.
+
+document.querySelectorAll('.close-add-modal').forEach(b => {
+    b.onclick = () => {
+        addModuleModal.classList.add('hidden');
+    };
+});
+
+// Type Switching
+moduleTypeBtns.forEach(btn => {
+    btn.onclick = () => {
+        // Reset styles
+        moduleTypeBtns.forEach(b => {
+             b.classList.remove('bg-bbs-accent', 'text-white', 'border-bbs-accent'); 
+             b.classList.add('bg-white/5', 'border-transparent');
+             b.querySelector('i').classList.remove('text-white');
+             b.querySelector('i').classList.add('text-slate-300');
+        });
+        
+        // Active Style
+        btn.classList.remove('bg-white/5', 'border-transparent');
+        btn.classList.add('bg-bbs-accent', 'text-white', 'border-bbs-accent');
+        btn.querySelector('i').classList.remove('text-slate-300');
+        btn.querySelector('i').classList.add('text-white');
+        
+        const type = btn.dataset.type;
+        document.getElementById('new-module-type').value = type;
+        
+        // Show/Hide Fields
+        ['text', 'image', 'link', 'audio'].forEach(t => {
+            const el = document.getElementById(`fields-${t}`);
+            if (t === type) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        });
+    };
+});
+
+// Init first type
+if (moduleTypeBtns.length > 0) moduleTypeBtns[0].click();
+
+if (addModuleForm) {
+    addModuleForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(addModuleForm);
+        const type = formData.get('module_type');
+        const editId = addModuleForm.dataset.editId;
+        
+        const payload = {
+            module_type: type,
+            content: {},
+            style: {}
+        };
+        
+        if (type === 'text') {
+            payload.content.text = formData.get('text_content');
+        } else if (type === 'image') {
+            payload.content.url = formData.get('image_url');
+        } else if (type === 'link') {
+            payload.content.url = formData.get('link_url');
+            payload.content.title = formData.get('link_title');
+        } else if (type === 'audio') {
+            payload.content.url = formData.get('audio_url');
+            payload.content.title = formData.get('audio_title');
+        }
+        
+        try {
+            let endpoint = '/wall/post/add';
+            if (editId) {
+                endpoint = '/wall/post/update';
+                payload.id = parseInt(editId);
+            } else {
+                payload.display_order = 999; // Append to end for new posts
+            }
+            
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if (data.ok) {
+                addModuleModal.classList.add('hidden');
+                addModuleForm.reset();
+                delete addModuleForm.dataset.editId; // Clear edit mode
+                // Reset submit button text
+                const submitBtn = addModuleForm.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="ph-bold ph-plus"></i> Add Block';
+                fetchProfile(); // Reload wall
+            } else {
+                alert(data.error || "Failed");
+            }
+        } catch(err) {
+            console.error(err);
+            alert("Network error");
+        }
+    };
+}
+
 // Init
 fetchProfile();
+

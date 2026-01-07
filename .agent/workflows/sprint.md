@@ -1,5 +1,5 @@
 ---
-description: Sprint-based development workflow for LocalBBS
+description: Sprint-based development workflow for NeoSpace
 ---
 
 # Sprint Workflow

@@ -1,12 +1,59 @@
-
-.venv/
+# --- Python Core ---
 __pycache__/
-*.pyc
-*.db
-*-wal
-*-shm
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+
+# --- Virtual Environments ---
+.venv
+venv/
+ENV/
+
+# --- Editor/IDE Files ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Antigravity & AI Agent Files ---
+# KEEP: The Constitution and Protocol (Shared Brain)
+!.antigravity/rules.md
+!.antigravity/memory.md
+!.antigravity/migration_log.md
+
+# IGNORE: Temporary scratchpads or agent backups
+.antigravity/temp/
+.antigravity/backups/
+.antigravity/*.tmp
+*.log
+
+# --- Frontend / Assets ---
+# Since you use CDN, you likely don't have node_modules, but just in case:
+node_modules/
+npm-debug.log
+yarn-error.log
 .env
-static/uploads/*
-static/avatars/*
-static/voice_intros/*
-!static/voice_intros/.gitkeep
+.env.local
+
+# --- Temporary Files ---
+COMMIT_MSG.txt

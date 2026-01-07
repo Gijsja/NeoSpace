@@ -1,8 +1,8 @@
-# LocalBBS (SBBS)
+# NeoSpace
 
 > **Development Workspace / Unstable Snapshot**
 
-This is the active development repository for **LocalBBS** (also known as SBBS), a server-authoritative, WebSocket-driven BBS-style chat application.
+NeoSpace is a server-authoritative, WebSocket-driven creative communication platform with customizable profile Walls and real-time chat.
 
 **⚠️ Status: Pre-Alpha / Internal Sandbox**
 This codebase is currently in active development. Features may be incomplete, and breaking changes happen frequently.

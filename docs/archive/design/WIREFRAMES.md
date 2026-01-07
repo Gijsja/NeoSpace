@@ -1,6 +1,6 @@
-# LocalBBS Wireframe Presentation
+# NeoSpace Wireframe Presentation
 
-I have generated three high-fidelity wireframes to visualize the core user flow of LocalBBS, adhering to the "Modern Slate" aesthetic.
+I have generated three high-fidelity wireframes to visualize the core user flow of NeoSpace, adhering to the "Modern Slate" aesthetic.
 
 ## Design Concept
 
@@ -102,7 +102,7 @@ An innovative, organic way to visualize the community. Breaking away from strict
 
 ## Innovation Summary
 
-We have transformed **LocalBBS** from a simple chat app into a **Creative Communication Operating System**.
+We have transformed **NeoSpace** from a simple chat app into a **Creative Communication Operating System**.
 
 ### The 4 Pillars of Innovation
 

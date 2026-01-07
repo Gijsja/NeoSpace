@@ -1,5 +1,5 @@
 /**
- * LocalBBS Socket Client
+ * NeoSpace Socket Client
  * Handles WebSocket communication and UI updates
  */
 
@@ -42,8 +42,8 @@ const uploadBtn = document.getElementById('upload-btn');
 const dragOverlay = document.getElementById('drag-overlay');
 
 // State
-let currentUser = localStorage.getItem('localbbs_username') || '';
-let currentRoom = localStorage.getItem('localbbs_last_room') || '# general';
+let currentUser = localStorage.getItem('neospace_username') || '';
+let currentRoom = localStorage.getItem('neospace_last_room') || '# general';
 let messageIds = new Set();
 let isLoading = false;
 let pendingDeleteId = null;
@@ -597,7 +597,7 @@ messageForm.addEventListener('submit', async (e) => {
   document.querySelectorAll('.room-link').forEach(link => {
     link.addEventListener('click', () => {
       currentRoom = link.dataset.room;
-      localStorage.setItem('localbbs_last_room', currentRoom);
+      localStorage.setItem('neospace_last_room', currentRoom);
     });
   });
 

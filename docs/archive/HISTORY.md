@@ -1,6 +1,6 @@
 # Project History
 
-A log of the major development eras of LocalBBS / NeoSpace.
+A log of the major development eras of NeoSpace / NeoSpace.
 
 ---
 

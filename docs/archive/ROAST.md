@@ -1,4 +1,4 @@
-# 🔥 The Roast of LocalBBS
+# 🔥 The Roast of NeoSpace
 
 > "If it breaks, it's art." — The NeoSpace Manifesto (a.k.a. "We don't write tests")
 

@@ -1,6 +1,6 @@
 # Design Gallery
 
-Visual index of all design artifacts for LocalBBS.
+Visual index of all design artifacts for NeoSpace.
 
 ---
 

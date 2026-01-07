@@ -2,7 +2,7 @@
 
 **Scenario**: Creating and Publishing an Interactive 3D Sketch
 **Persona**: "Alex" (Creative Coder)
-**Platform**: LocalBBS (Creative OS)
+**Platform**: NeoSpace (Creative OS)
 
 ---
 
@@ -13,7 +13,7 @@
 
 | Step    | User Action                                   | Touchpoint            | Emotional State      | System Response                                                                         |
 | :------ | :-------------------------------------------- | :-------------------- | :------------------- | :-------------------------------------------------------------------------------------- |
-| **1.1** | Alex opens LocalBBS.                          | **Unified Dashboard** | 😐 Neutral (Routine) | App connects instantly. Socket "Synced" status glows green.                             |
+| **1.1** | Alex opens NeoSpace.                          | **Unified Dashboard** | 😐 Neutral (Routine) | App connects instantly. Socket "Synced" status glows green.                             |
 | **1.2** | Sees "Code Mode" toggle in the context panel. | **Context Sidebar**   | 🧐 Curious           | Tooltip: "Enter Creative Sandbox".                                                      |
 | **1.3** | Clicks "Code Mode".                           | **Transition**        | 🤩 Anticipation      | Interface morphs. Chat recedes. Editor slides in. "Safe Mode" badge verifies isolation. |
 

@@ -1,6 +1,6 @@
-# LocalBBS "Creative OS" Roadmap
+# NeoSpace "Creative OS" Roadmap
 
-We are transforming LocalBBS from a chat app into a **Creative Communication Operating System**. This roadmap aligns with the "4 Pillars of Innovation" from our design mockups.
+We are transforming NeoSpace from a chat app into a **Creative Communication Operating System**. This roadmap aligns with the "4 Pillars of Innovation" from our design mockups.
 
 ### Sprint #7 (SHIPPED ✅)
 
@@ -58,7 +58,25 @@ We are transforming LocalBBS from a chat app into a **Creative Communication Ope
 - [x] **Context Pane**: Dynamic side-panel (Voice/Docs).
 - [x] **Electron Polish**: Native window controls.
 
----
+### Sprint #11 (SHIPPED ✅)
+
+**Theme**: NeoSpace Foundations
+
+- [x] **Audio Anthem**: Profile background music.
+- [x] **Identity First**: Hero blocks and status lines.
+
+### Sprint #12 (IN PROGRESS 🚧)
+
+**Theme**: The Modular Canvas
+
+**Goal**: Transform the profile wall into a mixed-media masonry grid.
+
+- [ ] **Data Layer**: Generic `profile_posts` table (Text, Image, Link).
+- [ ] **UI**: Unified Masonry Grid for Scripts + Posts.
+- [ ] **Modules**:
+  - [ ] **Note Block**: Markdown text.
+  - [ ] **Image Block**: visual media.
+  - [ ] **Link Block**: "Current Obsession" preview.
 
 ## Legacy Roadmap (Archived)
 

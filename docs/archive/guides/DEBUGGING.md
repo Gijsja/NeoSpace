@@ -1,6 +1,6 @@
 # Runbook: When Things Feel Weird
 
-Debugging guide for LocalBBS.
+Debugging guide for NeoSpace.
 
 ---
 

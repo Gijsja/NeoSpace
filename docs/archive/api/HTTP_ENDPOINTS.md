@@ -1,6 +1,6 @@
 # API Reference
 
-HTTP REST endpoints for LocalBBS.
+HTTP REST endpoints for NeoSpace.
 
 > ⚠️ **Endpoint behavior is frozen in E2.** See [CORE_FROZEN](CORE_FROZEN.md).
 

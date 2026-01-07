@@ -152,6 +152,21 @@ CREATE TABLE IF NOT EXISTS profile_scripts (
 );
 CREATE INDEX IF NOT EXISTS idx_profile_scripts_profile ON profile_scripts(profile_id, display_order);
 
+-- Sprint 12: Modular Wall (Unified Posts)
+CREATE TABLE IF NOT EXISTS profile_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    
+    module_type TEXT NOT NULL, -- 'text', 'image', 'link', 'script'
+    content_payload TEXT,      -- JSON data (e.g. {text: "Hi"}, {script_id: 1})
+    style_payload TEXT,        -- JSON style data (w, h, color)
+    display_order INTEGER NOT NULL DEFAULT 0,
+    
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_posts_profile ON profile_posts(profile_id, display_order);
+
 -- Additional performance indexes
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_user ON messages(user);
@@ -301,6 +316,27 @@ def with_retry(func):
                     raise
         raise last_error
     return wrapper
+
+
+def db_retry(operation):
+    """
+    Execute a database operation with retry on lock.
+    For inline usage - wraps an operation callable.
+    
+    Usage:
+        db_retry(lambda: db.execute(...))
+    """
+    last_error = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            return operation()
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e).lower() or "busy" in str(e).lower():
+                last_error = e
+                time.sleep(RETRY_DELAY_BASE * (2 ** attempt))
+            else:
+                raise
+    raise last_error
 
 
 # =============================================================================

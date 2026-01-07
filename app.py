@@ -23,46 +23,6 @@ def create_app(test_config=None):
     from routes.profiles import bp as profiles_bp
     app.register_blueprint(profiles_bp)
 
-    @app.route("/")
-    def index():
-        if g.user is None:
-             return redirect(url_for("auth.login"))
-        return send_from_directory("ui/views", "app.html")
-
-    @app.route("/desktop")
-    def desktop():
-        if g.user is None:
-             return redirect(url_for("auth.login"))
-        return send_from_directory("ui/views", "desktop.html")
-
-    @app.route("/ui/css/<path:filename>")
-    def serve_css(filename):
-        return send_from_directory("ui/css", filename)
-
-    @app.route("/ui/js/<path:filename>")
-    def serve_js(filename):
-        return send_from_directory("ui/js", filename)
-
-    @app.route("/ui/views/<path:filename>")
-    def serve_views(filename):
-        return send_from_directory("ui/views", filename)
-
-    @app.route("/static/uploads/<path:filename>")
-    def serve_uploads(filename):
-        return send_from_directory("static/uploads", filename)
-
-    @app.route("/static/avatars/<path:filename>")
-    def serve_avatars(filename):
-        return send_from_directory("static/avatars", filename)
-
-    @app.route("/static/voice_intros/<path:filename>")
-    def serve_voice_intros(filename):
-        return send_from_directory("static/voice_intros", filename)
-
-    @app.route("/ui/prototypes/<path:filename>")
-    def serve_prototypes(filename):
-        return send_from_directory("ui/prototypes", filename)
-
     @app.before_request
     def load_user():
         user_id = session.get('user_id')
@@ -82,21 +42,14 @@ def create_app(test_config=None):
         close_db(e)
 
     # =============================================
-    # CHAT ENDPOINTS (Protected with login_required)
+    # BLUEPRINTS
     # =============================================
-    app.add_url_rule("/send", "send", login_required(send_message), methods=["POST"])
-    app.add_url_rule("/edit", "edit", login_required(edit_message), methods=["POST"])
-    app.add_url_rule("/delete", "delete", login_required(delete_message), methods=["POST"])
-    app.add_url_rule("/upload", "upload", login_required(upload_file), methods=["POST"])
-    app.add_url_rule("/backfill", "backfill", backfill_messages)  # Read-only, can remain public
-    app.add_url_rule("/unread", "unread", unread_count)  # Read-only
+    from routes.chat import bp as chat_bp
+    app.register_blueprint(chat_bp)
 
+    from routes.views import bp as views_bp
+    app.register_blueprint(views_bp)
 
-
-    # =============================================
-    # SPRINT 6: DIRECT MESSAGES
-    # =============================================
-    from mutations.dm import send_dm, get_conversation, mark_dm_read, delete_dm, list_conversations
     from routes.scripts import bp as scripts_bp
     app.register_blueprint(scripts_bp)
 
@@ -106,8 +59,8 @@ def create_app(test_config=None):
     from routes.directory import bp as directory_bp
     app.register_blueprint(directory_bp)
 
-
-
+    from routes.wall import bp as wall_bp
+    app.register_blueprint(wall_bp)
 
 
     init_sockets(app)

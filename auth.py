@@ -1,32 +1,13 @@
 import functools
 import sqlite3
-import time
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, send_from_directory, jsonify
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from db import get_db
+from db import get_db, db_retry
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-# Retry settings
-MAX_RETRIES = 5
-RETRY_DELAY_BASE = 0.05
-
-
-def _db_retry(operation):
-    """Execute a database operation with retry on lock."""
-    last_error = None
-    for attempt in range(MAX_RETRIES):
-        try:
-            return operation()
-        except sqlite3.OperationalError as e:
-            if "locked" in str(e).lower() or "busy" in str(e).lower():
-                last_error = e
-                time.sleep(RETRY_DELAY_BASE * (2 ** attempt))
-            else:
-                raise
-    raise last_error
 
 
 @auth_bp.route('/register', methods=('POST',))
@@ -54,7 +35,7 @@ def register():
         db.commit()
 
     try:
-        _db_retry(do_register)
+        db_retry(do_register)
     except sqlite3.IntegrityError:
         return jsonify(error=f"User {username} is already registered."), 400
     except sqlite3.OperationalError:
@@ -74,7 +55,7 @@ def register():
         db.commit()
     
     try:
-        _db_retry(do_create_profile)
+        db_retry(do_create_profile)
     except sqlite3.OperationalError:
         pass  # Profile creation failure is non-critical
     
@@ -82,7 +63,7 @@ def register():
     session['user_id'] = user['id']
     session['username'] = user['username']
     
-    return jsonify(ok=True, redirect=url_for('index'))
+    return jsonify(ok=True, redirect=url_for('views.index'))
 
 @auth_bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -105,7 +86,7 @@ def login():
         session['user_id'] = user['id']
         session['username'] = user['username']
         
-        return jsonify(ok=True, redirect=url_for('index'))
+        return jsonify(ok=True, redirect=url_for('views.index'))
 
     return send_from_directory("ui/views", "login.html")
 

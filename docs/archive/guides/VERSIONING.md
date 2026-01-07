@@ -1,6 +1,6 @@
 # Versioning
 
-Version and tagging policy for LocalBBS.
+Version and tagging policy for NeoSpace.
 
 ---
 

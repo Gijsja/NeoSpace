@@ -1,28 +1,9 @@
 
 from flask import request, g, jsonify
-from db import get_db
+from db import get_db, db_retry
 import html
 import sqlite3
-import time
 
-# Retry settings for database operations
-MAX_RETRIES = 5
-RETRY_DELAY_BASE = 0.05
-
-
-def _db_retry(operation):
-    """Execute a database operation with retry on lock."""
-    last_error = None
-    for attempt in range(MAX_RETRIES):
-        try:
-            return operation()
-        except sqlite3.OperationalError as e:
-            if "locked" in str(e).lower() or "busy" in str(e).lower():
-                last_error = e
-                time.sleep(RETRY_DELAY_BASE * (2 ** attempt))
-            else:
-                raise
-    raise last_error
 
 
 def send_message():
@@ -39,7 +20,7 @@ def send_message():
         return row
     
     try:
-        row = _db_retry(do_insert)
+        row = db_retry(do_insert)
         return jsonify(id=row['id'])
     except sqlite3.OperationalError:
         return jsonify(error="Database busy, please retry"), 503
@@ -70,7 +51,7 @@ def edit_message():
         db.commit()
     
     try:
-        _db_retry(do_update)
+        db_retry(do_update)
         return jsonify(ok=True, id=msg_id)
     except sqlite3.OperationalError:
         return jsonify(ok=False, error="Database busy, please retry"), 503
@@ -100,7 +81,7 @@ def delete_message():
         db.commit()
     
     try:
-        _db_retry(do_delete)
+        db_retry(do_delete)
         return jsonify(ok=True, id=msg_id)
     except sqlite3.OperationalError:
         return jsonify(ok=False, error="Database busy, please retry"), 503

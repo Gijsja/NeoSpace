@@ -1,4 +1,4 @@
-# Project Brief: LocalBBS "Creative OS"
+# Project Brief: NeoSpace "Creative OS"
 
 **Date**: January 6, 2026
 **Author**: [Your Name/Antigravity], Lead Experience Architect
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-**LocalBBS** is not just a chat application; it is a **Creative Communication Operating System**. In an era of sterile, grid-locked social platforms, we are building a "Digital Third Place" that honors the chaotic, expressive soul of the early web (BBS culture) while leveraging the robust, server-authoritative architecture of modern distributed systems.
+**NeoSpace** is not just a chat application; it is a **Creative Communication Operating System**. In an era of sterile, grid-locked social platforms, we are building a "Digital Third Place" that honors the chaotic, expressive soul of the early web (BBS culture) while leveraging the robust, server-authoritative architecture of modern distributed systems.
 
 Our mission is to reconcile two opposing forces: **System Correctness** (The Trust) and **User Sovereignty** (The Vibe).
 

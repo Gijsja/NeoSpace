@@ -3,10 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>User Directory - LocalBBS</title>
+    <title>User Directory - NeoSpace</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="stylesheet" href="/ui/css/styles.css">
     <script>
       tailwind.config = {
@@ -20,22 +21,14 @@
               'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
             },
             fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-            animation: {
-              'fade-in': 'fadeIn 0.3s ease-out',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
-            },
-            boxShadow: {
-              'glow': '0 0 15px rgba(96, 165, 250, 0.5)',
-            }
           }
         }
       }
     </script>
+    <style>
+        .htmx-request { opacity: 0.5; transition: opacity 200ms; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+    </style>
 </head>
 <body class="bg-bbs-bg text-slate-200 min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
 
@@ -51,148 +44,33 @@
         </div>
         <div class="relative group">
             <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
-            <input type="search" id="search-users" placeholder="Search profiles..." class="w-64 pl-9 pr-4 py-2 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow transition-all duration-200" />
+            <input type="search" 
+                   name="search"
+                   placeholder="Search profiles..." 
+                   class="w-64 pl-9 pr-4 py-2 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow transition-all duration-200"
+                   hx-get="/users/cards"
+                   hx-trigger="input changed delay:300ms, search"
+                   hx-target="#user-grid"
+                   hx-swap="innerHTML" />
         </div>
     </nav>
 
     <!-- Main Content -->
     <div class="pt-24 px-6 pb-12 max-w-7xl mx-auto">
         
-        <!-- Grid -->
-        <div id="user-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Grid - Loads via HTMX on page load -->
+        <div id="user-grid" 
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+             hx-get="/users/cards"
+             hx-trigger="load"
+             hx-swap="innerHTML">
             <!-- Loading State -->
             <div class="col-span-full text-center py-12 text-slate-500 animate-pulse">
                 Loading directory...
             </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-            <button id="load-more" class="hidden px-6 py-2.5 bg-bbs-surface hover:bg-slate-700/50 border border-bbs-border rounded-lg text-slate-300 transition-all font-medium flex items-center gap-2">
-                Load More
-            </button>
-        </div>
     </div>
 
-    <!-- Template for User Card -->
-    <template id="user-card-template">
-        <div class="user-card bg-bbs-surface backdrop-blur-md border border-bbs-border rounded-xl p-5 hover:border-bbs-accent/50 transition-all duration-300 group hover:shadow-glow animate-fade-in relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div class="relative z-10 flex items-start gap-4">
-                <!-- Avatar -->
-                <div class="avatar-container w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold text-white shrink-0 shadow-lg border-2 border-bbs-bg overflow-hidden bg-cover bg-center">
-                    <!-- Text fallback injected via JS -->
-                </div>
-                
-                <div class="flex-1 min-w-0">
-                    <h3 class="username text-lg font-bold text-white truncate group-hover:text-bbs-accent transition-colors"></h3>
-                    <p class="handle text-sm text-slate-400 mb-2 truncate"></p>
-                    
-                    <div class="flex items-center gap-2 text-xs">
-                        <!-- Actions -->
-                        <a href="#" class="btn-profile px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-slate-200 transition-colors flex items-center gap-1.5">
-                            <i class="ph-bold ph-user"></i> Profile
-                        </a>
-                        <button class="btn-dm px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 rounded-lg transition-colors flex items-center gap-1.5 border border-blue-500/30">
-                            <i class="ph-bold ph-chat-circle"></i> DM
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <script>
-        const userGrid = document.getElementById('user-grid');
-        const loadMoreBtn = document.getElementById('load-more');
-        const searchInput = document.getElementById('search-users');
-        const template = document.getElementById('user-card-template');
-        
-        let nextCursor = '0';
-        let isLoading = false;
-        let searchDebounce;
-
-        // Fetch users
-        async function fetchUsers(reset = false) {
-            if (isLoading) return;
-            isLoading = true;
-            
-            if (reset) {
-                nextCursor = '0';
-                userGrid.innerHTML = '';
-            }
-
-            const search = searchInput.value;
-            const url = `/users?cursor=${nextCursor}&limit=21&search=${encodeURIComponent(search)}`;
-            
-            try {
-                const res = await fetch(url);
-                if (res.status === 401) {
-                    window.location.href = '/auth/login';
-                    return;
-                }
-                const data = await res.json();
-                
-                if (data.users.length === 0 && reset) {
-                    userGrid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">No users found.</div>';
-                }
-
-                data.users.forEach((user, index) => {
-                    const clone = template.content.cloneNode(true);
-                    
-                    // Add staggered animation
-                    const card = clone.querySelector('.user-card');
-                    card.style.opacity = '0';
-                    card.classList.add('animate-fade-in-up');
-                    card.style.animationDelay = `${index * 50}ms`;
-                    card.style.animationFillMode = 'forwards';
-                    
-                    const avatarEl = clone.querySelector('.avatar-container');
-                    if (user.avatar_path) {
-                        avatarEl.style.backgroundImage = `url('${user.avatar_path}')`;
-                        avatarEl.classList.add('bg-slate-800');
-                    } else {
-                        // Fallback gradient
-                        avatarEl.classList.add('bg-gradient-to-br', 'from-blue-500', 'to-purple-500');
-                        avatarEl.textContent = user.username.charAt(0).toUpperCase();
-                    }
-                    
-                    clone.querySelector('.username').textContent = user.display_name;
-                    clone.querySelector('.handle').textContent = `@${user.username}`;
-                    
-                    const profileLink = clone.querySelector('.btn-profile');
-                    profileLink.href = `/ui/views/wall.html?user_id=${user.id}`;
-                    
-                    const dmBtn = clone.querySelector('.btn-dm');
-                    dmBtn.onclick = () => {
-                        window.location.href = `/ui/views/messages.html?with=${user.id}`;
-                    };
-
-                    userGrid.appendChild(clone);
-                });
-
-                nextCursor = data.next_cursor;
-                loadMoreBtn.classList.toggle('hidden', !nextCursor);
-                
-            } catch (err) {
-                console.error("Failed to load users", err);
-                if (reset) userGrid.innerHTML = '<div class="col-span-full text-center text-red-400">Failed to load directory.</div>';
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        // Initial load
-        fetchUsers(true);
-
-        // Events
-        loadMoreBtn.addEventListener('click', () => fetchUsers());
-        
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchDebounce);
-            searchDebounce = setTimeout(() => fetchUsers(true), 300);
-        });
-    </script>
 </body>
 </html>

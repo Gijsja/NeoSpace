@@ -1,6 +1,6 @@
 # Project Overview
 
-**LocalBBS** is a local-first, server-authoritative chat system designed for correctness, determinism, and debuggability.
+**NeoSpace** is a server-authoritative creative communication platform designed for correctness, determinism, and debuggability.
 
 ## Philosophy
 

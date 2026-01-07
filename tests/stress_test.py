@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-SBBS Stress Test Suite
+NeoSpace Stress Test Suite
 ======================
-Comprehensive stress testing for LocalBBS server components.
+Comprehensive stress testing for NeoSpace server components.
 
 Run with: python tests/stress_test.py [options]
 Options:
@@ -602,7 +602,7 @@ def generate_html_report(results: List[StressResult], config: StressConfig, dura
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SBBS Stress Test Report - {timestamp}</title>
+    <title>NeoSpace Stress Test Report - {timestamp}</title>
     <style>
         :root {{
             --bg: #0f0f0f;
@@ -687,7 +687,7 @@ def generate_html_report(results: List[StressResult], config: StressConfig, dura
     </style>
 </head>
 <body>
-    <h1>🔥 SBBS Stress Test Report</h1>
+    <h1>🔥 NeoSpace Stress Test Report</h1>
     <p class="meta">Generated: {timestamp} | Duration: {duration:.1f}s</p>
     
     <div class="summary">
@@ -761,7 +761,7 @@ def run_stress_tests(config: StressConfig, generate_report: bool = False) -> int
     """Run all stress tests and return exit code."""
     
     print("\n" + "="*60)
-    print("🔥 SBBS STRESS TEST SUITE")
+    print("🔥 NeoSpace STRESS TEST SUITE")
     print("="*60)
     print(f"Configuration: {config.http_concurrent_users} concurrent users")
     print(f"Started: {datetime.now().isoformat()}")
@@ -847,7 +847,7 @@ def run_stress_tests(config: StressConfig, generate_report: bool = False) -> int
 
 
 def main():
-    parser = argparse.ArgumentParser(description="SBBS Stress Test Suite")
+    parser = argparse.ArgumentParser(description="NeoSpace Stress Test Suite")
     parser.add_argument("--quick", action="store_true", help="Run quick stress test")
     parser.add_argument("--full", action="store_true", help="Run full stress test")
     parser.add_argument("--report", action="store_true", help="Generate HTML report")

@@ -106,19 +106,35 @@ def get_profile():
         ).fetchall()
         stickers = [dict(r) for r in sticker_rows]
     
-    # Get pinned scripts
-    pinned_scripts = []
+    # Get Modular Wall Posts (Sprint 12)
+    # Replaces legacy pinned_scripts
+    wall_modules = []
     if row["profile_id"]:
-        script_rows = db.execute(
-            """SELECT s.id, s.title, s.script_type, s.updated_at,
-                      ps.display_order
-               FROM profile_scripts ps
-               JOIN scripts s ON ps.script_id = s.id
-               WHERE ps.profile_id = ?
-               ORDER BY ps.display_order ASC""",
-            (row["profile_id"],)
-        ).fetchall()
-        pinned_scripts = [dict(r) for r in script_rows]
+        from mutations.wall import get_wall_posts
+        wall_modules = get_wall_posts(row["profile_id"])
+        
+        # Enrich script modules with details
+        # We need script title/type/content for the card
+        # Collect script IDs
+        script_ids = [m["content"].get("script_id") for m in wall_modules if m["module_type"] == 'script' and m["content"].get("script_id")]
+        
+        if script_ids:
+            placeholders = ",".join("?" * len(script_ids))
+            script_details = db.execute(
+                f"SELECT id, title, script_type FROM scripts WHERE id IN ({placeholders})",
+                script_ids
+            ).fetchall()
+            script_map = {s["id"]: dict(s) for s in script_details}
+            
+            # Merge back
+            for m in wall_modules:
+                if m["module_type"] == 'script':
+                    sid = m["content"].get("script_id")
+                    if sid and sid in script_map:
+                        m["script_details"] = script_map[sid]
+                        # Backwards compat for now if needed, or just clean module structure
+                        # The UI will need to check m.script_details
+
     
     return jsonify(
         user_id=row["id"],
@@ -141,7 +157,8 @@ def get_profile():
         anthem_url=row["anthem_url"] or "",
         anthem_autoplay=bool(row["anthem_autoplay"]) if row["anthem_autoplay"] is not None else True,
         stickers=stickers,
-        pinned_scripts=pinned_scripts,
+        wall_modules=wall_modules,
+        pinned_scripts=[], # Deprecated, empty list to prevent UI error before refactor
         viewer_id=g.user["id"] if g.user else None
     )
 

@@ -1,6 +1,6 @@
-# LocalBBS Documentation
+# NeoSpace Documentation
 
-> Canonical documentation for the LocalBBS/SBBS project.
+> Canonical documentation for the NeoSpace project.
 
 ## Quick Navigation
 

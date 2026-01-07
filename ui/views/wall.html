@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My Wall - LocalBBS</title>
+    <title>My Wall - NeoSpace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="https://fav.farm/💾" />
-    <meta name="description" content="LocalBBS: Your Personal Wall.">
+    <meta name="description" content="NeoSpace: Your Personal Wall.">
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -52,6 +52,11 @@
         }
     </script>
     <script src="/ui/js/voice.js"></script>
+    <!-- Sprint 12: Markdown & Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="/ui/js/wall.js"></script>
   </head>
   <body class="bg-bbs-bg text-slate-200 min-h-screen font-sans" id="body-el">
@@ -150,13 +155,13 @@
       <!-- Content Container -->
       <div class="max-w-6xl mx-auto px-6 relative z-10">
 
-        <!-- Pinned Scripts -->
-        <div id="pinned-scripts-section" class="mb-6 hidden">
+        <!-- Wall Modules (Sprint 12) -->
+        <div id="wall-modules-section" class="mb-6 hidden">
             <h3 class="text-xs text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1">
-                <i class="ph-bold ph-code"></i> Pinned Scripts
+                <i class="ph-bold ph-squares-four"></i> Wall
             </h3>
-            <div id="pinned-scripts-grid">
-                <!-- Script cards injected here -->
+            <div id="wall-modules-grid">
+                <!-- Module cards injected here -->
             </div>
         </div>
 
@@ -351,9 +356,84 @@
     <audio id="anthem-player" preload="auto" loop></audio>
     
     <!-- Anthem Mute Toggle -->
-    <button id="anthem-toggle" class="fixed bottom-4 right-4 z-50 w-12 h-12 bg-purple-600/80 hover:bg-purple-500 backdrop-blur rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 hover:scale-110 hidden" title="Toggle Music">
-        <i class="ph-bold ph-speaker-high text-xl" id="anthem-icon"></i>
     </button>
+
+    <!-- Generic Add Module FAB (Sprint 12) -->
+    <button id="add-module-btn" class="fixed bottom-20 right-4 z-50 w-12 h-12 bg-white text-black hover:bg-slate-200 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 group hidden">
+        <i class="ph-bold ph-plus text-xl transition-transform group-hover:rotate-90"></i>
+    </button>
+    
+    <!-- Add Module Modal -->
+    <div id="add-module-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-bbs-surface border border-bbs-border rounded-xl w-full max-w-md shadow-2xl overflow-hidden animate-pop">
+            <div class="p-4 border-b border-bbs-border flex justify-between items-center bg-slate-800/50">
+                <h2 class="font-bold text-white flex items-center gap-2">
+                    <i class="ph-bold ph-squares-four text-bbs-accent"></i> Add to Wall
+                </h2>
+                <button type="button" class="close-add-modal text-slate-400 hover:text-white transition">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Type Selector -->
+            <div class="grid grid-cols-3 gap-2 p-4 border-b border-white/5" id="module-type-selector">
+                <button data-type="text" class="module-type-btn active flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition">
+                    <i class="ph-duotone ph-text-t text-2xl text-slate-300"></i>
+                    <span class="text-xs font-bold text-slate-400">Text</span>
+                </button>
+                <button data-type="image" class="module-type-btn flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition">
+                    <i class="ph-duotone ph-image text-2xl text-slate-300"></i>
+                    <span class="text-xs font-bold text-slate-400">Image</span>
+                </button>
+                <button data-type="link" class="module-type-btn flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition">
+                    <i class="ph-duotone ph-link text-2xl text-slate-300"></i>
+                    <span class="text-xs font-bold text-slate-400">Link</span>
+                </button>
+                <button data-type="audio" class="module-type-btn flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition">
+                    <i class="ph-duotone ph-music-notes text-2xl text-slate-300"></i>
+                    <span class="text-xs font-bold text-slate-400">Audio</span>
+                </button>
+            </div>
+            
+            <form id="add-module-form" class="p-4 space-y-4">
+                <input type="hidden" name="module_type" id="new-module-type" value="text">
+                
+                <!-- Text Inputs -->
+                <div id="fields-text" class="space-y-3">
+                    <label class="block text-xs uppercase text-slate-500 font-bold">Content (Markdown)</label>
+                    <textarea name="text_content" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white font-mono text-sm focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent h-32" placeholder="Write something..."></textarea>
+                </div>
+                
+                <!-- Image Inputs -->
+                <div id="fields-image" class="space-y-3 hidden">
+                    <label class="block text-xs uppercase text-slate-500 font-bold">Image URL</label>
+                    <input type="url" name="image_url" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="https://..." />
+                </div>
+                
+                <!-- Link Inputs -->
+                <div id="fields-link" class="space-y-3 hidden">
+                    <label class="block text-xs uppercase text-slate-500 font-bold">Link URL</label>
+                    <input type="url" name="link_url" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="https://..." />
+                     <label class="block text-xs uppercase text-slate-500 font-bold">Title (Optional)</label>
+                    <input type="text" name="link_title" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="My Cool Link" />
+                </div>
+
+                <!-- Audio Inputs -->
+                <div id="fields-audio" class="space-y-3 hidden">
+                    <label class="block text-xs uppercase text-slate-500 font-bold">Audio URL (MP3/WAV)</label>
+                    <input type="url" name="audio_url" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="https://example.com/song.mp3" />
+                     <label class="block text-xs uppercase text-slate-500 font-bold">Caption (Optional)</label>
+                    <input type="text" name="audio_title" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="Song Title" />
+                </div>
+                
+                <div class="flex justify-end pt-2">
+                    <button type="submit" class="px-6 py-2 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition shadow-glow flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Add Block
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     <script src="/ui/js/wall_ui.js"></script>
