@@ -3,6 +3,8 @@ from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
 from flask import g, session, request
 from db import get_db
 from mutations.message_mutations import send_message
+from structs import Message, row_to_message
+import msgspec
 import os
 import html
 
@@ -176,16 +178,17 @@ def init_sockets(app):
             emit("error", {"message": "Database busy, please retry"})
             return
 
-        # Broadcast to room only
-        emit("message", {
-            "id": row["id"],
-            "user": row["user"],
-            "content": row["content"],
-            "created_at": row["created_at"],
-            "room_id": row["room_id"],
-            "deleted": False,
-            "edited": False
-        }, room=room_name)
+        # Broadcast to room only (msgspec struct for speed)
+        msg = Message(
+            id=row["id"],
+            user=row["user"],
+            content=row["content"],
+            created_at=row["created_at"],
+            room_id=row["room_id"],
+            deleted=False,
+            edited=False
+        )
+        emit("message", msgspec.to_builtins(msg), room=room_name)
 
     @socketio.on("request_backfill")
     def backfill(data):
@@ -203,17 +206,19 @@ def init_sockets(app):
             (after, room_id)
         ).fetchall()
 
+        # Use msgspec structs for fast serialization
         msgs = []
         for r in rows:
-            msgs.append({
-                "id": r["id"],
-                "user": r["user"],
-                "content": r["content"],
-                "created_at": r["created_at"],
-                "room_id": r["room_id"],
-                "deleted": False,
-                "edited": bool(r["edited_at"]),
-            })
+            msg = Message(
+                id=r["id"],
+                user=r["user"],
+                content=r["content"],
+                created_at=r["created_at"],
+                room_id=r["room_id"],
+                deleted=False,
+                edited=bool(r["edited_at"]),
+            )
+            msgs.append(msgspec.to_builtins(msg))
         emit("backfill", {"phase": "continuity", "messages": msgs})
 
     @socketio.on("typing")

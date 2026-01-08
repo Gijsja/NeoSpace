@@ -57,9 +57,12 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #13 🚧
+### Current: Sprint #13 ✅
 
-**Theme**: TBD — Planning next sprint
+**Theme**: Speed Demon — msgspec Performance
+
+- [x] `structs.py`: Message, WallPost, Sticker structs
+- [x] `sockets.py`: msgspec for send_message + backfill
 
 ### Recently Shipped
 
