@@ -71,6 +71,9 @@ def create_app(test_config=None):
     from routes.notifications import bp as notifications_bp
     app.register_blueprint(notifications_bp)
 
+    from routes.feed import bp as feed_bp
+    app.register_blueprint(feed_bp)
+
 
     init_sockets(app)
     return app
