@@ -1,24 +1,50 @@
-localhost {
-    # Free Speed: Compress everything with Zstandard (faster than Gzip)
+# NeoSpace Caddyfile — Juiced Architecture Phase 3
+# =================================================
+# Run with: caddy run --config Caddyfile
+# Or use: ./startstack.sh (runs Caddy + Gunicorn together)
+# =================================================
+
+:80 {
+    # Zstandard compression (faster than Gzip)
     encode zstd gzip
 
     # Static Assets: Bypass Python entirely
     handle /static/* {
-        root * /home/geisha/Vibecode/SBBS
+        root * .
+        file_server
+    }
+    
+    # Uploaded files (avatars, voice intros, etc.)
+    handle /uploads/* {
+        root * .
         file_server
     }
 
     # Micro-Cache: Cache public reads for 1 second
-    # This turns 1000 req/sec into 1 req/sec for the backend.
+    # Turns 1000 req/sec into 1 req/sec for the backend
     @cacheable {
         method GET
-        path /wall/* /directory /public-feed
+        path /wall/* /directory/* /api/directory/*
     }
-    header @cacheable Cache-Control "max-age=1"
+    header @cacheable Cache-Control "max-age=1, stale-while-revalidate=5"
 
-    # Reverse Proxy to Flask
+    # WebSocket: No caching, must pass through
+    @websocket {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+
+    # Reverse Proxy to Flask/Gunicorn
     reverse_proxy 127.0.0.1:5000 {
+        # Pass real client info
         header_up Host {host}
-        header_up X-Real-IP {remote}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # WebSocket support
+        transport http {
+            keepalive 30s
+        }
     }
 }
