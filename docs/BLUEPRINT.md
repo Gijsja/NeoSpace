@@ -57,14 +57,15 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #22 🚧
+### Current: Sprint #23 (TBD)
 
-**Theme**: Live Wire UI & Realtime Alerts
+**Theme**: Optimization & Polish (Optional)
 
 ### Recently Shipped
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #22    | Live Wire UI            | Notification Center, Badges, Toasts   |
 | #21    | The Feed UI             | Home Stream, Infinite Scroll          |
 | #20    | Social Actions UI       | Follow/Unfollow, Top 8 Grid           |
 | #19    | Search UI               | Js-based Search, User/Post tabs       |

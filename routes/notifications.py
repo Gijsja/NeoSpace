@@ -4,12 +4,18 @@ Sprint #15: Live Wire — Notification Routes
 API endpoints for fetching and managing notifications.
 """
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, g, request, render_template
 from auth import login_required
 from queries.notifications import get_unread, get_unread_count, get_all
 from mutations.notifications import mark_read, mark_all_read, delete_notification
 
 bp = Blueprint('notifications', __name__, url_prefix='/notifications')
+
+
+@bp.route("/center")
+@login_required
+def notification_center():
+    return render_template("notifications.html")
 
 
 @bp.route("/")

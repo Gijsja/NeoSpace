@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - NeoSpace{% endblock %}
+{% block page_title %}Alert Center{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    
+    <!-- Header Controls -->
+    <div class="flex justify-end">
+        <button onclick="NotificationManager.markAllRead()" class="nb-button bg-white px-4 py-2 hover:bg-black hover:text-white flex items-center gap-2 text-sm">
+            <i class="ph-bold ph-checks"></i> Mark All Read
+        </button>
+    </div>
+
+    <!-- Notifications List -->
+    <div id="notifications-list" class="space-y-4">
+        <!-- Rendered Server Side usually, but we need to fetch them. 
+             Ideally backend passes them to template, or we fetch via JS.
+             Given current pattern, let's fetch via JS to reuse the API from Sprint 15.
+        -->
+        <div id="loading-notifs" class="text-center py-12">
+            <i class="ph-bold ph-spinner animate-spin text-3xl"></i>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const list = document.getElementById('notifications-list');
+        const loader = document.getElementById('loading-notifs');
+        
+        try {
+            const res = await fetch('/notifications/'); // Assuming GET /notifications/ returns list? 
+            // Checking routes/notifications.py ...
+            // Sprint 15 implementation: GET /notifications/ returns { ok: true, notifications: [...] }
+            
+            const data = await res.json();
+            
+            loader.remove();
+            
+            if (data.ok && data.notifications.length > 0) {
+                list.innerHTML = data.notifications.map(n => {
+                    const icon = n.type === 'follow' ? 'ph-user-plus' : 'ph-bell';
+                    const bg = n.is_read ? 'bg-white opacity-60' : 'bg-white border-l-8 border-l-acid-green';
+                    
+                    // Construct Message
+                    let msg = "";
+                    if (n.type === 'follow') msg = `started following you.`;
+                    else msg = n.message || "New interaction";
+                    
+                    return `
+                    <div class="nb-card p-4 ${bg} flex items-center gap-4 transition hover:opacity-100 relative group">
+                        <div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shrink-0">
+                            <i class="ph-bold ${icon} text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-sm">
+                                <span class="uppercase">New Alert</span>
+                                <span class="text-gray-400 text-xs ml-2 font-mono">${new Date(n.created_at).toLocaleString()}</span>
+                            </p>
+                            <p class="text-lg">
+                                ${msg}
+                            </p>
+                        </div>
+                        
+                        <!-- Actions depending on type -->
+                        ${n.type === 'follow' && n.data && n.data.follower_id ? `
+                            <a href="/wall?user_id=${n.data.follower_id}" class="nb-button px-4 py-1 text-xs bg-black text-white hover:bg-white hover:text-black">
+                                VIEW PROFILE
+                            </a>
+                        ` : ''}
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                list.innerHTML = `
+                    <div class="text-center py-12 opacity-50">
+                        <i class="ph-bold ph-bell-slash text-4xl mb-2"></i>
+                        <p>No new alerts.</p>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            console.error(e);
+            loader.innerHTML = "Failed to load notifications.";
+        }
+    });
+</script>
+
+<script src="/static/js/notifications.js"></script>
+{% endblock %}
