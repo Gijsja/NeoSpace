@@ -65,6 +65,9 @@ def create_app(test_config=None):
     from routes.rooms import bp as rooms_bp
     app.register_blueprint(rooms_bp)
 
+    from routes.friends import bp as friends_bp
+    app.register_blueprint(friends_bp)
+
 
     init_sockets(app)
     return app

@@ -171,6 +171,18 @@ CREATE INDEX IF NOT EXISTS idx_posts_profile ON profile_posts(profile_id, displa
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_user ON messages(user);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+-- Sprint 14: Social Graph (Friends + Top 8)
+CREATE TABLE IF NOT EXISTS friends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    follower_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    following_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    top8_position INTEGER,  -- NULL = not in Top 8, 1-8 = position
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(follower_id, following_id)
+);
+CREATE INDEX IF NOT EXISTS idx_friends_follower ON friends(follower_id);
+CREATE INDEX IF NOT EXISTS idx_friends_following ON friends(following_id);
 '''
 
 

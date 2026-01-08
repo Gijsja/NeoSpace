@@ -136,6 +136,14 @@ def get_profile():
                         # The UI will need to check m.script_details
 
     
+    # Sprint 14: Social Graph - Top 8 and counts
+    from queries.friends import get_top8, get_follower_count, get_following_count, is_following as check_following
+    
+    top8 = get_top8(user_id)
+    follower_count = get_follower_count(user_id)
+    following_count = get_following_count(user_id)
+    viewer_is_following = check_following(g.user["id"], user_id) if g.user and not is_own else False
+
     return jsonify(
         user_id=row["id"],
         username=row["username"],
@@ -158,7 +166,11 @@ def get_profile():
         anthem_autoplay=bool(row["anthem_autoplay"]) if row["anthem_autoplay"] is not None else True,
         stickers=stickers,
         wall_modules=wall_modules,
-        pinned_scripts=[], # Deprecated, empty list to prevent UI error before refactor
+        top8=top8,
+        follower_count=follower_count,
+        following_count=following_count,
+        viewer_is_following=viewer_is_following,
+        pinned_scripts=[], # Deprecated
         viewer_id=g.user["id"] if g.user else None
     )
 

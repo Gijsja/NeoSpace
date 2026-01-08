@@ -1,0 +1,109 @@
+"""
+Sprint #14: Social Graph — Friend Mutations
+
+CRUD operations for follow/unfollow and Top 8 management.
+"""
+
+from flask import g, jsonify, request
+from db import get_db
+
+
+def follow():
+    """Follow a user."""
+    if g.user is None:
+        return jsonify(error="Auth required"), 401
+    
+    data = request.get_json()
+    target_user_id = data.get("user_id")
+    
+    if not target_user_id:
+        return jsonify(error="user_id required"), 400
+    
+    if target_user_id == g.user["id"]:
+        return jsonify(error="Cannot follow yourself"), 400
+    
+    db = get_db()
+    
+    # Check target exists
+    target = db.execute("SELECT id FROM users WHERE id = ?", (target_user_id,)).fetchone()
+    if not target:
+        return jsonify(error="User not found"), 404
+    
+    # Check if already following
+    existing = db.execute(
+        "SELECT id FROM friends WHERE follower_id = ? AND following_id = ?",
+        (g.user["id"], target_user_id)
+    ).fetchone()
+    
+    if existing:
+        return jsonify(ok=True, already_following=True)
+    
+    # Insert follow
+    try:
+        db.execute(
+            "INSERT INTO friends (follower_id, following_id) VALUES (?, ?)",
+            (g.user["id"], target_user_id)
+        )
+        db.commit()
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+    
+    return jsonify(ok=True)
+
+
+def unfollow():
+    """Unfollow a user."""
+    if g.user is None:
+        return jsonify(error="Auth required"), 401
+    
+    data = request.get_json()
+    target_user_id = data.get("user_id")
+    
+    if not target_user_id:
+        return jsonify(error="user_id required"), 400
+    
+    db = get_db()
+    db.execute(
+        "DELETE FROM friends WHERE follower_id = ? AND following_id = ?",
+        (g.user["id"], target_user_id)
+    )
+    db.commit()
+    
+    return jsonify(ok=True)
+
+
+def set_top8():
+    """
+    Set Top 8 order.
+    Expects: { "order": [user_id_1, user_id_2, ...] }
+    Max 8 users.
+    """
+    if g.user is None:
+        return jsonify(error="Auth required"), 401
+    
+    data = request.get_json()
+    order = data.get("order", [])
+    
+    if len(order) > 8:
+        return jsonify(error="Max 8 users"), 400
+    
+    db = get_db()
+    my_id = g.user["id"]
+    
+    # Clear all existing Top 8 positions
+    db.execute(
+        "UPDATE friends SET top8_position = NULL WHERE follower_id = ?",
+        (my_id,)
+    )
+    
+    # Set new positions (only for users we follow)
+    for idx, user_id in enumerate(order, start=1):
+        db.execute(
+            """UPDATE friends 
+               SET top8_position = ? 
+               WHERE follower_id = ? AND following_id = ?""",
+            (idx, my_id, user_id)
+        )
+    
+    db.commit()
+    return jsonify(ok=True)

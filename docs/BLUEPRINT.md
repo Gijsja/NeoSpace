@@ -57,17 +57,16 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #13 ✅
+### Current: Sprint #15 🚧
 
-**Theme**: Speed Demon — msgspec Performance
-
-- [x] `structs.py`: Message, WallPost, Sticker structs
-- [x] `sockets.py`: msgspec for send_message + backfill
+**Theme**: TBD
 
 ### Recently Shipped
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #14    | Social Graph            | Friends, Top 8, Follow/Unfollow       |
+| #13    | Speed Demon             | msgspec structs for hot paths         |
 | #12    | Modular Canvas          | Profile posts (text/image/link/audio) |
 | #11    | NeoSpace Foundations    | Audio Anthem, Identity First          |
 | #10    | Unified Desktop         | 3-pane layout, Tool Integration       |
