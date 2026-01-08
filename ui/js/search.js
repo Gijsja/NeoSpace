@@ -112,11 +112,12 @@ const SearchUI = {
                         <p class="text-sm text-gray-500">@${user.username}</p>
                     </div>
                     
-                    <!-- Follow Button Placeholder (Sprint 20) -->
-                    <button class="nb-button w-full text-sm" 
+                    <!-- Follow Button (Sprint 20) -->
+                    <button class="nb-button w-full text-sm ${user.is_following ? 'bg-white text-black border border-black' : 'bg-black text-white'}" 
                             data-user-id="${user.id}"
-                            onclick="window.location.href='/wall?user_id=${user.id}'">
-                        VIEW PROFILE
+                            data-status="${user.is_following ? 'following' : 'not_following'}"
+                            onclick="FriendManager.toggleFollow(this)">
+                        ${user.is_following ? 'UNFOLLOW' : 'FOLLOW'}
                     </button>
                 </div>
             `).join('');

@@ -163,7 +163,51 @@ function renderProfile(data) {
     
     // Modular Wall (Sprint 12)
     renderWallModules(data.wall_modules);
+
+    // Social Actions (Sprint 20)
+    renderTop8(data.top8);
+
+    const followBtn = document.getElementById('follow-btn');
+    if (followBtn) {
+        if (!data.is_own && data.viewer_id) {
+            followBtn.classList.remove('hidden');
+            followBtn.dataset.userId = data.user_id; // Set ID
+            
+            // Set Initial State
+            const isFollowing = data.viewer_is_following;
+            followBtn.dataset.status = isFollowing ? 'following' : 'not_following';
+            
+            // Use FriendManager helper to style (if loaded)
+            if (window.FriendManager) {
+                window.FriendManager.updateButtonState(followBtn, isFollowing, false);
+                followBtn.onclick = () => window.FriendManager.toggleFollow(followBtn);
+            }
+        } else {
+            followBtn.classList.add('hidden');
+        }
+    }
 }
+
+function renderTop8(friends) {
+    const section = document.getElementById('top8-section');
+    const grid = document.getElementById('top8-grid');
+    if (!section || !grid) return;
+
+    if (!friends || friends.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    section.classList.remove('hidden');
+    grid.innerHTML = friends.map(f => `
+        <a href="/wall?user_id=${f.id}" class="block group relative" title="${f.display_name}">
+            <img src="${f.avatar_path || '/static/img/default_avatar.png'}" 
+                 class="w-full aspect-square object-cover border-2 border-black group-hover:scale-105 transition-transform bg-white">
+            <div class="absolute inset-x-0 bottom-0 bg-black text-white text-[10px] font-bold truncate px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                ${f.username}
+            </div>
+        </a>
+    `).join('');
 
 // --- Edit Logic ---
 

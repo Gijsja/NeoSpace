@@ -63,6 +63,10 @@
                         <button id="edit-profile-btn" class="px-3 py-1 bg-white border-2 border-black hover:bg-yellow-300 text-xs font-bold uppercase transition hidden flex items-center gap-2 shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
                             <i class="ph-bold ph-pencil-simple"></i> Edit Identity
                         </button>
+                        <!-- Follow Button (Sprint 20) -->
+                        <button id="follow-btn" class="px-3 py-1 bg-black text-white border-2 border-black hover:bg-neutral-800 text-xs font-bold uppercase transition hidden shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+                            FOLLOW
+                        </button>
                         <!-- Voice Intro Section -->
                          <div id="voice-intro-section" class="hidden"></div>
                     </div>
@@ -114,6 +118,17 @@
                  <button id="edit-now-btn" class="w-full mt-4 py-1.5 text-xs font-bold bg-white border-2 border-black hover:bg-black hover:text-white transition hidden uppercase">
                     Update
                  </button>
+            </div>
+
+            <!-- Top 8 Grid (Sprint 20) -->
+            <div id="top8-section" class="hidden">
+                 <h3 class="font-black uppercase text-xs tracking-wider mb-2 flex items-center gap-2">
+                    The Top 8 
+                    <span class="bg-black text-white text-[10px] px-1 rounded">FRIENDS</span>
+                 </h3>
+                 <div id="top8-grid" class="grid grid-cols-4 gap-2">
+                    <!-- Populated by JS -->
+                 </div>
             </div>
 
             <!-- Info Stats -->
@@ -358,6 +373,7 @@
 <!-- Voice Support -->
 <script src="/ui/js/voice.js"></script>
 <!-- Wall Logic -->
+<script src="/ui/js/friends.js"></script> <!-- Sprint 20 -->
 <script src="/ui/js/wall.js"></script>
 <script src="/ui/js/wall_ui.js"></script>
 

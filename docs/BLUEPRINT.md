@@ -57,14 +57,15 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #20 🚧
+### Current: Sprint #21 🚧
 
-**Theme**: TBD
+**Theme**: The Feed UI
 
 ### Recently Shipped
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #20    | Social Actions UI       | Follow/Unfollow, Top 8 Grid           |
 | #19    | Search UI               | Js-based Search, User/Post tabs       |
 | #18    | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)   |
 | #17    | Search API              | User and Post search endpoints        |
