@@ -57,7 +57,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #17 🚧
+### Current: Sprint #18 🚧
 
 **Theme**: TBD
 
@@ -65,6 +65,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #17    | Search API              | User and Post search endpoints        |
 | #16    | Feed API                | `/feed` endpoint, Pagination          |
 | #15    | Live Wire               | Notifications API, Follow triggers    |
 | #14    | Social Graph            | Friends, Top 8, Follow/Unfollow       |

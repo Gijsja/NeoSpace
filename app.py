@@ -74,6 +74,9 @@ def create_app(test_config=None):
     from routes.feed import bp as feed_bp
     app.register_blueprint(feed_bp)
 
+    from routes.search import bp as search_bp
+    app.register_blueprint(search_bp)
+
 
     init_sockets(app)
     return app
