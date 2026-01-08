@@ -19,12 +19,29 @@ def init_security(app):
     # CSP
     csp = {
         'default-src': ["'self'"],
-        'img-src': ["'self'", "data:", "blob:"],
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"], # unsafe-eval needed for some libs? check later. unsafe-inline for juiced UI.
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'connect-src': ["'self'", "ws:", "wss:"], # WebSockets
-        'worker-src': ["'self'", "blob:"],
-        'media-src': ["'self'"]
+        'img-src': ["'self'", "data:", "blob:", "https://*"],
+        'script-src': [
+            "'self'",
+            "'unsafe-inline'",  # Needed for Alpine/Tailwind config in HTML
+            "'unsafe-eval'",    # Needed for standard Alpine.js
+            "https://cdn.tailwindcss.com",
+            "https://cdn.jsdelivr.net",
+            "https://unpkg.com",
+            "https://cdn.socket.io"
+        ],
+        'style-src': [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+            "https://unpkg.com"
+        ],
+        'font-src': [
+            "'self'",
+            "https://fonts.gstatic.com",
+            "https://unpkg.com"
+        ],
+        'connect-src': ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+        'media-src': ["'self'", "https://cdn.pixabay.com"]
     }
     
     talisman.init_app(app, 

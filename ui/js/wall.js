@@ -3,51 +3,159 @@
  * Handles drag-and-drop, persistence, and rendering of stickers.
  */
 
-const STICKERS_PRESETS = ["🔥", "✨", "🎨", "💜", "🚀", "💻", "💾", "🌈", "👾", "⭐", "🎵", "🍕"];
+if (!window.StickerManager) {
+    const STICKERS_PRESETS = ["🔥", "✨", "🎨", "💜", "🚀", "💻", "💾", "🌈", "👾", "⭐", "🎵", "🍕"];
 
-class StickerManager {
-    constructor(containerId, isHost, currentUserId, targetUserId) {
-        this.container = document.getElementById(containerId);
-        this.isHost = isHost;
-        this.currentUserId = currentUserId;
-        this.targetUserId = targetUserId;
-        this.stickers = [];
-        
-        // Always init reception (guests can drop, hosts can drop)
-        if (this.currentUserId) {
-            this.initDragAndDrop();
-        }
-    }
-    
-    setStickers(stickersData) {
-        this.stickers = stickersData || [];
-        this.renderAll();
-    }
-    
-    renderAll() {
-        this.container.querySelectorAll('.sticker-item').forEach(el => el.remove());
-        this.stickers.forEach(s => this.renderSticker(s));
-    }
-    
-    renderSticker(data) {
-        const el = document.createElement('div');
-        el.className = 'sticker-item absolute select-none transition-transform drop-shadow-lg';
-        
-        // Sprint 11: Render Image or Emoji
-        if (data.image_path) {
-            // Image Sticker
-            const img = document.createElement('img');
-            img.src = data.image_path;
-            img.className = 'max-w-[150px] max-h-[150px] object-contain pointer-events-none rounded border-2 border-white/20 shadow-xl';
-            el.appendChild(img);
-        } else {
-            // Emoji Sticker
-            el.innerText = data.sticker_type;
-            el.className += ' text-4xl';
+    window.StickerManager = class StickerManager {
+        constructor(containerId, isHost, currentUserId, targetUserId) {
+            this.container = document.getElementById(containerId);
+            this.isHost = isHost;
+            this.currentUserId = currentUserId;
+            this.targetUserId = targetUserId;
+            this.stickers = [];
+            
+            // Always init reception (guests can drop, hosts can drop)
+            if (this.currentUserId) {
+                this.initDragAndDrop();
+            }
         }
         
-        el.style.left = `${data.x_pos}px`;
-        el.style.top = `${data.y_pos}px`;
+        setStickers(stickersData) {
+            this.stickers = stickersData || [];
+            this.renderAll();
+        }
+        
+        renderAll() {
+            if (!this.container) return;
+            this.container.querySelectorAll('.sticker-item').forEach(el => el.remove());
+            this.stickers.forEach(s => this.renderSticker(s));
+        }
+        
+        renderSticker(data) {
+            const el = document.createElement('div');
+            el.className = 'sticker-item absolute select-none transition-transform drop-shadow-lg';
+            
+            // Sprint 11: Render Image or Emoji
+            if (data.image_path) {
+                // Image Sticker
+                const img = document.createElement('img');
+                img.src = data.image_path;
+                img.className = 'max-w-[150px] max-h-[150px] object-contain pointer-events-none rounded border-2 border-white/20 shadow-xl';
+                el.appendChild(img);
+            } else {
+                // Emoji Sticker
+                el.innerText = data.sticker_type;
+                el.className += ' text-4xl';
+            }
+            
+            el.style.left = `${data.x_pos}px`;
+            el.style.top = `${data.y_pos}px`;
+            el.style.transform = `rotate(${data.rotation || 0}deg) scale(${data.scale || 1})`;
+            
+            // Add interaction only if host
+            if (this.isHost) {
+                this.makeInteractable(el, data.id);
+            }
+            
+            this.container.appendChild(el);
+        }
+        
+        initDragAndDrop() {
+            if (!this.container) return;
+            
+            this.container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            
+            this.container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const x = e.offsetX;
+                const y = e.offsetY;
+                
+                // Check if file drop or emoji drop
+                // This logic is mostly handled in wall_ui.js for files, but here for positioning?
+                // Actually wall_ui.js handles the 'drop' event on the CONTAINER usually
+                // Let's see if this conflicts. 
+                // The original code probably had drop logic here or wall_ui.js?
+                // Assuming wall_ui.js handles file uploads.
+            });
+        }
+        
+        makeInteractable(el, id) {
+             let isDragging = false;
+             let startX, startY;
+             
+             el.addEventListener('mousedown', (e) => {
+                 if (e.button !== 0) return; // Only left click
+                 isDragging = true;
+                 startX = e.offsetX;
+                 startY = e.offsetY;
+                 el.style.cursor = 'grabbing';
+             });
+             
+             window.addEventListener('mouseup', () => {
+                 if (isDragging) {
+                     isDragging = false;
+                     el.style.cursor = 'default';
+                     this.saveStickerState(id, el);
+                 }
+             });
+             
+             window.addEventListener('mousemove', (e) => {
+                 if (!isDragging) return;
+                 const rect = this.container.getBoundingClientRect();
+                 const x = e.clientX - rect.left - startX;
+                 const y = e.clientY - rect.top - startY;
+                 
+                 el.style.left = `${x}px`;
+                 el.style.top = `${y}px`;
+             });
+             
+             el.addEventListener('contextmenu', (e) => {
+                 e.preventDefault();
+                 if (confirm('Delete sticker?')) {
+                     this.deleteSticker(id, el);
+                 }
+             });
+        }
+        
+        saveStickerState(id, el) {
+            const x = parseInt(el.style.left);
+            const y = parseInt(el.style.top);
+            
+            // Optimistic update
+            const sticker = this.stickers.find(s => s.id === id);
+            if (sticker) {
+                sticker.x_pos = x;
+                sticker.y_pos = y;
+            }
+            
+            fetch('/wall/sticker/move', {
+                method: 'POST',
+                headers: {
+                     'Content-Type': 'application/json',
+                     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ id, x_pos: x, y_pos: y })
+            });
+        }
+        
+        deleteSticker(id, el) {
+            el.remove();
+            this.stickers = this.stickers.filter(s => s.id !== id);
+            
+            fetch('/wall/sticker/delete', {
+                method: 'POST',
+                headers: {
+                     'Content-Type': 'application/json',
+                     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ id })
+            });
+        }
+    };
+}
         el.style.transform = `rotate(${data.rotation}deg) scale(${data.scale})`;
         el.style.zIndex = data.z_index || 10;
         el.dataset.id = data.id;

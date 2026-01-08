@@ -1,4 +1,5 @@
-
+(() => {
+    
 // DOM Elements
 const wallContainer = document.getElementById('wall-container');
 const loadingEl = document.getElementById('loading');
@@ -1003,4 +1004,6 @@ if (addModuleForm) {
 
 // Init
 fetchProfile();
+window.fetchProfile = fetchProfile;
+})();
 

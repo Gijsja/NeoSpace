@@ -35,7 +35,7 @@ const NotificationManager = {
 
     async checkUnread() {
         try {
-            const res = await fetch('/notifications/count');
+            const res = await fetch('/notifications/unread-count');
             const data = await res.json();
             
             if (data.ok) {
@@ -99,7 +99,7 @@ const NotificationManager = {
     
     async markAllRead() {
         try {
-            const res = await fetch('/notifications/mark_all_read', {
+            const res = await fetch('/notifications/mark-all-read', {
                 method: 'POST'
             });
             const data = await res.json();

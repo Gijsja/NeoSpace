@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}NeoSpace{% endblock %}</title>
 
     <!-- Fonts: Inter -->
@@ -60,6 +61,8 @@
 
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <style>
         /* --- PROJECT CONCRETE: NEUBRUTALISM --- */
@@ -154,7 +157,8 @@
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="flex flex-col h-screen overflow-hidden selection:bg-hot-pink selection:text-white font-sans bg-bbs-bg">
+<body class="flex flex-col h-screen overflow-hidden selection:bg-hot-pink selection:text-white font-sans bg-bbs-bg" 
+      hx-boost="true" hx-target="#app-main" hx-select="#app-main" hx-swap="outerHTML">
 
     <!-- Marquee Header -->
     <div class="h-8 bg-yellow-400 border-b-2 border-black overflow-hidden flex items-center shrink-0 relative z-50">
@@ -289,7 +293,7 @@
         </aside>
 
         <!-- Main Content Wrapper -->
-        <main class="flex-1 flex flex-col min-w-0 h-full relative z-20">
+        <main id="app-main" class="flex-1 flex flex-col min-w-0 h-full relative z-20">
             
             <!-- Header (Brutalist Top Bar) -->
             <header class="h-16 flex items-center justify-between px-6 shrink-0 border-b-2 border-black bg-white">
@@ -327,13 +331,14 @@
             </div>
             {% endblock %}
 
+            {% block scripts %}{% endblock %}
         </main>
 
     </div>
 
-    {% block scripts %}{% endblock %}
+    <!-- Scripts Block Moved Inside Main for Re-Execution -->
     
-    <script src="/static/js/notifications.js"></script>
+    <script src="/ui/js/notifications.js"></script>
 
     <!-- Init Toast Container -->
     <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>

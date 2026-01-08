@@ -5,8 +5,12 @@
 
 console.log('socket_glue.js loaded');
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('socket_glue.js starting...');
+(() => {
+  if (window.CurrentChatCleanup) {
+      window.CurrentChatCleanup();
+      window.CurrentChatCleanup = null;
+  }
+  console.log('socket_glue.js starting (SPA mode)...');
   let socket;
   try {
     socket = io();
@@ -686,7 +690,11 @@ messageForm.addEventListener('submit', async (e) => {
       }
   }
 
-}); // End DOMContentLoaded
+    // Register Cleanup
+    window.CurrentChatCleanup = () => {
+        if (socket) socket.disconnect();
+    };
+})(); // End SPA Wrapper
 
 function insertAtCursor(input, text) {
   const start = input.selectionStart;

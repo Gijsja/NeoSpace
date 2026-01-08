@@ -34,10 +34,10 @@
         <div class="nb-card p-6 bg-white">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {{ g.user.display_name[0] }}
+                    {{ (g.user.display_name or g.user.username)[0] | upper }}
                 </div>
                 <div>
-                   <h3 class="font-bold">{{ g.user.display_name }}</h3>
+                   <h3 class="font-bold">{{ g.user.display_name or g.user.username }}</h3>
                    <span class="text-xs text-gray-500">@{{ g.user.username }}</span>
                 </div>
             </div>
@@ -57,5 +57,5 @@
 
 </div>
 
-<script src="/static/js/feed.js"></script>
+<script src="/ui/js/feed.js"></script>
 {% endblock %}

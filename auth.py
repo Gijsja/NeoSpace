@@ -88,7 +88,7 @@ def login():
         
         return jsonify(ok=True, redirect=url_for('views.index'))
 
-    return send_from_directory("ui/views", "login.html")
+    return render_template("login.html")
 
 @auth_bp.route('/logout')
 def logout():

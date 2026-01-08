@@ -34,7 +34,12 @@ def create_app(test_config=None):
             g.user = None
         else:
             g.user = get_db().execute(
-                'SELECT * FROM users WHERE id = ?', (user_id,)
+                '''
+                SELECT u.*, p.display_name, p.bio, p.avatar_path 
+                FROM users u 
+                LEFT JOIN profiles p ON u.id = p.user_id 
+                WHERE u.id = ?
+                ''', (user_id,)
             ).fetchone()
 
     # Initialize database on app creation
@@ -85,3 +90,5 @@ def create_app(test_config=None):
     init_sockets(app)
     return app
 
+
+# Reload trigger 2026-01-08

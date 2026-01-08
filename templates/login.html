@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <title>Login - NeoSpace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'bbs-bg': '#FFFAF0',
+              'bbs-surface': '#FFFFFF',
+              'bbs-border': '#000000',
+              'acid-green': '#a3e635',
+              'hot-pink': '#ff6b6b',
+              'electric-blue': '#22d3ee',
+            },
+            fontFamily: { 
+                sans: ['Inter', 'system-ui', 'sans-serif'],
+                mono: ['monospace']
+            },
+            boxShadow: {
+              'hard': '4px 4px 0px 0px #000000',
+              'hard-sm': '2px 2px 0px 0px #000000',
+              'hard-xl': '8px 8px 0px 0px #000000',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        .nb-input {
+            background-color: #FFFFFF;
+            border: 2px solid #000000;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            font-family: monospace;
+            box-shadow: 4px 4px 0px 0px #000000;
+            transition: all 0.1s;
+        }
+        .nb-input:focus {
+            outline: none;
+            box-shadow: 2px 2px 0px 0px #000000;
+            transform: translate(2px, 2px);
+        }
+        .nb-button {
+            border: 2px solid #000000;
+            box-shadow: 4px 4px 0px 0px #000000;
+            transition: all 0.1s;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .nb-button:active, .nb-button:hover {
+            box-shadow: 2px 2px 0px 0px #000000;
+            transform: translate(2px, 2px);
+        }
+        .nb-card {
+            background-color: #FFFFFF;
+            border: 2px solid #000000;
+            box-shadow: 8px 8px 0px 0px #000000;
+        }
+    </style>
+</head>
+<body class="bg-bbs-bg text-black flex items-center justify-center min-h-screen px-4">
+    
+    <!-- Marquee Banner -->
+    <div class="fixed top-0 left-0 right-0 h-8 bg-black text-white overflow-hidden z-50 flex items-center">
+        <div class="animate-marquee whitespace-nowrap font-mono text-xs font-bold tracking-widest">
+            ★ NEOSPACE ★ WELCOME TO THE GRID ★ LOGIN OR REGISTER ★ PROJECT CONCRETE ★ NEOSPACE ★ WELCOME TO THE GRID ★ LOGIN OR REGISTER ★ PROJECT CONCRETE ★
+        </div>
+    </div>
+    <style>
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 20s linear infinite; }
+    </style>
+
+    <!-- Auth Card -->
+    <div x-data="authForm()" class="w-full max-w-md nb-card p-8 mt-12">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-black text-white mb-4 border-2 border-black shadow-hard">
+                <i class="ph-bold ph-broadcast text-4xl"></i>
+            </div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter mb-1">NeoSpace</h1>
+            <p class="text-sm font-mono text-gray-600">Access the Grid</p>
+        </div>
+
+        <!-- Tab Toggle -->
+        <div class="flex border-2 border-black mb-6">
+            <button @click="isLogin = true" 
+                    :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                    class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
+                <i class="ph-bold ph-sign-in"></i> Sign In
+            </button>
+            <button @click="isLogin = false"
+                    :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                    class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                <i class="ph-bold ph-user-plus"></i> Register
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form @submit.prevent="submit" class="space-y-5">
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <i class="ph-bold ph-user"></i> Username
+                </label>
+                <input type="text" x-model="username" required 
+                       class="nb-input" 
+                       placeholder="your_handle" />
+            </div>
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <i class="ph-bold ph-lock"></i> Password
+                </label>
+                <input type="password" x-model="password" required 
+                       class="nb-input" 
+                       placeholder="••••••••" />
+            </div>
+            
+            <!-- Error Message -->
+            <div x-show="error" x-text="error" x-transition
+                 class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold"></div>
+
+            <!-- Submit Button -->
+            <button type="submit" :disabled="loading"
+                    class="w-full py-4 nb-button bg-acid-green text-black flex items-center justify-center gap-2 disabled:opacity-50">
+                <template x-if="isLogin">
+                    <span class="flex items-center gap-2"><i class="ph-bold ph-sign-in"></i> Enter Grid</span>
+                </template>
+                <template x-if="!isLogin">
+                    <span class="flex items-center gap-2"><i class="ph-bold ph-user-plus"></i> Create Identity</span>
+                </template>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="text-center text-xs font-mono text-gray-500 mt-6 border-t-2 border-black pt-4">
+            NeoSpace v1.0 // Project Concrete
+        </p>
+    </div>
+
+    <script>
+        function authForm() {
+            return {
+                isLogin: true,
+                username: '',
+                password: '',
+                error: '',
+                loading: false,
+                
+                getCsrfToken() {
+                    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                },
+                
+                async submit() {
+                    this.loading = true;
+                    this.error = '';
+                    
+                    const endpoint = this.isLogin ? '/auth/login' : '/auth/register';
+                    const token = this.getCsrfToken();
+
+                    try {
+                        const res = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': token 
+                            },
+                            body: JSON.stringify({ 
+                                username: this.username, 
+                                password: this.password 
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok && data.ok) {
+                            window.location.href = data.redirect;
+                        } else {
+                            this.error = data.error || 'Authentication failed';
+                        }
+                    } catch (err) {
+                        this.error = 'Network error: ' + err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
