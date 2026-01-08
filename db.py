@@ -183,6 +183,20 @@ CREATE TABLE IF NOT EXISTS friends (
 );
 CREATE INDEX IF NOT EXISTS idx_friends_follower ON friends(follower_id);
 CREATE INDEX IF NOT EXISTS idx_friends_following ON friends(following_id);
+
+-- Sprint 15: Notifications (Live Wire)
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,  -- 'sticker', 'dm', 'follow', 'mention'
+    title TEXT NOT NULL,
+    message TEXT,
+    link TEXT,           -- URL to navigate on click
+    actor_id INTEGER REFERENCES users(id),
+    is_read INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, is_read);
 '''
 
 

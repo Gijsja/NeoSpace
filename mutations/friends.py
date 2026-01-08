@@ -45,6 +45,16 @@ def follow():
             (g.user["id"], target_user_id)
         )
         db.commit()
+        
+        # Sprint 15: Create notification for followed user
+        from mutations.notifications import create_notification
+        create_notification(
+            user_id=target_user_id,
+            notif_type="follow",
+            title=f"{g.user['username']} started following you",
+            link=f"/wall?user_id={g.user['id']}",
+            actor_id=g.user["id"]
+        )
     except Exception as e:
         return jsonify(error=str(e)), 500
     

@@ -57,7 +57,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #15 🚧
+### Current: Sprint #16 🚧
 
 **Theme**: TBD
 
@@ -65,6 +65,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #15    | Live Wire               | Notifications API, Follow triggers    |
 | #14    | Social Graph            | Friends, Top 8, Follow/Unfollow       |
 | #13    | Speed Demon             | msgspec structs for hot paths         |
 | #12    | Modular Canvas          | Profile posts (text/image/link/audio) |

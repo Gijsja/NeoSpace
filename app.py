@@ -68,6 +68,9 @@ def create_app(test_config=None):
     from routes.friends import bp as friends_bp
     app.register_blueprint(friends_bp)
 
+    from routes.notifications import bp as notifications_bp
+    app.register_blueprint(notifications_bp)
+
 
     init_sockets(app)
     return app
