@@ -1,0 +1,38 @@
+{% macro tabs(id, items) %}
+<!-- 
+  Tabs Component
+  Style: Neubrutalist
+  Usage: 
+    items = [{'id': 'account', 'label': 'Account'}, {'id': 'password', 'label': 'Password'}]
+    Content slots defined by caller inside specific divs
+-->
+<div x-data="{ activeTab: '{{ items[0].id }}' }" class="w-full">
+    
+    <!-- Tab List -->
+    <div class="flex border-b-2 border-black/10 mx-1">
+        {% for item in items %}
+        <button @click="activeTab = '{{ item.id }}'"
+                class="px-4 py-2 font-bold uppercase text-sm border-b-2 transition-colors hover:text-acid-green -mb-[2px]"
+                :class="activeTab === '{{ item.id }}' ? 'border-black text-black' : 'border-transparent text-gray-500'">
+            {{ item.label }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="mt-4 p-1">
+        {{ caller() }}
+    </div>
+
+</div>
+{% endmacro %}
+
+{% macro tab_panel(id) %}
+<div x-show="activeTab === '{{ id }}'" 
+     style="display: none;"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 translate-y-2"
+     x-transition:enter-end="opacity-100 translate-y-0">
+    {{ caller() }}
+</div>
+{% endmacro %}

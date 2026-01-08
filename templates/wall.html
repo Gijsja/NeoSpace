@@ -5,7 +5,8 @@
 
 {% block head %}
 <!-- Scripts needed for Wall features -->
-<script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+<!-- Vendored Assets -->
+<script src="/static/vendor/mobile-drag-drop.min.js"></script>
 <script>
     if (typeof MobileDragDrop !== 'undefined') {
         MobileDragDrop.polyfill({
@@ -14,15 +15,23 @@
         window.addEventListener( 'touchmove', function() {}, {passive: false});
     }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
+<script src="/static/vendor/purify.min.js"></script>
+<link rel="stylesheet" href="/static/vendor/highlight-atom-one-dark.min.css">
+<script src="/static/vendor/highlight.min.js"></script>
+
+<script>
+    // Initialize highlight.js
+    hljs.highlightAll();
+</script>
 {% endblock %}
 
 {% block content %}
 <!-- Loading State -->
-<div id="loading" class="flex flex-col items-center justify-center py-20 animate-pulse">
+<div id="loading" class="flex flex-col items-center justify-center py-20 min-h-[50vh]">
+    <div class="animate-spin text-4xl mb-4">
+        <i class="ph-bold ph-spinner"></i>
+    </div>
     <span class="font-mono text-xl font-bold uppercase tracking-widest border-2 border-black p-2 bg-white shadow-hard">Loading Identity Matrix...</span>
 </div>
 
@@ -346,8 +355,18 @@
                 <div id="fields-link" class="space-y-2 hidden">
                     <label class="block text-xs uppercase font-bold">Link URL</label>
                     <input type="url" name="link_url" class="nb-input" placeholder="https://..." />
-                     <label class="block text-xs uppercase font-bold">Title (Optional)</label>
+                    <label class="block text-xs uppercase font-bold">Title (Optional)</label>
                     <input type="text" name="link_title" class="nb-input" placeholder="Link Title" />
+                    
+                    <label class="block text-xs uppercase font-bold">Thumbnail URL (Optional)</label>
+                    <input type="url" name="link_thumb" class="nb-input" placeholder="https://example.com/image.jpg" />
+                    
+                    <label class="block text-xs uppercase font-bold">Display Style</label>
+                    <select name="link_style" class="nb-input h-10 bg-white border-2 border-black focus:outline-none">
+                        <option value="simple">Simple Row</option>
+                        <option value="button">Button</option>
+                        <option value="card">Card (Large Image)</option>
+                    </select>
                 </div>
 
                 <div id="fields-audio" class="space-y-2 hidden">
@@ -375,7 +394,8 @@
 <!-- Wall Logic -->
 <script src="/ui/js/friends.js"></script> <!-- Sprint 20 -->
 <script src="/ui/js/wall.js"></script>
-<script src="/ui/js/wall_ui.js"></script>
+<!-- <script src="/ui/js/wall_ui.js"></script> -->
+<script type="module" src="/ui/js/wall/WallMain.js"></script>
 
 <script>
     // Force init

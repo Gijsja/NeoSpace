@@ -1,0 +1,130 @@
+{% macro ghettoblaster(src, title="Unknown Frequency", autoplay=False) %}
+<!-- 
+  Neopunk Ghettoblaster 
+  Retro-futurist hardware audio player.
+  Dependencies: Alpine.js, Tailwind CSS
+-->
+<div x-data="{ 
+        playing: false, 
+        audio: null, 
+        progress: 0, 
+        duration: 0,
+        volume: 0.8,
+        init() {
+            this.audio = this.$refs.audioEl;
+            this.audio.volume = this.volume;
+            this.audio.addEventListener('loadedmetadata', () => {
+                this.duration = this.audio.duration;
+            });
+            this.audio.addEventListener('timeupdate', () => {
+                this.progress = (this.audio.currentTime / this.duration) * 100;
+            });
+            this.audio.addEventListener('ended', () => {
+                this.playing = false;
+                this.progress = 0;
+            });
+            {% if autoplay %}
+            this.play();
+            {% endif %}
+        },
+        toggle() {
+            if (this.playing) this.pause();
+            else this.play();
+        },
+        play() {
+            this.audio.play();
+            this.playing = true;
+        },
+        pause() {
+            this.audio.pause();
+            this.playing = false;
+        },
+        seek(e) {
+            // Click on progress bar
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const per = x / rect.width;
+            this.audio.currentTime = per * this.duration;
+        }
+    }"
+    class="ghettoblaster-shell relative w-full bg-slate-900 border-2 border-slate-700 rounded-sm shadow-xl overflow-hidden font-mono group select-none">
+    
+    <!-- Audio Element (Hidden) -->
+    <audio x-ref="audioEl" src="{{ src }}" preload="metadata"></audio>
+
+    <!-- Top Screw Header -->
+    <div class="h-6 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-2">
+        <div class="flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+        </div>
+        <div class="text-[10px] text-slate-500 tracking-widest uppercase">Sonyk-9000</div>
+        <div class="flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="p-4 flex flex-col gap-4 relative">
+        
+        <!-- LCD Display -->
+        <div class="lcd-screen bg-[#1a2d28] border border-slate-600 h-16 rounded-sm relative overflow-hidden flex flex-col justify-center px-3 shadow-inner">
+            <!-- Scanlines overlay -->
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_2px,3px_100%]"></div>
+            
+            <!-- Metadata -->
+            <div class="relative z-20">
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-cyan-400 text-xs tracking-wider animate-pulse" x-show="playing">PLAYING >></span>
+                    <span class="text-slate-500 text-xs tracking-wider" x-show="!playing">STANDBY</span>
+                    <span class="text-cyan-500 font-bold text-xs" x-text="new Date(progress * duration * 10).toISOString().substr(14, 5)">00:00</span>
+                </div>
+                <div class="text-cyan-300 font-bold text-sm truncate uppercase tracking-widest text-shadow-glow">{{ title }}</div>
+            </div>
+
+            <!-- Fake digital waveform -->
+            <div class="absolute bottom-1 left-0 right-0 h-4 flex gap-0.5 items-end opacity-50 px-3">
+                <template x-for="i in 20">
+                    <div class="flex-1 bg-cyan-700 transition-all duration-75" 
+                         :style="`height: ${playing ? Math.random() * 100 : 10}%;`"></div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="flex items-center gap-4">
+            <!-- Play/Pause Button (Chunky) -->
+            <button @click="toggle()" 
+                    class="w-12 h-12 bg-slate-800 rounded border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 transition text-cyan-400 flex items-center justify-center hover:bg-slate-700 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                <i class="ph-fill text-2xl" :class="playing ? 'ph-pause' : 'ph-play'"></i>
+            </button>
+
+            <!-- Progress Bar -->
+            <div class="flex-1 h-12 bg-slate-950 rounded border border-slate-800 relative cursor-crosshair group/bar" @click="seek($event)">
+                <!-- Track -->
+                <div class="absolute top-1/2 left-2 right-2 h-1 bg-slate-800 -translate-y-1/2 rounded-full overflow-hidden pointer-events-none">
+                    <div class="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.8)] transition-all duration-100 ease-linear" :style="`width: ${progress}%`"></div>
+                </div>
+                <!-- Thumb (Visual) -->
+                <div class="absolute top-1/2 w-4 h-6 bg-slate-200 border border-black -translate-y-1/2 -ml-2 transition-all duration-100 ease-linear pointer-events-none shadow-lg" 
+                     :style="`left: calc(16px + (100% - 32px) * ${progress/100})`">
+                    <div class="w-full h-full flex flex-col justify-center items-center gap-[1px]">
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Volume Dial (Visual only for MVP, or could implement) -->
+            <div class="w-12 h-12 bg-slate-800 rounded-full border-4 border-slate-900 flex items-center justify-center relative transform rotate-45 shadow-inner">
+                <div class="w-1 h-5 bg-slate-950 absolute top-1 rounded-full"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sticker Deco -->
+    <div class="absolute top-2 right-12 text-[9px] text-yellow-400/50 font-bold -rotate-2 border border-yellow-400/30 px-1">HI-FI</div>
+</div>
+{% endmacro %}

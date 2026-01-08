@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Codeground - NeoSpace{% endblock %}
+{% block page_title %}CODEGROUND{% endblock %}
+
+{% block head %}
+<!-- Tailwind already in base -->
+<style>
+    /* Custom editor styles */
+    .cm-editor { height: 100%; border: none; }
+    .cm-scroller { overflow: auto; }
+</style>
+{% endblock %}
+
+{% block main_container %}
+<!-- Override main container to be full height/width flex for the IDE feel -->
+<div class="flex flex-col h-full overflow-hidden bg-bbs-bg text-slate-200">
+    
+    <!-- Toolbar (Adapted from code_editor.html) -->
+    <div class="flex items-center justify-between px-4 py-2 bg-bbs-surface border-b-2 border-black shrink-0">
+        <div class="flex items-center gap-4">
+            <span class="text-emerald-400 text-sm flex items-center gap-1.5 font-mono font-bold uppercase">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Safe Mode
+            </span>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- Library Selector -->
+            <div class="flex bg-bbs-bg border-2 border-black shadow-hard-sm">
+                <button class="px-3 py-1.5 text-xs font-bold uppercase bg-acid-green text-black border-r-2 border-black">Three.js</button>
+                <button class="px-3 py-1.5 text-xs font-bold uppercase text-slate-400 hover:text-white transition">p5.js</button>
+            </div>
+            <!-- Actions -->
+            <button id="run-btn" class="px-4 py-1.5 text-xs font-bold uppercase bg-electric-blue hover:bg-hot-pink border-2 border-black shadow-hard-sm transition flex items-center gap-2 text-black">
+                <i class="ph-bold ph-play"></i> Run
+            </button>
+            <button id="publish-btn" class="px-4 py-1.5 text-xs font-bold uppercase bg-purple-600 hover:bg-purple-500 border-2 border-black shadow-hard-sm transition flex items-center gap-2 text-white">
+                <i class="ph-bold ph-upload-simple"></i> Publish
+            </button>
+        </div>
+    </div>
+
+    <!-- Split Pane: Editor | Preview -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: Code Editor -->
+        <div class="w-1/2 flex flex-col border-r-2 border-black bg-[#0f172a]">
+            <div class="px-3 py-1 bg-black text-white border-b-2 border-black text-[10px] font-mono uppercase tracking-widest flex justify-between">
+                <span>sketch.js</span>
+                <span>JS</span>
+            </div>
+            <div class="flex-1 relative">
+                <textarea id="code-input" class="w-full h-full bg-[#0f172a] text-slate-300 font-mono text-sm p-4 resize-none focus:outline-none custom-scrollbar" spellcheck="false">
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+camera.position.z = 5;
+
+const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const geometry = new THREE.IcosahedronGeometry(1.5, 0);
+const material = new THREE.MeshBasicMaterial({ 
+    color: 0xa3e635, 
+    wireframe: true 
+});
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+const animate = function () {
+    requestAnimationFrame(animate);
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+    renderer.render(scene, camera);
+};
+
+animate();
+                </textarea>
+            </div>
+        </div>
+
+        <!-- RIGHT: Live Preview -->
+        <div class="w-1/2 flex flex-col bg-black relative">
+            <div class="px-3 py-1 bg-white border-b-2 border-black text-[10px] font-mono uppercase tracking-widest flex justify-between items-center text-black">
+                <span>Preview</span>
+                <span class="flex items-center gap-1 text-emerald-600 font-bold"><i class="ph-fill ph-circle"></i> Live</span>
+            </div>
+            <div class="flex-1 relative overflow-hidden" id="preview-container">
+                <iframe id="preview-frame" class="w-full h-full border-none"></iframe>
+            </div>
+            
+            <!-- Overlay Loader -->
+            <div id="preview-loader" class="absolute inset-0 bg-black/50 flex items-center justify-center hidden pointer-events-none">
+                <i class="ph-bold ph-spinner animate-spin text-white text-3xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Console -->
+    <div class="h-32 bg-bbs-surface border-t-2 border-black shrink-0 flex flex-col font-mono text-xs">
+        <div class="px-3 py-1 bg-black text-white border-b border-white/20 flex items-center justify-between">
+            <span class="uppercase tracking-widest">System Output</span>
+            <button class="hover:text-acid-green uppercase" onclick="document.getElementById('console-output').innerHTML = ''">Clear</button>
+        </div>
+        <div id="console-output" class="flex-1 overflow-auto p-2 space-y-1 text-slate-400">
+            <div class="text-emerald-400">[SYSTEM] Codeground initialized.</div>
+            <div>> Ready for input...</div>
+        </div>
+    </div>
+    <!-- Publish Modal -->
+    <div id="publish-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white border-2 border-black shadow-hard p-6 w-full max-w-md transform scale-95 transition-transform duration-300" id="publish-modal-content">
+            <h2 class="text-2xl font-black uppercase mb-4 text-black">Publish to Grid</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1 text-gray-600">Script Title</label>
+                    <input type="text" id="script-title" class="w-full border-2 border-black p-2 font-mono text-sm focus:outline-none focus:shadow-hard-sm transition-all text-black" placeholder="My Awesome Glitch">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-1 text-gray-600">Description</label>
+                    <textarea id="script-desc" class="w-full border-2 border-black p-2 font-mono text-sm focus:outline-none focus:shadow-hard-sm transition-all h-24 text-black" placeholder="What does this code do?"></textarea>
+                </div>
+                
+                <div class="flex gap-4 pt-4">
+                    <button id="cancel-publish" class="flex-1 py-3 font-bold uppercase border-2 border-black hover:bg-gray-100 text-black transition-colors">Cancel</button>
+                    <button id="confirm-publish" class="flex-1 py-3 font-bold uppercase bg-black text-white hover:bg-gray-800 transition-colors border-2 border-black">
+                        <i class="ph-bold ph-upload-simple"></i> Publish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Simple Codeground Logic
+    const codeInput = document.getElementById('code-input');
+    const previewFrame = document.getElementById('preview-frame');
+    const runBtn = document.getElementById('run-btn');
+    const publishBtn = document.getElementById('publish-btn');
+    const consoleOutput = document.getElementById('console-output');
+    
+    // Modal Elements
+    const modal = document.getElementById('publish-modal');
+    const modalContent = document.getElementById('publish-modal-content');
+    const cancelBtn = document.getElementById('cancel-publish');
+    const confirmBtn = document.getElementById('confirm-publish');
+
+    function log(msg, type='info') {
+        const div = document.createElement('div');
+        div.textContent = `> ${msg}`;
+        if (type === 'error') div.className = "text-red-400";
+        else if (type === 'success') div.className = "text-emerald-400";
+        consoleOutput.appendChild(div);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    function runCode() {
+        const code = codeInput.value;
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>body { margin: 0; overflow: hidden; background: transparent; }</style>
+                <script src="/static/vendor/three.min.js"></script>
+                <script src="/static/vendor/p5.min.js"></script>
+            </head>
+            <body>
+                <script>
+                    // Capture console
+                    window.console.log = function(...args) { 
+                        window.parent.postMessage({type: 'log', msg: args.join(' ')}, '*');
+                    }
+                    window.console.error = function(...args) { 
+                        window.parent.postMessage({type: 'error', msg: args.join(' ')}, '*');
+                    }
+                    window.onerror = function(msg, source, lineno, colno, error) {
+                         window.parent.postMessage({type: 'error', msg: msg}, '*');
+                    }
+                    
+                    try {
+                        ${code}
+                    } catch(e) {
+                        console.error(e);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+        
+        const blob = new Blob([html], { type: 'text/html' });
+        previewFrame.src = URL.createObjectURL(blob);
+        log("Executing...", 'success');
+    }
+
+    // -- Modal Logic --
+    publishBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        // Small delay for transition
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }, 10);
+    });
+
+    function closeModal() {
+        modal.classList.add('opacity-0');
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+    
+    cancelBtn.addEventListener('click', closeModal);
+
+    // -- Publish Logic --
+    confirmBtn.addEventListener('click', async () => {
+        const title = document.getElementById('script-title').value || "Untitled Script";
+        const desc = document.getElementById('script-desc').value || "";
+        const code = codeInput.value;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
+
+        try {
+            const res = await fetch('/wall/post/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    module_type: 'script',
+                    content: {
+                        code: code,
+                        title: title,
+                        description: desc,
+                        created_at: new Date().toISOString()
+                    },
+                    style: { theme: 'dark' } // Default style
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (data.ok) {
+                log("Script Published Successfully!", 'success');
+                closeModal();
+                // Optional: ask to view it?
+                if(confirm("Script published! View on your wall?")) {
+                    window.location.href = '/wall';
+                }
+            } else {
+                log("Error: " + (data.error || "Unknown error"), 'error');
+            }
+        } catch (err) {
+            log("Network Error: " + err.message, 'error');
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="ph-bold ph-upload-simple"></i> Publish';
+        }
+    });
+
+    runBtn.addEventListener('click', runCode);
+
+    // Initial Run
+    runCode();
+
+    // Listen for logs from iframe
+    window.addEventListener('message', (e) => {
+        if (e.data.type === 'log') log(e.data.msg);
+        if (e.data.type === 'error') log(e.data.msg, 'error');
+    });
+
+    // Handle Tab in Textarea
+    codeInput.addEventListener('keydown', function(e) {
+        if (e.key == 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + "  " + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 2;
+        }
+    });
+
+    // Keybinds
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            runCode();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% macro badge(text, variant='default', class='') %}
+<!-- 
+  Badge Component
+  Style: Neubrutalist
+-->
+{% set variants = {
+    'default': "bg-black text-white hover:bg-neutral-800",
+    'outline': "bg-white text-black border-2 border-black",
+    'acid': "bg-acid-green text-black border-2 border-black",
+    'destructive': "bg-red-500 text-white border-2 border-black"
+} %}
+
+<span class="inline-flex items-center px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 {{ variants[variant] }} {{ class }}">
+    {{ text }}
+</span>
+{% endmacro %}

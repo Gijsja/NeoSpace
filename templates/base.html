@@ -32,21 +32,54 @@
                         'hot-pink': '#ff6b6b',
                         'construction-orange': '#fb923c',
                         'electric-blue': '#22d3ee',
-                        'warm-beige': '#f5f5dc'
+                        'warm-beige': '#f5f5dc',
+
+                        // Penguin UI / Neo-Brutalism Palette
+                        'neo-bg': '#0a0f1a',
+                        'neo-surface': 'rgba(30, 41, 59, 0.85)',
+                        'neo-border': 'rgba(71, 85, 105, 0.5)',
+                        'neo-accent': '#60a5fa',
+                        'neo-accent-glow': 'rgba(96, 165, 250, 0.4)',
+                        'neo-yellow': '#F3F722', // Acid Yellow
+                        'neo-pink': '#FF69B4',   // Hot Pink
+                        'neo-green': '#A3E635',  // Lime Green
+                        'neo-black': '#000000',
+                        'neo-white': '#FFFFFF',
                     },
                     boxShadow: {
                         'hard': '4px 4px 0px 0px #000000',
                         'hard-sm': '2px 2px 0px 0px #000000',
                         'hard-xl': '8px 8px 0px 0px #000000',
+                        'glow': '0 0 20px rgba(96, 165, 250, 0.5)',
                     },
                     animation: {
                         'marquee': 'marquee 20s linear infinite',
+                        'fade-in': 'fadeIn 0.4s ease-out',
+                        'pop': 'pop 0.2s ease-out',
+                        'glitch': 'glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite',
                     },
                     keyframes: {
                         marquee: {
                             '0%': { transform: 'translateX(100%)' },
                             '100%': { transform: 'translateX(-100%)' }
-                        }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.95)' },
+                            '50%': { transform: 'scale(1.02)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        glitch: {
+                            '0%': { transform: 'translate(0)' },
+                            '20%': { transform: 'translate(-2px, 2px)' },
+                            '40%': { transform: 'translate(-2px, -2px)' },
+                            '60%': { transform: 'translate(2px, 2px)' },
+                            '80%': { transform: 'translate(2px, -2px)' },
+                            '100%': { transform: 'translate(0)' },
+                        },
                     }
                 }
             }
@@ -154,6 +187,62 @@
         
         /* Sidebar Hover Slide */
         .sidebar-link:hover { padding-left: 1.5rem; }
+
+        /* --- SPRINT 21: VISUAL POLISH ANIMATIONS --- */
+        
+        /* 1. Glitch Effect on Hover */
+        .animate-glitch:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: #FF00FF; /* Hot Pink */
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* 2. Button Spring Physics */
+        .btn-spring {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-spring:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 6px 6px 0px 0px #000000;
+        }
+        .btn-spring:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 1px 1px 0px 0px #000000;
+        }
+
+        /* 3. Page Transitions (Fade) */
+        .page-transition-enter {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .page-transition-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .page-transition-exit {
+            opacity: 1;
+        }
+        .page-transition-exit-active {
+            opacity: 0;
+            transition: opacity 300ms;
+        }
+        
+        /* Apply to main content */
+        #app-main > div {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
@@ -231,7 +320,9 @@
 
                 {{ nav_link('/feed/home', 'ph-bold ph-house-line', 'Stream', class='sidebar-link') }}
                 {{ nav_link('/wall', 'ph-bold ph-user-square', 'Identity', class='sidebar-link') }}
-                {{ nav_link('/ui/views/playground.html', 'ph-bold ph-code', 'Sandbox', class='sidebar-link') }}
+                {{ nav_link('/codeground', 'ph-bold ph-code', 'Codeground', class='sidebar-link') }}
+                {{ nav_link('/components', 'ph-bold ph-swatches', 'UI Kit', class='sidebar-link') }}
+                {{ nav_link('/penguin', 'ph-bold ph-bird', 'Penguin UI', class='sidebar-link') }}
                 {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
                 
                 <div class="h-0.5 bg-black my-4 opacity-10 mx-4"></div>

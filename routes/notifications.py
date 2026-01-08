@@ -44,13 +44,14 @@ def get_count():
 @login_required
 def mark_one_read():
     """Mark a notification as read."""
-    data = request.get_json()
-    notification_id = data.get("id")
+    try:
+        import msgspec
+        from msgspec_models import MarkNotificationReadRequest
+        req = msgspec.json.decode(request.get_data(), type=MarkNotificationReadRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not notification_id:
-        return jsonify(error="id required"), 400
-    
-    success = mark_read(notification_id, g.user["id"])
+    success = mark_read(req.notification_id, g.user["id"])
     return jsonify(ok=success)
 
 
@@ -66,11 +67,12 @@ def mark_all():
 @login_required
 def delete():
     """Delete a notification."""
-    data = request.get_json()
-    notification_id = data.get("id")
+    try:
+        import msgspec
+        from msgspec_models import DeleteNotificationRequest
+        req = msgspec.json.decode(request.get_data(), type=DeleteNotificationRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not notification_id:
-        return jsonify(error="id required"), 400
-    
-    success = delete_notification(notification_id, g.user["id"])
+    success = delete_notification(req.notification_id, g.user["id"])
     return jsonify(ok=success)

@@ -11,6 +11,7 @@
     <meta name="description" content="NeoSpace: Your Personal Wall.">
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -393,6 +394,10 @@
                     <i class="ph-duotone ph-music-notes text-2xl text-slate-300"></i>
                     <span class="text-xs font-bold text-slate-400">Audio</span>
                 </button>
+                <button data-type="voice" class="module-type-btn flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition">
+                    <i class="ph-duotone ph-microphone text-2xl text-slate-300"></i>
+                    <span class="text-xs font-bold text-slate-400">Voice</span>
+                </button>
             </div>
             
             <form id="add-module-form" class="p-4 space-y-4">
@@ -424,6 +429,34 @@
                     <input type="url" name="audio_url" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="https://example.com/song.mp3" />
                      <label class="block text-xs uppercase text-slate-500 font-bold">Caption (Optional)</label>
                     <input type="text" name="audio_title" class="w-full bg-bbs-bg border border-bbs-border rounded-lg px-3 py-2 text-white focus:border-bbs-accent focus:outline-none focus:ring-1 focus:ring-bbs-accent" placeholder="Song Title" />
+                </div>
+
+                <!-- Voice Note Inputs (Recorder) -->
+                <div id="fields-voice" class="space-y-3 hidden">
+                    <label class="block text-xs uppercase text-slate-500 font-bold">Record Voice Note</label>
+                    
+                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-4 flex flex-col gap-3">
+                        <!-- Recorder Visualizer -->
+                        <canvas id="voice-module-canvas" width="300" height="60" class="w-full h-16 bg-black rounded border border-white/10"></canvas>
+                        
+                        <!-- Controls -->
+                        <div class="flex gap-2">
+                            <button type="button" id="btn-record-note" class="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded flex items-center justify-center gap-2 transition">
+                                <i class="ph-bold ph-microphone"></i> Record
+                            </button>
+                            <button type="button" id="btn-stop-note" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded flex items-center justify-center gap-2 transition hidden">
+                                <i class="ph-bold ph-stop"></i> Stop
+                            </button>
+                        </div>
+                        
+                        <div id="voice-note-preview" class="hidden">
+                            <audio controls class="w-full h-8 mt-2 opacity-80" id="voice-note-audio-el"></audio>
+                            <button type="button" id="btn-reset-note" class="text-xs text-slate-400 hover:text-white mt-1 underline">Retry</button>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="voice_url" id="voice-module-url">
+                    <p id="voice-module-status" class="text-[10px] text-center text-slate-500 h-4"></p>
                 </div>
                 
                 <div class="flex justify-end pt-2">

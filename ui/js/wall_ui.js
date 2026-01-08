@@ -29,38 +29,66 @@ async function fetchProfile() {
             window.location.href = '/auth/login';
             return;
         }
-        const data = await res.json();
+        
+        let data;
+        try {
+            data = await res.json();
+        } catch (jsonErr) {
+             throw new Error("Invalid JSON response from server");
+        }
         
         if (data.error) {
-            loadingEl.innerHTML = `<div class="text-red-400 font-bold">${data.error}</div>`;
+            loadingEl.innerHTML = `<div class="text-red-400 font-bold border-2 border-red-500 p-4 bg-white shadow-hard">${data.error}</div>`;
             return;
         }
 
         currentUserData = data;
-        renderProfile(data);
+        
+        try {
+            renderProfile(data);
+        } catch (renderErr) {
+            console.error("Render Error:", renderErr);
+            // Don't block loading on render error, partial render is better
+        }
         
         // Init Stickers
-        if (!stickerManager) {
-            // containerId, isHost, currentUserId, targetUserId
-            stickerManager = new StickerManager(
-                'sticker-canvas', 
-                data.is_own, 
-                data.viewer_id, 
-                data.user_id
-            );
-            
-            // Show palette if logged in
-            if (data.viewer_id) {
-                setupPalette();
+        try {
+            if (!stickerManager) {
+                // containerId, isHost, currentUserId, targetUserId
+                // Ensure dependencies are loaded
+                if (typeof StickerManager !== 'undefined') {
+                    stickerManager = new StickerManager(
+                        'sticker-canvas', 
+                        data.is_own, 
+                        data.viewer_id, 
+                        data.user_id
+                    );
+                    
+                    // Show palette if logged in
+                    if (data.viewer_id) {
+                        setupPalette();
+                    }
+                } else {
+                    console.warn("StickerManager not loaded");
+                }
             }
+            if (stickerManager) stickerManager.setStickers(data.stickers);
+        } catch (stickerErr) {
+            console.error("Sticker Init Error:", stickerErr);
         }
-        stickerManager.setStickers(data.stickers);
         
         loadingEl.classList.add('hidden');
         wallContainer.classList.remove('hidden');
+
     } catch (err) {
         console.error(err);
-        loadingEl.innerHTML = `<div class="text-red-400 font-bold">Failed to load profile (Network Error).</div>`;
+        loadingEl.innerHTML = `
+            <div class="text-red-500 font-bold border-2 border-red-500 p-4 bg-white shadow-hard flex flex-col items-center gap-2">
+                <i class="ph-bold ph-warning-octagon text-3xl"></i>
+                <span>CONNECTION LOST</span>
+                <span class="text-xs font-mono text-black">${err.message || 'Unknown Error'}</span>
+                <button onclick="window.location.reload()" class="mt-2 px-4 py-1 bg-black text-white text-xs font-bold uppercase hover:bg-gray-800">Retry</button>
+            </div>`;
     }
 }
 
@@ -209,6 +237,7 @@ function renderTop8(friends) {
             </div>
         </a>
     `).join('');
+}
 
 // --- Edit Logic ---
 
@@ -384,11 +413,22 @@ if (editForm) {
         payload.is_public = formData.get('is_public') === 'on';
         payload.show_online_status = formData.get('show_online_status') === 'on';
         payload.anthem_autoplay = formData.get('anthem_autoplay') === 'on';
+        
+        // Add dm_policy if not present (default to 'everyone')
+        if (!payload.dm_policy) {
+            payload.dm_policy = currentUserData?.dm_policy || 'everyone';
+        }
 
         try {
+            // Get CSRF token from meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
             const res = await fetch('/profile/update', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || ''
+                },
                 body: JSON.stringify(payload)
             });
             const data = await res.json();

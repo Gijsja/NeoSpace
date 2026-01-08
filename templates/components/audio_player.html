@@ -1,0 +1,123 @@
+{% macro audio_player(id="main-player") %}
+<!-- 
+  Audio Player Component (Radio Widget)
+  Style: Neubrutalist (Adapted from User Concept)
+  Dependencies: Alpine.js
+-->
+<div x-data="{ 
+       playing: false,
+       station: '',
+       stationName: 'Select a Station',
+       audio: null,
+       error: false,
+       init() {
+           this.audio = this.$refs.audioElement;
+           this.audio.addEventListener('play', () => { this.playing = true; this.error = false; });
+           this.audio.addEventListener('pause', () => this.playing = false);
+           this.audio.addEventListener('error', () => { this.playing = false; this.error = true; });
+       },
+       changeStation(url, name) {
+           this.station = url;
+           this.stationName = name;
+           this.error = false;
+           this.audio.src = url;
+           if(url) {
+               this.audio.play().catch(e => {
+                   console.log('Autoplay prevented', e);
+                   this.playing = false;
+               });
+           }
+       },
+       togglePlay() {
+           if(!this.station) return;
+           if(this.playing) this.audio.pause();
+           else this.audio.play();
+       }
+     }"
+     class="w-full max-w-md mx-auto">
+
+    <!-- Neubrutalist Frame -->
+    <div class="bg-black p-1 rounded-xl shadow-[8px_8px_0_0_#000]">
+        <div class="bg-neutral-900 rounded-lg p-6 text-white border-2 border-white/10 relative overflow-hidden">
+            
+            <!-- 'Live' Gradient Background Effect -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-acid-green/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6 relative z-10">
+                <div class="flex items-center gap-3">
+                     <div class="w-10 h-10 bg-black border border-white/20 rounded-full flex items-center justify-center">
+                        <i class="ph-fill ph-radio text-2xl" :class="playing ? 'text-acid-green animate-pulse' : 'text-gray-500'"></i>
+                     </div>
+                     <div>
+                         <h3 class="font-bold text-lg leading-none">NeoFM</h3>
+                         <p class="text-[10px] text-gray-400 font-mono uppercase tracking-widest mt-1">Web Player</p>
+                     </div>
+                </div>
+                
+                <div class="px-2 py-1 bg-red-600 rounded text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-lg shadow-red-900/50">
+                    <span class="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                    Live
+                </div>
+            </div>
+
+            <!-- Status Display -->
+            <div class="mb-6 text-center">
+                <p class="text-xs text-gray-400 mb-1 font-mono uppercase">Frequency</p>
+                <div class="text-2xl font-black truncate text-acid-green drop-shadow-[0_0_5px_rgba(163,230,53,0.5)]" x-text="stationName"></div>
+                <div x-show="error" class="text-xs text-red-400 mt-2 font-bold uppercase">Signal Lost / Stream Error</div>
+            </div>
+
+            <!-- Station Select -->
+            <div class="relative mb-6">
+                <select @change="changeStation($event.target.value, $event.target.options[$event.target.selectedIndex].text)"
+                        class="w-full bg-black border-2 border-white/20 text-white py-3 px-4 pr-10 rounded text-sm font-bold uppercase tracking-wide focus:outline-none focus:border-acid-green focus:ring-1 focus:ring-acid-green appearance-none cursor-pointer transition-colors hover:border-white/40">
+                    <option value="">-- Tune Frequency --</option>
+                    
+                    <optgroup label="NPO (Publiek)">
+                      <option value="http://icecast.omroep.nl/radio1-bb-mp3">NPO Radio 1</option>
+                      <option value="http://icecast.omroep.nl/radio2-bb-mp3">NPO Radio 2</option>
+                      <option value="http://icecast.omroep.nl/3fm-bb-mp3">NPO 3FM</option>
+                    </optgroup>
+                
+                    <optgroup label="Landelijk Commercieel">
+                      <option value="https://21233.live.streamtheworld.com/RADIO538.mp3">Radio 538</option>
+                      <option value="https://icecast-qmusicnl-cdp.triple-it.nl/Qmusic_nl_live_96.mp3">Qmusic</option>
+                      <option value="https://19993.live.streamtheworld.com/SKYRADIO.mp3">Sky Radio</option>
+                    </optgroup>
+                
+                    <optgroup label="Code & Chill">
+                      <option value="http://ice1.somafm.com/groovesalad-128-mp3">SomaFM: Groove Salad</option>
+                      <option value="https://stream.radioparadise.com/mp3-192">Radio Paradise</option>
+                    </optgroup>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                    <i class="ph-bold ph-caret-down"></i>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-4 bg-black/50 p-2 rounded-lg border border-white/5">
+                <button @click="togglePlay()" 
+                        :disabled="!station"
+                        class="w-12 h-12 flex items-center justify-center rounded-full bg-white text-black hover:bg-acid-green transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="ph-fill text-xl" :class="playing ? 'ph-pause' : 'ph-play'"></i>
+                </button>
+                
+                <!-- Visualizer Mockup -->
+                <div class="flex-1 h-8 flex items-center justify-center gap-0.5 opacity-50" :class="playing ? 'opacity-100' : 'opacity-30'">
+                    <template x-for="i in 20">
+                        <div class="w-1 bg-acid-green rounded-full transition-all duration-75"
+                             :class="playing ? 'animate-[pulse_0.5s_ease-in-out_infinite]' : 'h-1'"
+                             :style="playing ? `height: ${Math.random() * 100}%; animation-delay: -${Math.random()}s` : ''"></div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Hidden Audio Element -->
+            <audio x-ref="audioElement" class="hidden"></audio>
+            
+        </div>
+    </div>
+</div>
+{% endmacro %}

@@ -71,13 +71,16 @@ def create_room():
     if g.user is None:
         return jsonify(error="Authentication required"), 401
     
-    data = request.get_json()
-    if not data or not data.get("name"):
-        return jsonify(error="Room name required"), 400
+    try:
+        import msgspec
+        from msgspec_models import CreateRoomRequest
+        req = msgspec.json.decode(request.get_data(), type=CreateRoomRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    name = data["name"].lower().strip().replace(" ", "-")
-    description = data.get("description", "")
-    room_type = data.get("room_type", "text")
+    name = req.name.lower().strip().replace(" ", "-")
+    description = req.description or ""
+    room_type = "text"  # Default
     
     # Validate name
     if len(name) < 2 or len(name) > 32:

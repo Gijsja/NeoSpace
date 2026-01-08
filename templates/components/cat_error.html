@@ -1,0 +1,44 @@
+{% macro cat_error(code, title, message, details=None) %}
+<div class="min-h-screen flex items-center justify-center p-8 bg-bbs-bg">
+    <div class="nb-card p-0 max-w-md w-full overflow-hidden">
+        <!-- Cat Image -->
+        <div class="border-b-2 border-black">
+            <img 
+                src="https://http.cat/{{ code }}" 
+                alt="HTTP {{ code }} - {{ title }}" 
+                class="w-full h-auto object-cover"
+                onerror="this.src='https://http.cat/500'"
+            >
+        </div>
+        
+        <!-- Error Info -->
+        <div class="p-6 space-y-4">
+            <div class="flex items-baseline gap-3">
+                <span class="text-5xl font-black text-black">{{ code }}</span>
+                <span class="text-xl font-bold uppercase tracking-tight">{{ title }}</span>
+            </div>
+            
+            <p class="text-gray-600 font-mono text-sm leading-relaxed">
+                {{ message }}
+            </p>
+            
+            {% if details %}
+            <div class="bg-gray-100 border-2 border-black p-3 font-mono text-xs">
+                <span class="font-bold uppercase text-[10px] text-gray-500 block mb-1">Details</span>
+                {{ details }}
+            </div>
+            {% endif %}
+            
+            <!-- Actions -->
+            <div class="flex gap-3 pt-2">
+                <a href="/" class="nb-button px-4 py-2 bg-acid-green hover:bg-yellow-400 transition-colors">
+                    <i class="ph-bold ph-house"></i> Go Home
+                </a>
+                <button onclick="history.back()" class="nb-button px-4 py-2 bg-white hover:bg-gray-100 transition-colors">
+                    <i class="ph-bold ph-arrow-left"></i> Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

@@ -1,5 +1,9 @@
 # NeoSpace
 
+[![CI](https://github.com/Gijsja/SBBS/actions/workflows/ci.yml/badge.svg)](https://github.com/Gijsja/SBBS/actions/workflows/ci.yml)
+![Version](https://img.shields.io/badge/version-0.3.4-blue)
+![Status](https://img.shields.io/badge/status-pre--alpha-orange)
+
 > **Development Workspace / Unstable Snapshot**
 
 NeoSpace is a server-authoritative, WebSocket-driven creative communication platform with customizable profile Walls and real-time chat.

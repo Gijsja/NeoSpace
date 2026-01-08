@@ -4,7 +4,7 @@
 {% block page_title %}Signal Stream{% endblock %}
 
 {% block head %}
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -14,8 +14,17 @@
     <div class="lg:col-span-8">
         
         <!-- Feed Wrapper -->
-        <div id="feed-container" class="space-y-6 min-h-[400px]">
+        <div id="feed-container" class="space-y-6 min-h-[400px]" x-data="{ hasPosts: false }" x-init="$watch('$el.children.length', count => hasPosts = count > 0)">
             <!-- JS inserts posts here -->
+            <!-- We will check if children are empty via JS or server-side, 
+                 but since load is async JS, we can just put a default message that gets overwritten or hidden -->
+            <div id="feed-empty-state" class="hidden flex flex-col items-center justify-center py-20 opacity-60">
+                <div class="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-4xl mb-4 animate-bounce">
+                    <i class="ph-bold ph-broadcast"></i>
+                </div>
+                <h3 class="font-black uppercase text-xl text-center">Static Silence...</h3>
+                <p class="font-mono text-sm text-center max-w-xs mt-2">No signals detected in the stream. Be the first to broadcast.</p>
+            </div>
         </div>
         
         <!-- Loader / Trigger -->

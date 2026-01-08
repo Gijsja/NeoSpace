@@ -3,7 +3,7 @@ import secrets
 from flask import request, jsonify, current_app
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'webm', 'mp3', 'wav'}
 
 def allowed_file(filename):
     return '.' in filename and \

@@ -46,16 +46,17 @@ def get_wall_posts(profile_id):
 def add_wall_post():
     if g.user is None:
         return jsonify(error="Auth required"), 401
-        
-    data = request.get_json()
-    module_type = data.get("module_type")
-    content = data.get("content", {})
-    style = data.get("style", {})
     
-    if module_type not in ALLOWED_TYPES:
-        return jsonify(error=f"Invalid type. {ALLOWED_TYPES}"), 400
-        
-    display_order = data.get("display_order", 0)
+    try:
+        # Fast msgspec decoding with automatic validation
+        import msgspec
+        from msgspec_models import AddWallPostRequest
+        req = msgspec.json.decode(request.get_data(), type=AddWallPostRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
+    
+    if req.module_type not in ALLOWED_TYPES:
+        return jsonify(error=f"Invalid type. Allowed: {ALLOWED_TYPES}"), 400
     
     db = get_db()
     user_id = g.user["id"]
@@ -68,8 +69,8 @@ def add_wall_post():
     profile_id = profile["id"]
     
     try:
-        content_json = json.dumps(content)
-        style_json = json.dumps(style)
+        content_json = json.dumps(req.content)
+        style_json = json.dumps(req.style)
     except:
         return jsonify(error="Invalid JSON content/style"), 400
         
@@ -77,18 +78,24 @@ def add_wall_post():
     cursor = db.execute(
         """INSERT INTO profile_posts (profile_id, module_type, content_payload, style_payload, display_order)
            VALUES (?, ?, ?, ?, ?)""",
-        (profile_id, module_type, content_json, style_json, display_order)
+        (profile_id, req.module_type, content_json, style_json, req.display_order)
     )
     new_id = cursor.lastrowid
     db.commit()
     
     return jsonify(ok=True, id=new_id)
 
+
 def update_wall_post():
-    if g.user is None: return jsonify(error="Auth required"), 401
-    data = request.get_json()
-    post_id = data.get("id")
-    if not post_id: return jsonify(error="ID required"), 400
+    if g.user is None: 
+        return jsonify(error="Auth required"), 401
+    
+    try:
+        import msgspec
+        from msgspec_models import UpdateWallPostRequest
+        req = msgspec.json.decode(request.get_data(), type=UpdateWallPostRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
     db = get_db()
     
@@ -98,7 +105,7 @@ def update_wall_post():
         """SELECT p.id FROM profile_posts p
            JOIN profiles pr ON p.profile_id = pr.id
            WHERE p.id = ? AND pr.user_id = ?""",
-        (post_id, g.user["id"])
+        (req.id, g.user["id"])
     ).fetchone()
     
     if not row:
@@ -107,23 +114,23 @@ def update_wall_post():
     updates = []
     values = []
     
-    if "content" in data:
+    if req.content is not None:
         updates.append("content_payload = ?")
-        values.append(json.dumps(data["content"]))
+        values.append(json.dumps(req.content))
         
-    if "style" in data:
+    if req.style is not None:
         updates.append("style_payload = ?")
-        values.append(json.dumps(data["style"]))
+        values.append(json.dumps(req.style))
         
-    if "module_type" in data:
-        if data["module_type"] in ALLOWED_TYPES:
+    if req.module_type is not None:
+        if req.module_type in ALLOWED_TYPES:
             updates.append("module_type = ?")
-            values.append(data["module_type"])
+            values.append(req.module_type)
             
     if not updates:
         return jsonify(ok=True)
         
-    values.append(post_id)
+    values.append(req.id)
     sql = f"UPDATE profile_posts SET {', '.join(updates)}, updated_at = datetime('now') WHERE id = ?"
     
     db.execute(sql, values)
@@ -131,31 +138,45 @@ def update_wall_post():
     
     return jsonify(ok=True)
 
+
 def delete_wall_post():
-    if g.user is None: return jsonify(error="Auth required"), 401
-    data = request.get_json()
-    post_id = data.get("id")
+    if g.user is None: 
+        return jsonify(error="Auth required"), 401
+    
+    try:
+        import msgspec
+        from msgspec_models import DeleteWallPostRequest
+        req = msgspec.json.decode(request.get_data(), type=DeleteWallPostRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
     db = get_db()
     # Owner check + Delete
     db.execute(
         """DELETE FROM profile_posts 
            WHERE id = ? AND profile_id IN (SELECT id FROM profiles WHERE user_id = ?)""",
-        (post_id, g.user["id"])
+        (req.id, g.user["id"])
     )
     db.commit()
     return jsonify(ok=True)
+
 
 def reorder_wall_posts():
     """
     Accepts { "order": [id1, id2, id3] }
     Updates display_order for each.
     """
-    if g.user is None: return jsonify(error="Auth required"), 401
-    data = request.get_json()
-    order_ids = data.get("order", [])
+    if g.user is None: 
+        return jsonify(error="Auth required"), 401
     
-    if not order_ids:
+    try:
+        import msgspec
+        from msgspec_models import ReorderWallPostsRequest
+        req = msgspec.json.decode(request.get_data(), type=ReorderWallPostsRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
+    
+    if not req.order:
         return jsonify(ok=True)
         
     db = get_db()
@@ -169,7 +190,7 @@ def reorder_wall_posts():
     # Verify all IDs belong to this profile to prevent tampering
     # Actually just update with WHERE profile_id = ? constraint
     
-    for idx, post_id in enumerate(order_ids):
+    for idx, post_id in enumerate(req.order):
         db.execute(
             "UPDATE profile_posts SET display_order = ? WHERE id = ? AND profile_id = ?",
             (idx, post_id, pid)
@@ -177,3 +198,4 @@ def reorder_wall_posts():
         
     db.commit()
     return jsonify(ok=True)
+

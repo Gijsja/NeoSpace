@@ -172,37 +172,43 @@ def get_pinned_scripts(profile_id):
 # =============================================================================
 
 def pin_script_view():
-    data = request.get_json()
-    script_id = data.get("script_id")
-    display_order = data.get("display_order", 0)
+    try:
+        import msgspec
+        from msgspec_models import PinScriptRequest
+        req = msgspec.json.decode(request.get_data(), type=PinScriptRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not script_id:
-        return jsonify(error="script_id required"), 400
-        
-    result = pin_script(g.user["id"], script_id, display_order)
+    display_order = 0  # Default, could add to struct if needed
+    result = pin_script(g.user["id"], req.script_id, display_order)
     if result["ok"]:
         return jsonify(ok=True)
     return jsonify(error=result.get("error")), 400
 
 
 def unpin_script_view():
-    data = request.get_json()
-    script_id = data.get("script_id")
+    try:
+        import msgspec
+        from msgspec_models import UnpinScriptRequest
+        req = msgspec.json.decode(request.get_data(), type=UnpinScriptRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not script_id:
-        return jsonify(error="script_id required"), 400
-        
-    result = unpin_script(g.user["id"], script_id)
+    result = unpin_script(g.user["id"], req.script_id)
     if result["ok"]:
         return jsonify(ok=True)
     return jsonify(error=result.get("error")), 400
 
 
 def reorder_pins_view():
-    data = request.get_json()
-    script_ids = data.get("script_ids", [])
+    try:
+        import msgspec
+        from msgspec_models import ReorderScriptsRequest
+        req = msgspec.json.decode(request.get_data(), type=ReorderScriptsRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    result = reorder_pins(g.user["id"], script_ids)
+    result = reorder_pins(g.user["id"], req.script_ids)
     if result["ok"]:
         return jsonify(ok=True)
     return jsonify(error=result.get("error")), 400

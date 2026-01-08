@@ -109,3 +109,48 @@ Lazy adoption — apply as files are touched:
 - [ ] `queries/backfill.py` — Backfill response
 - [ ] `routes/wall.py` — Wall post payloads
 - [ ] `sockets.py` — Socket event payloads
+
+## <!-- Source: docs/archive/STACK_AND_ARCHITECTURE.md -->
+
+## 8. Database Schema
+
+### Core Tables
+
+| Table             | Purpose                                                |
+| ----------------- | ------------------------------------------------------ |
+| `users`           | User accounts (username, bcrypt hash, avatar color)    |
+| `messages`        | Chat messages (scoped by room_id)                      |
+| `profiles`        | User profile data (bio, status, avatar, anthem, theme) |
+| `direct_messages` | E2E encrypted DMs with per-user soft delete            |
+| `scripts`         | User-created sandbox scripts (p5.js, Three.js)         |
+
+### Feature Tables
+
+| Table              | Purpose                                          |
+| ------------------ | ------------------------------------------------ |
+| `profile_stickers` | Draggable wall stickers (emoji, images)          |
+| `profile_scripts`  | Pinned scripts on profile walls (max 3)          |
+| `profile_posts`    | Modular canvas posts (text, image, link, script) |
+
+---
+
+## 9. Directory Structure
+
+```
+SBBS/
+├── app.py                 # Flask application factory
+├── db.py                  # Database schema, connection pool, retry logic
+├── auth.py                # Authentication blueprint (login/register/logout)
+├── sockets.py             # WebSocket event handlers
+├── crypto_utils.py        # AES-256-GCM encryption utilities
+│
+├── routes/                # HTTP route blueprints
+├── mutations/             # Database write operations
+├── queries/               # Database read operations
+├── templates/             # Jinja2 HTML templates
+├── ui/                    # Static frontend assets
+├── static/                # Uploaded files & assets
+├── tests/                 # pytest test suite
+├── scripts/               # Migration utilities
+└── docs/                  # Documentation
+```

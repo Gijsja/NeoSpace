@@ -1,0 +1,111 @@
+{% macro command_palette() %}
+<!-- 
+  Command Palette (CMD+K)
+  Style: Neubrutalist
+  Dependencies: Alpine.js
+-->
+<div x-data="{ 
+    open: false,
+    query: '',
+    selectedIndex: 0,
+    items: [
+        { id: 'home', label: 'Go to Home', icon: 'ph-house', action: () => window.location.href = '/' },
+        { id: 'dashboard', label: 'Go to Dashboard', icon: 'ph-squares-four', action: () => window.location.href = '/dashboard' },
+        { id: 'profile', label: 'Edit Profile', icon: 'ph-user', action: () => window.location.href = '/wall' },
+        { id: 'theme', label: 'Toggle Theme', icon: 'ph-moon', action: () => alert('Theme toggle coming soon!') },
+        { id: 'logout', label: 'Log Out', icon: 'ph-sign-out', action: () => window.location.href = '/auth/logout' }
+    ],
+    get filteredItems() {
+        if (this.query === '') return this.items;
+        return this.items.filter(item => 
+            item.label.toLowerCase().includes(this.query.toLowerCase())
+        );
+    },
+    execute(item) {
+        this.open = false;
+        item.action();
+    }
+}" 
+@keydown.window.prevent.cmd.k="open = !open"
+@keydown.window.prevent.ctrl.k="open = !open"
+@keydown.escape.window="open = false"
+class="relative z-[200]">
+
+    <template x-teleport="body">
+        <div x-show="open" 
+             style="display: none;"
+             class="fixed inset-0 flex items-start justify-center pt-[20vh] px-4">
+            
+            <!-- Backdrop -->
+            <div @click="open = false" 
+                 x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 backdrop-blur-none"
+                 x-transition:enter-end="opacity-100 backdrop-blur-sm"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 backdrop-blur-sm"
+                 x-transition:leave-end="opacity-0 backdrop-blur-none"
+                 class="absolute inset-0 bg-black/40"></div>
+
+            <!-- Palette -->
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 class="relative w-full max-w-xl bg-white border-2 border-black shadow-[12px_12px_0_0_#000] flex flex-col overflow-hidden">
+                
+                <!-- Search Input -->
+                <div class="flex items-center px-4 border-b-2 border-black h-14">
+                    <i class="ph-bold ph-magnifying-glass text-xl text-gray-500 mr-3"></i>
+                    <input type="text" 
+                           x-model="query"
+                           placeholder="Type a command or search..." 
+                           class="w-full h-full text-lg border-none focus:ring-0 placeholder:text-gray-400 font-mono"
+                           @keydown.down.prevent="selectedIndex = (selectedIndex + 1) % filteredItems.length"
+                           @keydown.up.prevent="selectedIndex = (selectedIndex - 1 + filteredItems.length) % filteredItems.length"
+                           @keydown.enter.prevent="execute(filteredItems[selectedIndex])"
+                           custom-autofocus>
+                    <div class="text-[10px] font-bold bg-gray-100 px-2 py-1 border border-gray-300 rounded text-gray-500">ESC</div>
+                </div>
+
+                <!-- Results -->
+                <div class="max-h-[300px] overflow-y-auto p-2">
+                    <template x-if="filteredItems.length === 0">
+                        <div class="p-8 text-center text-gray-500 font-mono text-sm">
+                            No results found.
+                        </div>
+                    </template>
+                    
+                    <template x-for="(item, index) in filteredItems" :key="item.id">
+                        <div @click="execute(item)"
+                             @mouseover="selectedIndex = index"
+                             :class="selectedIndex === index ? 'bg-acid-green text-black border-black' : 'text-gray-600 border-transparent'"
+                             class="flex items-center gap-3 px-4 py-3 cursor-pointer border-2 transition-colors">
+                            <i :class="'ph-bold ' + item.icon" class="text-xl"></i>
+                            <span x-text="item.label" class="font-bold text-sm uppercase tracking-wide"></span>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Footer -->
+                <div class="bg-gray-50 px-4 py-2 border-t-2 border-black/5 flex justify-between items-center text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                    <span>NeoSpace Command</span>
+                    <span class="flex gap-2">
+                        <span>Navigate <i class="ph-bold ph-arrows-vertical"></i></span>
+                        <span>Select <i class="ph-bold ph-arrow-return-left"></i></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+<script>
+    // Autofocus directive for Alpine
+    document.addEventListener('alpine:init', () => {
+        Alpine.directive('autofocus', (el) => {
+            setTimeout(() => el.focus(), 50);
+        });
+    });
+</script>
+{% endmacro %}

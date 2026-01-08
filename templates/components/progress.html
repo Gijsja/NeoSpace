@@ -1,0 +1,38 @@
+{% macro progress(value, max=100, label=None, show_value=False, variant='default') %}
+<!-- 
+  Penguin UI: Progress Bar
+  Style: Striped, Animated, Brutalist
+-->
+<div class="w-full">
+    {% if label or show_value %}
+    <div class="flex justify-between items-end mb-1">
+        {% if label %}
+        <span class="text-xs font-bold uppercase tracking-widest">{{ label }}</span>
+        {% endif %}
+        {% if show_value %}
+        <span class="text-xs font-mono font-bold">{{ value }}/{{ max }}</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="w-full bg-white border-2 border-black h-6 relative shadow-[4px_4px_0_0_#000]">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10" 
+             style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
+        
+        <!-- Fill -->
+        <div class="h-full bg-acid-green border-r-2 border-black relative overflow-hidden transition-all duration-500 ease-out"
+             style="width: {{ (value / max) * 100 }}%">
+             
+             {% if variant == 'striped' %}
+             <div class="absolute inset-0 animate-[move_1s_linear_infinite]" 
+                  style="background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px); background-size: 28px 28px;">
+             </div>
+             {% endif %}
+        </div>
+    </div>
+    <style>
+        @keyframes move { 0% { background-position: 0 0; } 100% { background-position: 28px 0; } }
+    </style>
+</div>
+{% endmacro %}

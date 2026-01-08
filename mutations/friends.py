@@ -16,11 +16,14 @@ def follow():
     if g.user is None:
         return jsonify(error="Auth required"), 401
     
-    data = request.get_json()
-    target_user_id = data.get("user_id")
+    try:
+        import msgspec
+        from msgspec_models import FollowRequest
+        req = msgspec.json.decode(request.get_data(), type=FollowRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not target_user_id:
-        return jsonify(error="user_id required"), 400
+    target_user_id = req.user_id
     
     if target_user_id == g.user["id"]:
         return jsonify(error="Cannot follow yourself"), 400
@@ -69,11 +72,14 @@ def unfollow():
     if g.user is None:
         return jsonify(error="Auth required"), 401
     
-    data = request.get_json()
-    target_user_id = data.get("user_id")
+    try:
+        import msgspec
+        from msgspec_models import UnfollowRequest
+        req = msgspec.json.decode(request.get_data(), type=UnfollowRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not target_user_id:
-        return jsonify(error="user_id required"), 400
+    target_user_id = req.user_id
     
     db = get_db()
     db.execute(
@@ -94,8 +100,14 @@ def set_top8():
     if g.user is None:
         return jsonify(error="Auth required"), 401
     
-    data = request.get_json()
-    order = data.get("order", [])
+    try:
+        import msgspec
+        from msgspec_models import UpdateTop8Request
+        req = msgspec.json.decode(request.get_data(), type=UpdateTop8Request)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
+    
+    order = req.friend_ids
     
     if len(order) > 8:
         return jsonify(error="Max 8 users"), 400

@@ -1,0 +1,28 @@
+{% macro switch(name, label=None, checked=False) %}
+<!-- 
+  Switch Component
+  Style: Neubrutalist
+  Dependencies: Alpine.js
+-->
+<div x-data="{ on: {{ 'true' if checked else 'false' }} }" 
+     class="flex items-center gap-3">
+    
+    <input type="hidden" name="{{ name }}" :value="on">
+    
+    <button type="button" 
+            role="switch" 
+            :aria-checked="on" 
+            @click="on = !on" 
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer border-2 border-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            :class="on ? 'bg-acid-green' : 'bg-white'">
+        <span class="pointer-events-none block h-5 w-5 border-2 border-black bg-white shadow-sm ring-0 transition-transform"
+              :class="on ? 'translate-x-5' : 'translate-x-0'"></span>
+    </button>
+
+    {% if label %}
+    <label @click="on = !on" class="text-sm font-bold uppercase cursor-pointer select-none">
+        {{ label }}
+    </label>
+    {% endif %}
+</div>
+{% endmacro %}

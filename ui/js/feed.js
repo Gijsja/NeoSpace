@@ -124,14 +124,34 @@ if (!window.FeedManager) {
                     </div>
                 `;
             } else if (post.module_type === 'script') {
+                 // SCRIPT MODULE - Interactive Player
+                 const scriptId = `script-${post.id}`;
+                 const scriptCode = post.content.code ? encodeURIComponent(post.content.code) : '';
+                 const scriptTitle = post.content.title || "Untitled Script";
+                 
                  contentHTML = `
-                    <div class="aspect-video bg-black rounded border border-white/10 flex items-center justify-center relative group overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
-                            <div class="font-mono text-xs text-acid-green mb-1">SCRIPT</div>
-                            <div class="font-bold text-white">${post.script_details?.title || "Untitled Script"}</div>
+                    <div class="relative group overflow-hidden bg-black border border-white/10 rounded-xl" id="${scriptId}-container">
+                        
+                        <!-- Thumbnail / Start Screen -->
+                        <div class="aspect-video flex flex-col items-center justify-center p-6 relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
+                            <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-black/80"></div>
+                            
+                            <!-- Icon -->
+                            <div class="w-16 h-16 rounded-full bg-black/50 border border-white/20 flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:border-acid-green backdrop-blur-sm shadow-xl">
+                                <i class="ph-bold ph-play text-3xl text-white group-hover:text-acid-green ml-1"></i>
+                            </div>
+                            
+                            <h3 class="relative z-20 font-black text-2xl text-white uppercase tracking-tighter shadow-black drop-shadow-md">${scriptTitle}</h3>
+                            <button onclick="window.FeedManager.playScript('${scriptId}', '${scriptCode}')" 
+                                    class="relative z-20 mt-4 px-6 py-2 bg-acid-green text-black font-bold uppercase tracking-widest border-2 border-black hover:bg-white transition-colors shadow-hard">
+                                Run Program
+                            </button>
                         </div>
-                        <a href="/wall?user_id=${post.user_id}" class="absolute inset-0 z-10"></a>
-                        <i class="ph-fill ph-code text-4xl text-slate-700 group-hover:text-white transition"></i>
+                        
+                        <!-- Grid Background -->
+                        <div class="absolute inset-0 opacity-20 pointer-events-none" 
+                             style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 20px 20px;">
+                        </div>
                     </div>
                  `;
             }
@@ -186,26 +206,70 @@ if (!window.FeedManager) {
         
         showEmptyState() {
             this.container.innerHTML = `
-                <div class="text-center py-20 px-4">
-                    <i class="ph-bold ph-globe-hemisphere-west text-6xl mb-4 opacity-20"></i>
-                    <h2 class="text-xl font-black uppercase mb-2">Your Feed is Quiet</h2>
-                    <p class="text-slate-500 mb-6 max-w-md mx-auto">Follow more people to see their updates here.</p>
-                    <a href="/directory" class="nb-button inline-block bg-black text-white px-6 py-2">
-                        Find People
+                <div class="flex flex-col items-center justify-center py-20 opacity-60 animate-fade-in">
+                    <div class="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-4xl mb-4 animate-bounce">
+                        <i class="ph-bold ph-broadcast"></i>
+                    </div>
+                    <h3 class="font-black uppercase text-xl text-center">Static Silence...</h3>
+                    <p class="font-mono text-sm text-center max-w-xs mt-2 mb-6">No signals detected in the stream. Be the first to broadcast.</p>
+                    <a href="/directory" class="nb-button inline-block bg-acid-green text-black border-2 border-black px-6 py-2 shadow-hard hover:bg-hot-pink transition">
+                        Find Signal
                     </a>
                 </div>
             `;
         },
         
-        showEndMessage() {
-            if (document.getElementById('feed-end')) return;
-            const el = document.createElement('div');
-            el.id = "feed-end";
-            el.className = "text-center py-10 opacity-50 font-mono text-sm uppercase tracking-widest";
-            el.innerText = "End of Transmission";
-            this.container.appendChild(el);
+        checkEmpty() {
+             if (this.state.posts.length === 0 && !this.state.loading) {
+                 this.showEmptyState();
+             }
+        },
+
+        playScript(containerId, encodedCode) {
+            const container = document.getElementById(containerId + '-container');
+            if (!container) return;
             
-            if (this.observerTarget) this.observerTarget.style.display = 'none';
+            const code = decodeURIComponent(encodedCode);
+            
+            // iframe construction
+            const iframe = document.createElement('iframe');
+            iframe.className = "w-full aspect-video border-none bg-black animate-fade-in relative z-20";
+            
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>body { margin: 0; overflow: hidden; background: #000; }</style>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"><\/script>
+                </head>
+                <body>
+                    <script>${code}<\/script>
+                </body>
+                </html>
+            `;
+            
+            // Replace content
+            container.innerHTML = '';
+            container.appendChild(iframe);
+            
+            // Write to iframe
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+            
+            // Add reset button overlay
+            const resetBtn = document.createElement('button');
+            resetBtn.className = "absolute top-2 right-2 z-30 p-2 bg-black/50 text-white hover:text-red-400 rounded transition";
+            resetBtn.innerHTML = '<i class="ph-bold ph-stop"></i>';
+            resetBtn.onclick = () => {
+                // Reload feed item (lazy way: just reload page or re-render post? For now, refresh feed logic)
+                // Better: Store original HTML and restore it?
+                // For MVP, just show a "Stopped" state
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-white font-mono uppercase">Terminated</div>';
+            };
+            container.appendChild(resetBtn);
         }
     };
 }

@@ -1,0 +1,25 @@
+{% macro input(name, label=None, type='text', placeholder='', value='', required=False, error=None, class='') %}
+<!-- 
+  Input Component
+  Style: Neubrutalist
+-->
+<div class="flex flex-col gap-1.5 w-full">
+    {% if label %}
+    <label for="{{ name }}" class="text-xs font-bold uppercase tracking-wider text-black">
+        {{ label }}
+    </label>
+    {% endif %}
+    
+    <input type="{{ type }}" 
+           id="{{ name }}" 
+           name="{{ name }}"
+           placeholder="{{ placeholder }}"
+           value="{{ value }}"
+           {% if required %}required{% endif %}
+           class="flex h-10 w-full bg-white border-2 border-black px-3 py-2 text-sm font-mono placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:bg-pink-50 focus:shadow-[4px_4px_0_0_#000] transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ class }}">
+           
+    {% if error %}
+    <span class="text-xs font-bold text-red-500 mt-1">{{ error }}</span>
+    {% endif %}
+</div>
+{% endmacro %}

@@ -1,0 +1,27 @@
+{% macro avatar(src=None, text=None, size='md', class='') %}
+<!-- 
+  Avatar Component
+  Style: Neubrutalist
+-->
+{% set sizes = {
+    'sm': "w-8 h-8 text-xs",
+    'md': "w-10 h-10 text-sm",
+    'lg': "w-16 h-16 text-xl",
+    'xl': "w-24 h-24 text-3xl"
+} %}
+
+<div class="relative inline-block {{ sizes[size] }} {{ class }}">
+    {% if src %}
+    <img src="{{ src }}" 
+         alt="{{ text or 'Avatar' }}" 
+         class="w-full h-full object-cover border-2 border-black bg-gray-100 shadow-[2px_2px_0_0_#000]">
+    {% else %}
+    <div class="w-full h-full bg-white border-2 border-black flex items-center justify-center font-black uppercase shadow-[2px_2px_0_0_#000] select-none">
+        {{ text[:2] if text else '??' }}
+    </div>
+    {% endif %}
+    
+    <!-- Online Indicator Slot (Optional) -->
+    {{ caller() if caller else '' }}
+</div>
+{% endmacro %}

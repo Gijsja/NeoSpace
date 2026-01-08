@@ -59,7 +59,12 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ### Current: Sprint #23 (TBD)
 
-**Theme**: Optimization & Polish (Optional)
+**Theme**: Optimization & Polish
+
+**Features**:
+
+- **Rich Link Modules**: Thumbnails, Card/Button styles, Grouping
+- **Identity Canvas Enhancements**: Better module controls
 
 ### Recently Shipped
 
@@ -82,6 +87,40 @@ This system trades convenience for reliability. Every decision prioritizes corre
 | #8     | Creative Sandbox        | Scripts API, Code Editor              |
 | #7     | Identity & Transparency | Wall Stickers, System Internals       |
 | #6     | User Profiles           | Profile Wall, DMs, Directory          |
+
+<!-- Source: docs/archive/ROADMAP.md -->
+
+### Legacy Sprints (Historical)
+
+| Sprint | Theme               | Features                                 |
+| ------ | ------------------- | ---------------------------------------- |
+| #5     | Authentication      | Standard User/Pass Auth, Sessions        |
+| #4     | Data Persistence    | Message Timestamps, File Uploads         |
+| #3     | Backend Integration | Live WebSocket, Persistent Room State    |
+| #2     | Chat Functionality  | Message Hover Actions, Typing Indicators |
+| #1     | Foundation          | Git init, Tailwind CSS, 3-pane scaffold  |
+
+---
+
+<!-- Source: docs/archive/KNOWN_ISSUES.md -->
+
+## Known Trade-offs
+
+### The Good (Why we did it)
+
+- **Deterministic Server**: No split-brain, no race conditions.
+- **Clear Invariants**: Easy to verify correctness.
+- **Simple Stack**: SQLite + Flask = easy to deploy and debug.
+
+### The Bad (Current limitations)
+
+- **No Optimistic UI**: Slower perceived performance (client waits for server).
+- **No Offline Support**: Simplified sync logic requires connection.
+
+### The "Ugly" (Intentional)
+
+- **SQLite Concurrency**: Chosen for simplicity. Scaling is a future problem.
+- **Polling/Reloads**: Used freely over complex delta updates.
 
 ---
 

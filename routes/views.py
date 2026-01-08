@@ -26,6 +26,24 @@ def directory():
          return redirect(url_for("auth.login"))
     return render_template("directory.html")
 
+@bp.route("/codeground")
+def codeground():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("codeground.html")
+
+@bp.route("/components")
+def components():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("playground.html")
+
+@bp.route("/penguin")
+def penguin():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("penguin_test.html")
+
 @bp.route("/desktop")
 def desktop():
     if g.user is None:

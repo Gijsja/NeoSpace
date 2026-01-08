@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>404 - Page Not Found | NeoSpace</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="/static/vendor/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        'bbs-bg': '#FFFAF0',
+                        'acid-green': '#a3e635',
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px #000000',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
+    
+    <style>
+        .nb-card {
+            background-color: #FFFFFF;
+            border: 2px solid #000000;
+            box-shadow: 4px 4px 0px 0px #000000;
+        }
+        .nb-button {
+            border: 2px solid #000000;
+            box-shadow: 4px 4px 0px 0px #000000;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nb-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="font-sans bg-bbs-bg min-h-screen">
+    {% from 'components/cat_error.html' import cat_error %}
+    {{ cat_error(
+        code=404,
+        title="Page Not Found",
+        message="The cat couldn't find what you're looking for. The page may have been moved, deleted, or never existed in the first place."
+    ) }}
+</body>
+</html>

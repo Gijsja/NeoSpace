@@ -12,12 +12,15 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_bp.route('/register', methods=('POST',))
 def register():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    try:
+        import msgspec
+        from msgspec_models import RegisterRequest
+        req = msgspec.json.decode(request.get_data(), type=RegisterRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not username or not password:
-        return jsonify(error="Username and password required"), 400
+    username = req.username
+    password = req.password
         
     db = get_db()
     
@@ -68,9 +71,15 @@ def register():
 @auth_bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
+        try:
+            import msgspec
+            from msgspec_models import LoginRequest
+            req = msgspec.json.decode(request.get_data(), type=LoginRequest)
+        except msgspec.ValidationError as e:
+            return jsonify(error=f"Invalid request: {e}"), 400
+        
+        username = req.username
+        password = req.password
         
         db = get_db()
         user = db.execute(

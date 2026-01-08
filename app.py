@@ -1,5 +1,5 @@
 
-from flask import Flask, g, request, send_from_directory, session, redirect, url_for
+from flask import Flask, g, request, send_from_directory, session, redirect, url_for, render_template
 from db import get_db, close_db, init_db
 from sockets import socketio, init_sockets
 from mutations.message_mutations import send_message, edit_message, delete_message
@@ -86,6 +86,20 @@ def create_app(test_config=None):
     from routes.search import bp as search_bp
     app.register_blueprint(search_bp)
 
+    # =============================================
+    # ERROR HANDLERS (Cat Error Pages)
+    # =============================================
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template('errors/500.html'), 500
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template('errors/403.html'), 403
 
     init_sockets(app)
     return app

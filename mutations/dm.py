@@ -29,12 +29,16 @@ def send_dm():
     if g.user is None:
         return jsonify(error="Authentication required"), 401
     
-    data = request.get_json()
-    recipient_id = data.get("recipient_id")
-    content = data.get("content", "").strip()
+    try:
+        import msgspec
+        from msgspec_models import SendDMRequest
+        req = msgspec.json.decode(request.get_data(), type=SendDMRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not recipient_id:
-        return jsonify(error="Recipient ID required"), 400
+    recipient_id = req.recipient_id
+    content = req.content.strip()
+    
     if not content:
         return jsonify(error="Message content required"), 400
     if len(content) > 2000:
@@ -60,7 +64,20 @@ def send_dm():
     if profile and profile["dm_policy"] == "nobody":
         return jsonify(error="User has disabled direct messages"), 403
     
-    # TODO: Check "mutuals" policy when follows table exists
+    # Check "mutuals" policy (Sprint cleanup)
+    if profile and profile["dm_policy"] == "mutuals":
+        # Check if both users follow each other
+        sender_follows = db.execute(
+            "SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?",
+            (sender_id, recipient_id)
+        ).fetchone()
+        recipient_follows = db.execute(
+            "SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?",
+            (recipient_id, sender_id)
+        ).fetchone()
+        
+        if not (sender_follows and recipient_follows):
+            return jsonify(error="User only accepts DMs from mutual follows"), 403
     
     # Encrypt the message
     master_key = get_dm_key()
@@ -174,11 +191,14 @@ def mark_dm_read():
     if g.user is None:
         return jsonify(error="Authentication required"), 401
     
-    data = request.get_json()
-    message_id = data.get("message_id")
+    try:
+        import msgspec
+        from msgspec_models import MarkDMReadRequest
+        req = msgspec.json.decode(request.get_data(), type=MarkDMReadRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not message_id:
-        return jsonify(error="message_id required"), 400
+    message_id = req.message_id
     
     db = get_db()
     user_id = g.user["id"]
@@ -206,11 +226,14 @@ def delete_dm():
     if g.user is None:
         return jsonify(error="Authentication required"), 401
     
-    data = request.get_json()
-    message_id = data.get("message_id")
+    try:
+        import msgspec
+        from msgspec_models import DeleteDMRequest
+        req = msgspec.json.decode(request.get_data(), type=DeleteDMRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
     
-    if not message_id:
-        return jsonify(error="message_id required"), 400
+    message_id = req.message_id
     
     db = get_db()
     user_id = g.user["id"]

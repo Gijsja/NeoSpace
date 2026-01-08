@@ -7,11 +7,24 @@ import sqlite3
 
 
 from security import limiter
+import msgspec
+from msgspec_models import SendMessageRequest
 
 @limiter.limit("60/minute")
 def send_message():
+    """
+    Send a chat message with msgspec-based parsing.
+    Automatic validation + 10-80x faster than request.json.
+    """
     db = get_db()
-    content = html.escape(request.json.get("content", ""))
+    
+    try:
+        # Fast msgspec decoding with automatic validation
+        req = msgspec.json.decode(request.get_data(), type=SendMessageRequest)
+        content = html.escape(req.content)
+    except msgspec.ValidationError as e:
+        return jsonify(error=f"Invalid request: {e}"), 400
+    
     username = g.user['username'] if g.user else 'anonymous'
     
     def do_insert():

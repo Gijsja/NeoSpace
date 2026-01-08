@@ -1,0 +1,16 @@
+# Default owner for everything
+* @Gijsja
+
+# Backend
+*.py @Gijsja
+/mutations/ @Gijsja
+/queries/ @Gijsja
+/routes/ @Gijsja
+
+# Frontend
+/ui/ @Gijsja
+/templates/ @Gijsja
+
+# Infrastructure
+/.github/ @Gijsja
+/docs/ @Gijsja

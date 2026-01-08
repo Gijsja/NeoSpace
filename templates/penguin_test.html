@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Penguin UI Check{% endblock %}
+
+{% block head %}
+    <!-- Tailwind and Alpine are already loaded in base.html -->
+{% endblock %}
+
+{% block main_container %}
+<div class="p-10 bg-neo-bg min-h-full space-y-12 text-white">
+
+    <!-- Header -->
+    <div class="border-b-4 border-neo-black pb-6 mb-10 bg-neo-yellow text-neo-black p-6 shadow-hard-xl">
+        <h1 class="text-6xl font-black uppercase tracking-tighter">Penguin UI</h1>
+        <p class="font-mono text-xl mt-2 font-bold">Integration Status: <span class="bg-neo-black text-white px-2">ACTIVE</span></p>
+    </div>
+
+    <!-- Buttons Section -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-pink pl-4">01. Buttons & Interaction</h2>
+        <div class="flex flex-wrap gap-6 p-6 bg-white border-2 border-black shadow-hard text-black">
+            
+            <!-- Primary Button -->
+            <button class="px-8 py-3 bg-neo-green border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-neo-pink">
+                Primary Action
+            </button>
+
+            <!-- Secondary Button -->
+            <button class="px-8 py-3 bg-white border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:bg-gray-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
+                Secondary
+            </button>
+
+             <!-- Glitch Button -->
+             <button class="px-8 py-3 bg-neo-black text-neo-yellow border-2 border-white font-black uppercase tracking-wider shadow-glow hover:animate-glitch">
+                GLITCH_MODE
+            </button>
+        </div>
+    </section>
+
+    <!-- Cards Section -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-accent pl-4">02. Cards & Content</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Standard Card -->
+            <div class="bg-white border-2 border-black p-6 shadow-hard relative group">
+                <div class="absolute -top-3 -right-3 bg-neo-pink border-2 border-black px-2 py-1 font-bold text-xs shadow-hard-sm transform rotate-12 group-hover:rotate-0 transition-transform">
+                    NEW
+                </div>
+                <h3 class="text-2xl font-black text-black mb-2">The Standard</h3>
+                <p class="text-black font-mono leading-relaxed">
+                    This is a standard content card using the "Hard" shadow utility.
+                    It mimics the print-design aesthetic of Neo-Brutalism.
+                </p>
+            </div>
+
+            <!-- Dark Card -->
+            <div class="bg-neo-black border-2 border-neo-pink p-6 shadow-[8px_8px_0_0_#FF69B4] text-white">
+                <h3 class="text-2xl font-black text-neo-pink mb-2">Dark Mode</h3>
+                <p class="font-mono leading-relaxed">
+                    Using inverse colors. High contrast is key.
+                    <br>
+                    <span class="bg-neo-green text-black px-1">console.log('Hello');</span>
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Inputs Section -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-green pl-4">03. Forms</h2>
+        <div class="p-6 bg-neo-surface border-2 border-white shadow-hard">
+            <label class="block font-black uppercase text-sm mb-2">Username</label>
+            <input type="text" class="w-full h-12 border-2 border-black p-4 font-mono focus:outline-none focus:shadow-hard focus:bg-neo-yellow transition-all" placeholder="Enter codename...">
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% macro button(text, variant='primary', size='md', type='button', class='', attrs='') %}
+<!-- 
+  Button Component
+  Variants: primary, secondary, destructive, ghost, outline
+-->
+{% set base_classes = "inline-flex items-center justify-center font-bold uppercase tracking-wider transition-all focus:outline-none disabled:opacity-50 disabled:pointer-events-none" %}
+
+{% set variants = {
+    'primary': "bg-black text-white border-2 border-black hover:bg-acid-green hover:text-black shadow-[4px_4px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#000]",
+    'secondary': "bg-white text-black border-2 border-black hover:bg-gray-100 shadow-[4px_4px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#000]",
+    'destructive': "bg-red-500 text-white border-2 border-black hover:bg-red-600 shadow-[4px_4px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#000]",
+    'ghost': "bg-transparent text-black hover:bg-black/5",
+    'outline': "bg-transparent text-black border-2 border-black hover:bg-black hover:text-white"
+} %}
+
+{% set sizes = {
+    'sm': "h-8 px-3 text-xs",
+    'md': "h-10 px-4 text-sm",
+    'lg': "h-12 px-8 text-base"
+} %}
+
+<button type="{{ type }}" 
+        class="{{ base_classes }} {{ variants[variant] }} {{ sizes[size] }} {{ class }}"
+        {{ attrs }}>
+    {{ text }}
+</button>
+{% endmacro %}
