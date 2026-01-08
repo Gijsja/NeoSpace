@@ -62,6 +62,9 @@ def create_app(test_config=None):
     from routes.wall import bp as wall_bp
     app.register_blueprint(wall_bp)
 
+    from routes.rooms import bp as rooms_bp
+    app.register_blueprint(rooms_bp)
+
 
     init_sockets(app)
     return app

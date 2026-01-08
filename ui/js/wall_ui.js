@@ -477,7 +477,7 @@ function renderWallModules(modules) {
     
     if (grid) {
         grid.innerHTML = '';
-        grid.className = 'columns-1 md:columns-3 gap-6 space-y-6';
+        grid.className = 'columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6';
         
         modules.forEach(mod => {
             let card = document.createElement('div');

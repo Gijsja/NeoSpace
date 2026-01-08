@@ -43,7 +43,7 @@ const dragOverlay = document.getElementById('drag-overlay');
 
 // State
 let currentUser = localStorage.getItem('neospace_username') || '';
-let currentRoom = localStorage.getItem('neospace_last_room') || '# general';
+let currentRoom = new URLSearchParams(window.location.search).get('room') || 'general';
 let messageIds = new Set();
 let isLoading = false;
 let pendingDeleteId = null;
@@ -536,7 +536,19 @@ function setConnectionStatus(status) {
 }
 
 socket.on('connect', () => setConnectionStatus('connected'));
-socket.on('connected', () => socket.emit('request_backfill', { after_id: 0 }));
+socket.on('connected', (data) => {
+    // Join the room first, then request backfill
+    socket.emit('join_room', { room: currentRoom });
+    // Store username from server
+    if (data && data.username) {
+        currentUser = data.username;
+        localStorage.setItem('neospace_username', currentUser);
+    }
+});
+socket.on('room_joined', (data) => {
+    // Room joined, now request backfill for this room
+    socket.emit('request_backfill', { after_id: 0 });
+});
 socket.on('disconnect', () => { setConnectionStatus('disconnected'); showToast('Offline', 'warning'); });
 socket.on('reconnect', () => { setConnectionStatus('connected'); showToast('Back online', 'success'); });
 socket.on('reconnecting', () => setConnectionStatus('reconnecting'));

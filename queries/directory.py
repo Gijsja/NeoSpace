@@ -200,7 +200,7 @@ def user_cards_html():
         rows = db.execute(query, (cursor_id, limit)).fetchall()
     
     if not rows:
-        return '<div class="col-span-full text-center py-12 text-slate-500">No users found.</div>'
+        return '<div class="col-span-full nb-card p-8 text-center font-mono uppercase">No users found.</div>'
     
     html_parts = []
     for row in rows:
@@ -210,22 +210,22 @@ def user_cards_html():
         avatar_path = row["avatar_path"]
         initial = username[0].upper() if username else "?"
         
-        # Avatar HTML
+        # Avatar HTML - Neubrutalist Square Style
         if avatar_path:
-            avatar_html = f'<div class="w-16 h-16 rounded-full bg-slate-800 bg-cover bg-center border-2 border-slate-700" style="background-image: url(\'{avatar_path}\')"></div>'
+            avatar_html = f'<div class="w-14 h-14 bg-black bg-cover bg-center border-2 border-black shadow-[2px_2px_0_0_#000]" style="background-image: url(\'{avatar_path}\')"></div>'
         else:
-            avatar_html = f'<div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-2xl font-bold text-white">{initial}</div>'
+            avatar_html = f'<div class="w-14 h-14 bg-black flex items-center justify-center text-xl font-bold text-white border-2 border-black shadow-[2px_2px_0_0_#000]">{initial}</div>'
         
         card_html = f'''
-        <div class="bg-slate-800/80 border border-slate-700/50 rounded-xl p-5 hover:border-blue-500/50 transition-all group">
+        <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0_0_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_0_#000] transition-all">
             <div class="flex items-start gap-4">
                 {avatar_html}
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-bold text-white truncate group-hover:text-blue-400 transition-colors">{display_name}</h3>
-                    <p class="text-sm text-slate-400 mb-2">@{username}</p>
-                    <div class="flex items-center gap-2 text-xs">
-                        <a href="/ui/views/wall.html?user_id={user_id}" class="px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-slate-200 transition-colors">Profile</a>
-                        <a href="/ui/views/messages.html?with={user_id}" class="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg border border-blue-500/30">DM</a>
+                    <h3 class="text-lg font-black text-black uppercase truncate">{display_name}</h3>
+                    <p class="text-xs font-mono text-gray-500 mb-3">@{username}</p>
+                    <div class="flex items-center gap-2">
+                        <a href="/wall?user_id={user_id}" class="px-3 py-1.5 bg-white border-2 border-black text-black font-bold text-xs uppercase hover:bg-acid-green transition-colors shadow-[2px_2px_0_0_#000]">Wall</a>
+                        <a href="/ui/views/messages.html?with={user_id}" class="px-3 py-1.5 bg-black border-2 border-black text-white font-bold text-xs uppercase hover:bg-hot-pink transition-colors shadow-[2px_2px_0_0_#000]">DM</a>
                     </div>
                 </div>
             </div>
@@ -239,7 +239,7 @@ def user_cards_html():
         load_more = f'''
         <div class="col-span-full flex justify-center mt-4">
             <button hx-get="/users/cards?cursor={next_cursor}" hx-target="#user-grid" hx-swap="beforeend" 
-                    class="px-6 py-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-slate-300 transition-all">
+                    class="px-6 py-3 bg-white border-2 border-black font-black uppercase text-black shadow-[4px_4px_0_0_#000] hover:bg-acid-green transition-colors">
                 Load More
             </button>
         </div>

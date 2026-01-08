@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Network - NeoSpace{% endblock %}
+{% block page_title %}Network Directory{% endblock %}
+
+{% block head %}
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<style>
+    .htmx-request { opacity: 0.5; transition: opacity 200ms; }
+    .htmx-request .htmx-indicator { display: inline-block; }
+    
+    /* User Card Styling */
+    .user-card {
+        background-color: #FFFFFF;
+        border: 2px solid #000000;
+        box-shadow: 4px 4px 0px 0px #000000;
+        transition: all 0.1s;
+    }
+    .user-card:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px 0px #000000;
+    }
+    .user-card:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px 0px #000000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <!-- Search Bar -->
+    <div class="nb-card p-4 flex items-center gap-4">
+        <i class="ph-bold ph-magnifying-glass text-xl"></i>
+        <input type="search" 
+               name="search"
+               placeholder="SEARCH PROFILES..." 
+               class="nb-input flex-1"
+               hx-get="/users/cards"
+               hx-trigger="input changed delay:300ms, search"
+               hx-target="#user-grid"
+               hx-swap="innerHTML" />
+    </div>
+
+    <!-- Grid - Loads via HTMX on page load -->
+    <div id="user-grid" 
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+         hx-get="/users/cards"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <!-- Loading State -->
+        <div class="col-span-full nb-card p-8 text-center">
+            <i class="ph-bold ph-spinner text-4xl animate-spin mb-2"></i>
+            <p class="font-mono text-sm uppercase">Loading Directory...</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

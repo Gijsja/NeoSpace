@@ -1,4 +1,4 @@
-from flask import Blueprint, send_from_directory, g, redirect, url_for
+from flask import Blueprint, send_from_directory, g, redirect, url_for, render_template
 
 bp = Blueprint('views', __name__)
 
@@ -6,7 +6,25 @@ bp = Blueprint('views', __name__)
 def index():
     if g.user is None:
          return redirect(url_for("auth.login"))
-    return send_from_directory("ui/views", "app.html")
+    return render_template("app.html")
+
+@bp.route("/app")
+def app_view():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("app.html")
+
+@bp.route("/dashboard")
+def dashboard():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("dashboard.html")
+
+@bp.route("/directory")
+def directory():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("directory.html")
 
 @bp.route("/desktop")
 def desktop():
