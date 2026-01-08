@@ -1,6 +1,6 @@
 # NeoSpace: The "Juiced" Architecture
 
-> **Directive for Claude:**
+> **Directive for AI Assistants:**
 > This project is a **"No-Build" creative social platform**.
 > We prioritize **raw performance and iteration speed** over enterprise abstraction.
 > **Constraint:** Host hardware is a 2013 Mac (Dual Core, 8-16GB RAM) running Linux.
@@ -10,173 +10,102 @@
 
 ## 1. The "Max Juice" Technology Stack
 
-We use lightweight, high-performance components that minimize CPU overhead and maximize concurrency on older hardware.
-
-| Layer             | Choice           | Rationale                                                                                               |
-| :---------------- | :--------------- | :------------------------------------------------------------------------------------------------------ |
-| **Reverse Proxy** | **Caddy**        | Replaces Nginx. Auto-HTTPS, Zstd compression, and 1-line micro-caching.                                 |
-| **App Server**    | **Granian**      | Replaces Gunicorn/Gevent. Rust-based HTTP server. Handles WebSockets vastly better than Python workers. |
-| **Framework**     | **Flask**        | Lightweight, proven. Paired with `Flask-SocketIO` for real-time state.                                  |
-| **Database**      | **SQLite (WAL)** | Zero-latency, in-process DB. No network overhead. Tuned via PRAGMA.                                     |
-| **Serialization** | **msgspec**      | Replaces Pydantic. 10-80x faster JSON serialization/validation.                                         |
-| **Frontend**      | **Vanilla JS**   | HTML-over-WebSockets. No React, no Webpack, no `npm install`.                                           |
+| Layer             | Choice               | Rationale                                                    |
+| :---------------- | :------------------- | :----------------------------------------------------------- |
+| **Reverse Proxy** | **Caddy**            | Auto-HTTPS, Zstd compression, micro-caching                  |
+| **App Server**    | **Gunicorn gthread** | Thread-based workers; SQLite-friendly, Flask-SocketIO compat |
+| **Framework**     | **Flask**            | Lightweight, paired with `Flask-SocketIO` for real-time      |
+| **Database**      | **SQLite (WAL)**     | Zero-latency, in-process. Tuned via PRAGMA                   |
+| **Serialization** | **msgspec**          | 10-80x faster than Pydantic (Phase 4: lazy adoption)         |
+| **Frontend**      | **Vanilla JS**       | HTML-over-WebSockets. No React, no Webpack                   |
 
 ---
 
 ## 2. Database "God Mode" Configuration
 
-**Crucial:** SQLite is the engine. It must be tuned to prevent blocking on the single-writer lock.
-
-### The Connection Factory (`db.py`)
-
 ```python
-import sqlite3
-import msgspec
-from flask import g
+# db.py - Connection Settings
+db = sqlite3.connect('app.db', timeout=15)  # 15s retry window
 
-def get_db():
-    if 'db' not in g:
-        # TIMEOUT: 15s to allow clients to retry rather than hanging indefinitely
-        g.db = sqlite3.connect('neospace.db', timeout=15)
-
-        # --- THE JUICE CONFIG ---
-        # 1. Concurrency: Writers do not block Readers
-        g.db.execute('PRAGMA journal_mode = WAL;')
-
-        # 2. Safety/Speed Balance: Sync less often (safe for social apps)
-        g.db.execute('PRAGMA synchronous = NORMAL;')
-
-        # 3. RAM Cache: Use 512MB RAM for cache (negative = kilobytes)
-        g.db.execute('PRAGMA cache_size = -512000;')
-
-        # 4. Memory Map: Map 2GB of DB file to RAM (Zero-copy reads)
-        g.db.execute('PRAGMA mmap_size = 2147483648;')
-
-        # 5. Temp Store: Sorts/Groups happen in RAM, not disk
-        g.db.execute('PRAGMA temp_store = MEMORY;')
-
-        # 6. Page Size: Must be 8192 (8KB) for modern SSD alignment
-        # Requires "VACUUM;" run once manually.
-
-        g.db.row_factory = sqlite3.Row
-    return g.db
+# THE JUICE CONFIG
+db.execute('PRAGMA journal_mode = WAL;')           # Readers don't block writers
+db.execute('PRAGMA synchronous = NORMAL;')         # Balanced durability
+db.execute('PRAGMA cache_size = -512000;')         # 512MB RAM cache
+db.execute('PRAGMA mmap_size = 2147483648;')       # 2GB memory-mapped I/O
+db.execute('PRAGMA temp_store = MEMORY;')          # Sorts in RAM
+# Run once: PRAGMA page_size=8192; VACUUM;         # SSD alignment
 ```
 
 ---
 
-## 3. Server Configuration (Granian)
-
-We reject Gevent (Async Python) because SQLite blocks it. We use **Granian (Rust)** which manages the event loop outside Python, or **Gunicorn with Threads**.
-
-**The Run Command:**
+## 3. Server Configuration
 
 ```bash
-# Granian (Preferred):
-granian --interface wsgi --port 5000 --workers 4 --threads 2 app:app
-
-# OR Gunicorn (Alternative):
-gunicorn -w 4 --threads 16 --worker-class gthread --worker-tmp-dir /dev/shm app:app
+# Production: startprod.sh or startstack.sh
+gunicorn -w 4 --threads 16 --worker-class gthread \
+    --worker-tmp-dir /dev/shm --bind 0.0.0.0:5000 "app:create_app()"
 ```
+
+| Setting      | Value    | Rationale                          |
+| ------------ | -------- | ---------------------------------- |
+| Workers      | 4        | One per core (2013 dual-core + HT) |
+| Threads      | 16       | ~64 concurrent requests            |
+| Worker class | gthread  | SQLite-compatible threading        |
+| Tmp dir      | /dev/shm | RAM-backed heartbeat               |
 
 ---
 
-## 4. The "Micro-Caching" Layer (Caddy)
-
-We use Caddy to absorb "viral" read traffic. Requests for public feeds never hit Python if they were served recently.
-
-**`Caddyfile` Configuration:**
+## 4. The Caddy Layer
 
 ```caddyfile
-localhost {
-    # Free Speed: Compress everything with Zstandard (faster than Gzip)
-    encode zstd gzip
-
-    # Static Assets: Bypass Python entirely
-    handle /static/* {
-        file_server
-    }
-
-    # Micro-Cache: Cache public reads for 1 second
-    # This turns 1000 req/sec into 1 req/sec for the backend.
-    @cacheable {
-        method GET
-        path /wall/* /directory /public-feed
-    }
-    header @cacheable Cache-Control "max-age=1"
-
-    # Reverse Proxy
-    reverse_proxy 127.0.0.1:5000 {
-        header_up Host {host}
-        header_up X-Real-IP {remote}
-    }
+:80 {
+    encode zstd gzip                              # Compression
+    handle /static/* { file_server }              # Bypass Python
+    @cacheable { method GET; path /wall/* }
+    header @cacheable Cache-Control "max-age=1"   # Micro-cache
+    reverse_proxy 127.0.0.1:5000                  # Flask backend
 }
 ```
 
 ---
 
-## 5. Coding Patterns & "The Law"
+## 5. The Laws
 
-### Law 1: Short Transactions (The "Prepare-Then-Commit" Pattern)
+### Law 1: Short Transactions
 
-**NEVER** perform I/O (File writes, API calls, Sleep) inside a `with db:` block.
-
-- **Bad:** `Open Tx -> Save File -> Insert Row -> Commit`
-- **Good:** `Save File -> Open Tx -> Insert Row -> Commit`
+Never perform I/O inside `with db:`. Prepare files first, then commit.
 
 ### Law 2: No Over-Abstraction
 
-- **Reject:** Repository Patterns, Abstract Base Classes, Clean Architecture Layers.
-- **Accept:** Vertical Slices. Put the SQL query directly in the Route handler or a localized helper function. We need visibility, not abstraction.
+Reject Repository/Clean Architecture patterns. Use vertical slices.
 
 ### Law 3: Hybrid Caching
 
-- **Public Data:** Relies on Caddy (HTTP Cache).
-- **Private Data:** Relies on Python `lru_cache` or `Flask-Caching` (SimpleCache).
-- **Do Not:** Install Redis unless absolutely necessary.
+- Public data → Caddy (HTTP cache)
+- Private data → Python `lru_cache`
+- No Redis unless necessary
 
-### Law 4: Validation Speed
+### Law 4: msgspec for Speed
 
-Use `msgspec` for internal data structures and heavy JSON payloads. It is strictly faster than Pydantic.
-
-```python
-import msgspec
-
-class Message(msgspec.Struct):
-    id: int
-    content: str
-    timestamp: float
-
-# decoding is instant
-data = msgspec.json.decode(payload, type=Message)
-```
+Use `msgspec.Struct` for hot-path JSON (Phase 4 sprint item).
 
 ---
 
-## 6. Directory Structure (Optimized)
+## 6. Startup Scripts
 
-Keep related logic together. `mutations` and `queries` folders are good—keep them.
+| Script          | Purpose                          |
+| --------------- | -------------------------------- |
+| `startlocal.sh` | Dev mode with Flask debug server |
+| `startprod.sh`  | Gunicorn gthread (no Caddy)      |
+| `startstack.sh` | Full stack: Caddy + Gunicorn     |
 
-```text
-NeoSpace/
-├── app.py                 # App Factory
-├── db.py                  # "God Mode" SQLite Connection
-├── Caddyfile              # The Edge Server config
-├── requirements.txt       # Keep it lean (Flask, Granian, msgspec, etc)
-│
-├── routes/                # HTTP Endpoints (Vertical Slices)
-│   ├── wall.py
-│   ├── chat.py
-│   └── ...
-│
-├── mutations/             # Write Operations (Short Transaction Logic)
-│   ├── post_mutations.py
-│   └── ...
-│
-├── queries/               # Read Operations (Cached)
-│   ├── feed_queries.py
-│   └── ...
-│
-├── static/                # Raw Assets
-├── templates/             # Jinja2
-└── ui/                    # Vanilla JS Modules
-```
+---
+
+## 7. Sprint Backlog: Phase 4 (msgspec)
+
+Lazy adoption — apply as files are touched:
+
+- [ ] `mutations/message_mutations.py` — Message struct
+- [ ] `queries/backfill.py` — Backfill response
+- [ ] `routes/wall.py` — Wall post payloads
+- [ ] `sockets.py` — Socket event payloads

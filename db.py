@@ -367,7 +367,7 @@ def get_db():
         db = sqlite3.connect(
             path, 
             check_same_thread=False,
-            timeout=30.0,
+            timeout=15.0,  # JUICED: 15s allows client retry rather than indefinite hang
             isolation_level=None
         )
         _configure_connection(db, path)

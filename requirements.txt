@@ -409,3 +409,4 @@ yt-dlp==2024.4.9
 zeroconf==0.131.0
 zope.event==6.1
 zope.interface==8.1.1
+msgspec==0.20.0
