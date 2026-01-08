@@ -57,7 +57,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #19 🚧
+### Current: Sprint #20 🚧
 
 **Theme**: TBD
 
@@ -65,6 +65,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #19    | Search UI               | Js-based Search, User/Post tabs       |
 | #18    | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)   |
 | #17    | Search API              | User and Post search endpoints        |
 | #16    | Feed API                | `/feed` endpoint, Pagination          |

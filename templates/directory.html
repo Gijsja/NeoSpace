@@ -30,31 +30,42 @@
 {% block content %}
 <div class="space-y-6">
     
-    <!-- Search Bar -->
-    <div class="nb-card p-4 flex items-center gap-4">
-        <i class="ph-bold ph-magnifying-glass text-xl"></i>
-        <input type="search" 
-               name="search"
-               placeholder="SEARCH PROFILES..." 
-               class="nb-input flex-1"
-               hx-get="/users/cards"
-               hx-trigger="input changed delay:300ms, search"
-               hx-target="#user-grid"
-               hx-swap="innerHTML" />
-    </div>
-
-    <!-- Grid - Loads via HTMX on page load -->
-    <div id="user-grid" 
-         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-         hx-get="/users/cards"
-         hx-trigger="load"
-         hx-swap="innerHTML">
-        <!-- Loading State -->
-        <div class="col-span-full nb-card p-8 text-center">
-            <i class="ph-bold ph-spinner text-4xl animate-spin mb-2"></i>
-            <p class="font-mono text-sm uppercase">Loading Directory...</p>
+    <!-- Header & Search Controls -->
+    <div class="flex flex-col gap-4">
+        <!-- Search Bar -->
+        <div class="nb-card p-4 flex items-center gap-4">
+            <i class="ph-bold ph-magnifying-glass text-xl"></i>
+            <input type="search" 
+                   name="search"
+                   placeholder="SEARCH..." 
+                   class="nb-input flex-1 border-none focus:ring-0 text-lg"
+                   autocomplete="off" />
+        </div>
+        
+        <!-- Type Toggles -->
+        <div class="flex gap-2">
+            <button class="search-type-toggle nb-button px-6 py-2 bg-black text-white hover:translate-x-0 hover:translate-y-0" data-type="users">
+                PEOPLE
+            </button>
+            <button class="search-type-toggle nb-button px-6 py-2 bg-white text-black hover:bg-gray-100 hover:translate-x-0 hover:translate-y-0" data-type="posts">
+                POSTS
+            </button>
         </div>
     </div>
 
+    <!-- Results Grid -->
+    <div id="search-results" 
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px]">
+        
+        <!-- Empty State -->
+        <div class="col-span-full text-center p-8 opacity-50">
+            <i class="ph-bold ph-magnifying-glass text-4xl mb-2"></i>
+            <p>SEARCH THE NETWORK</p>
+        </div>
+        
+    </div>
+
 </div>
+
+<script src="/static/js/search.js"></script>
 {% endblock %}
