@@ -57,24 +57,21 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #12 🚧
+### Current: Sprint #13 🚧
 
-**Theme**: The Modular Canvas
-
-- [ ] Data Layer: `profile_posts` table (Text, Image, Link)
-- [ ] UI: Unified Masonry Grid for Scripts + Posts
-- [ ] Modules: Note Block, Image Block, Link Block
+**Theme**: TBD — Planning next sprint
 
 ### Recently Shipped
 
-| Sprint | Theme                   | Features                        |
-| ------ | ----------------------- | ------------------------------- |
-| #11    | NeoSpace Foundations    | Audio Anthem, Identity First    |
-| #10    | Unified Desktop         | 3-pane layout, Tool Integration |
-| #9     | Sonic Identity          | Voice Intros, Waveform Player   |
-| #8     | Creative Sandbox        | Scripts API, Code Editor        |
-| #7     | Identity & Transparency | Wall Stickers, System Internals |
-| #6     | User Profiles           | Profile Wall, DMs, Directory    |
+| Sprint | Theme                   | Features                              |
+| ------ | ----------------------- | ------------------------------------- |
+| #12    | Modular Canvas          | Profile posts (text/image/link/audio) |
+| #11    | NeoSpace Foundations    | Audio Anthem, Identity First          |
+| #10    | Unified Desktop         | 3-pane layout, Tool Integration       |
+| #9     | Sonic Identity          | Voice Intros, Waveform Player         |
+| #8     | Creative Sandbox        | Scripts API, Code Editor              |
+| #7     | Identity & Transparency | Wall Stickers, System Internals       |
+| #6     | User Profiles           | Profile Wall, DMs, Directory          |
 
 ---
 
