@@ -4,11 +4,17 @@ Sprint #16: Feed API Routes
 Endpoint for the main activity feed.
 """
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request, g, render_template
 from auth import login_required
 from queries.feed import get_feed
 
 bp = Blueprint('feed', __name__, url_prefix='/feed')
+
+
+@bp.route("/home")
+@login_required
+def feed_home():
+    return render_template("feed.html")
 
 
 @bp.route("/")

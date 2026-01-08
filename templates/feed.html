@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Home Stream - NeoSpace{% endblock %}
+{% block page_title %}Signal Stream{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Main Feed Column -->
+    <div class="lg:col-span-8">
+        
+        <!-- Feed Wrapper -->
+        <div id="feed-container" class="space-y-6 min-h-[400px]">
+            <!-- JS inserts posts here -->
+        </div>
+        
+        <!-- Loader / Trigger -->
+        <div id="load-more-trigger" class="h-20 flex items-center justify-center">
+            <div id="feed-loader" class="hidden">
+                <i class="ph-bold ph-spinner animate-spin text-3xl"></i>
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="lg:col-span-4 space-y-6 hidden lg:block">
+        
+        <!-- Mini Profile Card -->
+        <div class="nb-card p-6 bg-white">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold text-xl">
+                    {{ g.user.display_name[0] }}
+                </div>
+                <div>
+                   <h3 class="font-bold">{{ g.user.display_name }}</h3>
+                   <span class="text-xs text-gray-500">@{{ g.user.username }}</span>
+                </div>
+            </div>
+            <a href="/wall" class="block w-full text-center py-2 border-2 border-black hover:bg-black hover:text-white transition uppercase text-xs font-bold">
+                Go to Wall
+            </a>
+        </div>
+        
+        <!-- Discovery Hint -->
+        <div class="nb-card p-6 bg-acid-green/20 border-dashed">
+            <h3 class="font-black uppercase text-sm mb-2">Explore</h3>
+            <p class="text-sm text-slate-600 mb-4">Find artists, coders, and strange signals around the network.</p>
+            <a href="/directory" class="text-sm font-bold underline hover:text-hot-pink">Browse Directory →</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/feed.js"></script>
+{% endblock %}

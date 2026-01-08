@@ -57,14 +57,15 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #21 🚧
+### Current: Sprint #22 🚧
 
-**Theme**: The Feed UI
+**Theme**: Live Wire UI & Realtime Alerts
 
 ### Recently Shipped
 
 | Sprint | Theme                   | Features                              |
 | ------ | ----------------------- | ------------------------------------- |
+| #21    | The Feed UI             | Home Stream, Infinite Scroll          |
 | #20    | Social Actions UI       | Follow/Unfollow, Top 8 Grid           |
 | #19    | Search UI               | Js-based Search, User/Post tabs       |
 | #18    | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)   |
