@@ -62,10 +62,11 @@ def sanitize_display_name(name: str) -> str:
 
 
 def sanitize_bio(bio: str) -> str:
-    """Sanitize bio content, escaping HTML."""
+    """Sanitize bio content using bleach."""
     if not bio:
         return ""
-    return html.escape(bio.strip()[:MAX_BIO_LENGTH])
+    from utils.sanitize import clean_html
+    return clean_html(bio.strip()[:MAX_BIO_LENGTH])
 
 
 # =============================================

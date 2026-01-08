@@ -11,8 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Tailwind CSS (v3.4 CDN - robust for no-build) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (Vendored) -->
+    <script src="/static/vendor/tailwindcss.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -87,15 +87,17 @@
     </script>
 
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
 
     <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
 
     <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/static/vendor/apexcharts.min.js"></script>
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="/static/vendor/htmx.min.js"></script>
 
     <style>
         /* --- PROJECT CONCRETE: NEUBRUTALISM --- */

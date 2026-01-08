@@ -58,12 +58,12 @@ def get_posts_for_profile(profile_id: int) -> List[Dict[str, Any]]:
         post = dict(r)
         try:
             post["content"] = json.loads(post["content_payload"])
-        except:
+        except Exception:
             post["content"] = {}
             
         try:
             post["style"] = json.loads(post["style_payload"]) if post["style_payload"] else {}
-        except:
+        except Exception:
             post["style"] = {}
             
         del post["content_payload"]

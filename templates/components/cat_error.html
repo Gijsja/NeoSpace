@@ -1,13 +1,13 @@
 {% macro cat_error(code, title, message, details=None) %}
 <div class="min-h-screen flex items-center justify-center p-8 bg-bbs-bg">
     <div class="nb-card p-0 max-w-md w-full overflow-hidden">
-        <!-- Cat Image -->
-        <div class="border-b-2 border-black">
+        <!-- Cat Image (Local) -->
+        <div class="border-b-2 border-black bg-white flex items-center justify-center p-8">
             <img 
-                src="https://http.cat/{{ code }}" 
+                src="/static/images/cat_{{ code }}.png" 
                 alt="HTTP {{ code }} - {{ title }}" 
-                class="w-full h-auto object-cover"
-                onerror="this.src='https://http.cat/500'"
+                class="max-w-full h-auto max-h-64 object-contain"
+                onerror="this.src='/static/images/cat_500.png'"
             >
         </div>
         

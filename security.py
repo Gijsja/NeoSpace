@@ -16,32 +16,28 @@ def init_security(app):
     # CSRF
     csrf.init_app(app)
     
-    # CSP
+    # CSP - Tightened since assets are now vendored locally
     csp = {
         'default-src': ["'self'"],
-        'img-src': ["'self'", "data:", "blob:", "https://*"],
+        'img-src': ["'self'", "data:", "blob:", "https://http.cat", "https://i.pravatar.cc"],
         'script-src': [
             "'self'",
             "'unsafe-inline'",  # Needed for Alpine/Tailwind config in HTML
             "'unsafe-eval'",    # Needed for standard Alpine.js
-            "https://cdn.tailwindcss.com",
-            "https://cdn.jsdelivr.net",
-            "https://unpkg.com",
-            "https://cdn.socket.io"
+            "https://cdn.jsdelivr.net"  # Fallback for emoji-picker only
         ],
         'style-src': [
             "'self'",
             "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-            "https://unpkg.com"
+            "https://fonts.googleapis.com"
         ],
         'font-src': [
             "'self'",
-            "https://fonts.gstatic.com",
-            "https://unpkg.com"
+            "https://fonts.gstatic.com"
         ],
-        'connect-src': ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
-        'media-src': ["'self'", "https://cdn.pixabay.com"]
+        'connect-src': ["'self'", "wss:", "ws:"],  # WebSocket for Socket.IO
+        'media-src': ["'self'", "blob:", "data:", "https://*", "http://*"],  # Allow external audio streams
+        'frame-src': ["'self'", "blob:"]  # For script sandboxes
     }
     
     talisman.init_app(app, 

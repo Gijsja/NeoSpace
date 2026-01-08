@@ -16,7 +16,7 @@ def add_audio():
         if not data.get("ok"):
             print(f"Login failed: {data.get('error')}")
             return
-    except:
+    except Exception:
         print(f"Login failed (non-JSON): {res.text}")
         return
 

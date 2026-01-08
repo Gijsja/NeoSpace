@@ -16,7 +16,7 @@ def get_session():
         if not data.get("ok"):
             print(f"Login failed: {data.get('error')}")
             return None
-    except:
+    except Exception:
         print(f"Login failed (non-JSON): {res.text}")
         return None
         

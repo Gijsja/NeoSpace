@@ -57,36 +57,38 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Sprint #23 (TBD)
+### Current: Stage 3 Planning
 
-**Theme**: Optimization & Polish
+**Theme**: Feature Expansion & Testing
 
-**Features**:
+**Next Options**:
 
-- **Rich Link Modules**: Thumbnails, Card/Button styles, Grouping
-- **Identity Canvas Enhancements**: Better module controls
+- Unit tests for service layer
+- Video/Omegle feature
+- Script publishing flow completion
 
 ### Recently Shipped
 
-| Sprint | Theme                   | Features                              |
-| ------ | ----------------------- | ------------------------------------- |
-| #22    | Live Wire UI            | Notification Center, Badges, Toasts   |
-| #21    | The Feed UI             | Home Stream, Infinite Scroll          |
-| #20    | Social Actions UI       | Follow/Unfollow, Top 8 Grid           |
-| #19    | Search UI               | Js-based Search, User/Post tabs       |
-| #18    | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)   |
-| #17    | Search API              | User and Post search endpoints        |
-| #16    | Feed API                | `/feed` endpoint, Pagination          |
-| #15    | Live Wire               | Notifications API, Follow triggers    |
-| #14    | Social Graph            | Friends, Top 8, Follow/Unfollow       |
-| #13    | Speed Demon             | msgspec structs for hot paths         |
-| #12    | Modular Canvas          | Profile posts (text/image/link/audio) |
-| #11    | NeoSpace Foundations    | Audio Anthem, Identity First          |
-| #10    | Unified Desktop         | 3-pane layout, Tool Integration       |
-| #9     | Sonic Identity          | Voice Intros, Waveform Player         |
-| #8     | Creative Sandbox        | Scripts API, Code Editor              |
-| #7     | Identity & Transparency | Wall Stickers, System Internals       |
-| #6     | User Profiles           | Profile Wall, DMs, Directory          |
+| Sprint      | Theme                   | Features                                                   |
+| ----------- | ----------------------- | ---------------------------------------------------------- |
+| **Stage 2** | **Maturation**          | Service layer, ES6 modules, vendored assets, CSP hardening |
+| #22         | Live Wire UI            | Notification Center, Badges, Toasts                        |
+| #21         | The Feed UI             | Home Stream, Infinite Scroll                               |
+| #20         | Social Actions UI       | Follow/Unfollow, Top 8 Grid                                |
+| #19         | Search UI               | Js-based Search, User/Post tabs                            |
+| #18         | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)                        |
+| #17         | Search API              | User and Post search endpoints                             |
+| #16         | Feed API                | `/feed` endpoint, Pagination                               |
+| #15         | Live Wire               | Notifications API, Follow triggers                         |
+| #14         | Social Graph            | Friends, Top 8, Follow/Unfollow                            |
+| #13         | Speed Demon             | msgspec structs for hot paths                              |
+| #12         | Modular Canvas          | Profile posts (text/image/link/audio)                      |
+| #11         | NeoSpace Foundations    | Audio Anthem, Identity First                               |
+| #10         | Unified Desktop         | 3-pane layout, Tool Integration                            |
+| #9          | Sonic Identity          | Voice Intros, Waveform Player                              |
+| #8          | Creative Sandbox        | Scripts API, Code Editor                                   |
+| #7          | Identity & Transparency | Wall Stickers, System Internals                            |
+| #6          | User Profiles           | Profile Wall, DMs, Directory                               |
 
 <!-- Source: docs/archive/ROADMAP.md -->
 

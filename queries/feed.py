@@ -51,12 +51,12 @@ def get_feed(user_id: int, limit: int = 20, before_id: int = None) -> list:
         # Parse JSON payloads
         try:
             r["content"] = json.loads(r["content_payload"]) if r["content_payload"] else {}
-        except:
+        except Exception:
             r["content"] = {}
             
         try:
             r["style"] = json.loads(r["style_payload"]) if r["style_payload"] else {}
-        except:
+        except Exception:
             r["style"] = {}
             
         # Cleanup raw JSON fields

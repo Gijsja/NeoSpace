@@ -205,7 +205,7 @@ class StressTestFixture:
                 if os.path.exists(path):
                     try:
                         os.unlink(path)
-                    except:
+                    except Exception:
                         pass
 
 

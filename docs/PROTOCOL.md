@@ -20,12 +20,16 @@ Violating any invariant is a **critical bug**.
 
 ## The No-Build Stack
 
-| Layer       | Technology     | Source                |
-| ----------- | -------------- | --------------------- |
-| Core        | Python (Flask) | Server-side templates |
-| Styling     | Tailwind CSS   | CDN                   |
-| Reactivity  | Alpine.js      | CDN                   |
-| Server Sync | HTMX           | CDN                   |
+| Layer       | Technology     | Source                            |
+| ----------- | -------------- | --------------------------------- |
+| Core        | Python (Flask) | Server-side templates             |
+| Styling     | Tailwind CSS   | `static/vendor/tailwindcss.js`    |
+| Reactivity  | Alpine.js      | `static/vendor/alpine.min.js`     |
+| Server Sync | HTMX           | `static/vendor/htmx.min.js`       |
+| Icons       | Phosphor       | `static/vendor/phosphor/*.css`    |
+| Charts      | ApexCharts     | `static/vendor/apexcharts.min.js` |
+
+> **Assets are vendored locally** — no CDN dependency at runtime (except Google Fonts and emoji-picker).
 
 **FORBIDDEN:** React, Vue, Webpack, Vite, `npm`, `package.json`
 

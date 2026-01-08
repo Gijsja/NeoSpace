@@ -98,7 +98,7 @@ def search_posts(query: str, limit: int = 20) -> list:
         r = dict(row)
         try:
             r["content"] = json.loads(r["content_payload"])
-        except:
+        except Exception:
             r["content"] = {}
         
         # Double check match in python to be safe (JSON string structure)
