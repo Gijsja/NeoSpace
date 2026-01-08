@@ -12,7 +12,14 @@ ALLOWED_ORIGINS = os.environ.get(
     "http://localhost:5000,http://127.0.0.1:5000"
 ).split(",")
 
-socketio = SocketIO(cors_allowed_origins=ALLOWED_ORIGINS)
+# JUICED: Use threading mode for Gunicorn gthread compatibility
+# Falls back to eventlet/gevent if available (for dev mode)
+ASYNC_MODE = os.environ.get("SOCKETIO_ASYNC_MODE", None)
+
+socketio = SocketIO(
+    cors_allowed_origins=ALLOWED_ORIGINS,
+    async_mode=ASYNC_MODE  # None = auto-detect, 'threading' for gthread
+)
 
 # Store authenticated socket connections
 # Maps session ID to {user_id, username, room_id, room_name}
