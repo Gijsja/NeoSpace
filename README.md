@@ -1,6 +1,6 @@
 # NeoSpace
 
-[![CI](https://github.com/Gijsja/SBBS/actions/workflows/ci.yml/badge.svg)](https://github.com/Gijsja/SBBS/actions/workflows/ci.yml)
+[![CI](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml/badge.svg)](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml)
 ![Version](https://img.shields.io/badge/version-0.3.4-blue)
 ![Status](https://img.shields.io/badge/status-pre--alpha-orange)
 
