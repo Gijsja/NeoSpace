@@ -16,6 +16,7 @@ def app():
     
     app = create_app()
     app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False # Disable for regression tests
     
     yield app
     

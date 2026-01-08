@@ -8,6 +8,9 @@ from flask import g, jsonify, request
 from db import get_db
 
 
+from security import limiter
+
+@limiter.limit("20/minute")
 def follow():
     """Follow a user."""
     if g.user is None:

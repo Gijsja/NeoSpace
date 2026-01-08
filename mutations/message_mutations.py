@@ -6,6 +6,9 @@ import sqlite3
 
 
 
+from security import limiter
+
+@limiter.limit("60/minute")
 def send_message():
     db = get_db()
     content = html.escape(request.json.get("content", ""))
