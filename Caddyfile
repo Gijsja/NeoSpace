@@ -1,0 +1,24 @@
+localhost {
+    # Free Speed: Compress everything with Zstandard (faster than Gzip)
+    encode zstd gzip
+
+    # Static Assets: Bypass Python entirely
+    handle /static/* {
+        root * /home/geisha/Vibecode/SBBS
+        file_server
+    }
+
+    # Micro-Cache: Cache public reads for 1 second
+    # This turns 1000 req/sec into 1 req/sec for the backend.
+    @cacheable {
+        method GET
+        path /wall/* /directory /public-feed
+    }
+    header @cacheable Cache-Control "max-age=1"
+
+    # Reverse Proxy to Flask
+    reverse_proxy 127.0.0.1:5000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+    }
+}

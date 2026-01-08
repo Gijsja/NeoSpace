@@ -352,8 +352,10 @@ def _configure_connection(db, path):
     db.execute(f"PRAGMA busy_timeout = {BUSY_TIMEOUT_MS};")
     db.execute("PRAGMA journal_mode = WAL;")
     db.execute("PRAGMA synchronous = NORMAL;")
-    db.execute("PRAGMA mmap_size = 268435456;")
-    db.execute("PRAGMA cache_size = -64000;")
+    # JUICED: 2GB memory-mapped I/O (zero-copy reads)
+    db.execute("PRAGMA mmap_size = 2147483648;")
+    # JUICED: 512MB RAM cache (negative = kilobytes)
+    db.execute("PRAGMA cache_size = -512000;")
     db.execute("PRAGMA temp_store = MEMORY;")
     db.execute("PRAGMA foreign_keys = ON;")
 
