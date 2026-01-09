@@ -1,95 +1,99 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="h-full flex flex-col p-6 overflow-y-auto">
+{% from "components/ui_macros.html" import button, card, badge %}
+
+<div class="h-full flex flex-col p-6 overflow-y-auto w-full">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-black uppercase tracking-widest text-bbs-accent text-shadow-glow">
+        <h1 class="text-3xl font-black uppercase tracking-widest text-black text-shadow-glow">
             System Administration
         </h1>
         <div class="flex gap-4">
-            <div class="bg-slate-800 p-2 rounded border border-slate-700">
-                <span class="text-xs text-slate-400 uppercase">Pending</span>
-                <span class="block text-xl font-bold text-white">{{ pending_count }}</span>
+            {% call card(class="!p-2 flex items-center justify-between w-32") %}
+            <div>
+                <span class="text-xs text-gray-500 uppercase font-bold">Pending</span>
+                <span class="block text-xl font-bold text-black">{{ pending_count }}</span>
             </div>
-            <div class="bg-slate-800 p-2 rounded border border-slate-700">
-                <span class="text-xs text-slate-400 uppercase">Users</span>
-                <span class="block text-xl font-bold text-white">{{ users_count }}</span>
+            {% endcall %}
+            {% call card(class="!p-2 flex items-center justify-between w-32") %}
+            <div>
+                <span class="text-xs text-gray-500 uppercase font-bold">Users</span>
+                <span class="block text-xl font-bold text-black">{{ users_count }}</span>
             </div>
+            {% endcall %}
         </div>
     </div>
 
     <!-- Reports Table -->
-    <div class="flex-1 bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden flex flex-col">
-        <div class="p-4 bg-slate-800 border-b-2 border-slate-700 flex justify-between items-center">
-            <h2 class="font-bold text-white uppercase"><i class="ph-bold ph-warning-octagon mr-2"></i> Report Log</h2>
-        </div>
-
-        <div class="flex-1 overflow-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-950 text-slate-400 text-xs uppercase font-mono sticky top-0 z-10">
-                    <tr>
-                        <th class="p-3 border-b border-slate-800">ID</th>
-                        <th class="p-3 border-b border-slate-800">Reporter</th>
-                        <th class="p-3 border-b border-slate-800">Type</th>
-                        <th class="p-3 border-b border-slate-800">Target ID</th>
-                        <th class="p-3 border-b border-slate-800">Reason</th>
-                        <th class="p-3 border-b border-slate-800">Status</th>
-                        <th class="p-3 border-b border-slate-800 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm font-mono divide-y divide-slate-800">
-                    {% for r in reports %}
-                    <tr class="hover:bg-white/5 transition group">
-                        <td class="p-3 text-slate-500">#{{ r.id }}</td>
-                        <td class="p-3 text-emerald-400 font-bold">{{ r.reporter_name }}</td>
-                        <td class="p-3">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] uppercase border
-                                {% if r.content_type == 'post' %} border-cyan-500/50 text-cyan-400 bg-cyan-900/20
-                                {% elif r.content_type == 'script' %} border-purple-500/50 text-purple-400 bg-purple-900/20
-                                {% else %} border-yellow-500/50 text-yellow-400 bg-yellow-900/20 {% endif %}">
-                                {{ r.content_type }}
-                            </span>
-                        </td>
-                        <td class="p-3 text-slate-400">{{ r.content_id }}</td>
-                        <td class="p-3 text-slate-200 max-w-xs truncate" title="{{ r.reason }}">{{ r.reason }}</td>
-                        <td class="p-3">
+    {% call card(title="Report Log", class="flex-1 overflow-hidden flex flex-col") %}
+    <div class="flex-1 overflow-auto -mx-4 -mb-4">
+        <!-- Negative margin to counteract card padding for full width table -->
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-black text-white text-xs uppercase font-mono sticky top-0 z-10">
+                <tr>
+                    <th class="p-3 border-b-2 border-black">ID</th>
+                    <th class="p-3 border-b-2 border-black">Reporter</th>
+                    <th class="p-3 border-b-2 border-black">Type</th>
+                    <th class="p-3 border-b-2 border-black">Target ID</th>
+                    <th class="p-3 border-b-2 border-black">Reason</th>
+                    <th class="p-3 border-b-2 border-black">Status</th>
+                    <th class="p-3 border-b-2 border-black text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm font-mono divide-y-2 divide-black">
+                {% for r in reports %}
+                <tr class="hover:bg-acid-green/10 transition group">
+                    <td class="p-3 text-black font-bold">#{{ r.id }}</td>
+                    <td class="p-3 text-black font-bold">{{ r.reporter_name }}</td>
+                    <td class="p-3">
+                        {% if r.content_type == 'post' %}
+                        {{ badge(r.content_type, variant='outline', class='bg-cyan-100') }}
+                        {% elif r.content_type == 'script' %}
+                        {{ badge(r.content_type, variant='outline', class='bg-purple-100') }}
+                        {% else %}
+                        {{ badge(r.content_type, variant='outline', class='bg-yellow-100') }}
+                        {% endif %}
+                    </td>
+                    <td class="p-3 text-gray-600">{{ r.content_id }}</td>
+                    <td class="p-3 text-black max-w-xs truncate" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td class="p-3">
+                        {% if r.status == 'pending' %}
+                        {{ badge('PENDING', variant='primary') }} <!-- Acid Green for pending/active -->
+                        {% elif r.status == 'resolved' %}
+                        {{ badge('RESOLVED', variant='secondary') }}
+                        {% else %}
+                        {{ badge('DISMISSED', variant='outline') }}
+                        {% endif %}
+                    </td>
+                    <td class="p-3 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
                             {% if r.status == 'pending' %}
-                            <span class="text-yellow-400 animate-pulse">PENDING</span>
-                            {% elif r.status == 'resolved' %}
-                            <span class="text-emerald-500">RESOLVED</span>
-                            {% else %}
-                            <span class="text-slate-500">DISMISSED</span>
+                            {{ button(None, variant='ghost', icon='ph-bold ph-x',
+                            class='p-1 h-8 w-8 text-gray-500 hover:text-black hover:bg-gray-200 rounded-none border-none
+                            shadow-none',
+                            attrs='onclick="resolveReport(' ~ r.id ~ ', \'dismiss\')"', title='Dismiss') }}
+
+                            {% if r.content_type in ['post', 'script'] %}
+                            {{ button(None, variant='ghost', icon='ph-bold ph-trash',
+                            class='p-1 h-8 w-8 text-red-500 hover:text-white hover:bg-red-500 rounded-none border-none
+                            shadow-none',
+                            attrs='onclick="resolveReport(' ~ r.id ~ ', \'delete_content\')"', title='Delete Content')
+                            }}
                             {% endif %}
-                        </td>
-                        <td class="p-3 text-right">
-                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
-                                {% if r.status == 'pending' %}
-                                <button onclick="resolveReport({{ r.id }}, 'dismiss')"
-                                    class="p-1 hover:text-white text-slate-500 hover:bg-slate-700 rounded"
-                                    title="Dismiss">
-                                    <i class="ph-bold ph-x"></i>
-                                </button>
-                                {% if r.content_type in ['post', 'script'] %}
-                                <button onclick="resolveReport({{ r.id }}, 'delete_content')"
-                                    class="p-1 hover:text-white text-red-400 hover:bg-red-500/20 rounded"
-                                    title="Delete Content">
-                                    <i class="ph-bold ph-trash"></i>
-                                </button>
-                                {% endif %}
-                                <button onclick="resolveReport({{ r.id }}, 'ban_user')"
-                                    class="p-1 hover:text-white text-rose-500 hover:bg-rose-500/20 rounded"
-                                    title="Ban User">
-                                    <i class="ph-bold ph-hand-palm"></i>
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+
+                            {{ button(None, variant='ghost', icon='ph-bold ph-hand-palm',
+                            class='p-1 h-8 w-8 text-red-500 hover:text-white hover:bg-red-500 rounded-none border-none
+                            shadow-none',
+                            attrs='onclick="resolveReport(' ~ r.id ~ ', \'ban_user\')"', title='Ban User') }}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% endcall %}
 </div>
 
 <script>

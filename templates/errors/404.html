@@ -4,38 +4,38 @@
 
 {% block content %}
 <div class="min-h-screen flex items-center justify-center p-4">
-    <div class="nb-card p-8 bg-white max-w-2xl w-full text-center space-y-8 relative overflow-hidden">
+    {% from "components/ui_macros.html" import card, button %}
 
-        <!-- Glitch Overlay -->
-        <div class="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
+    {% call card(class='max-w-2xl w-full text-center space-y-8 relative overflow-hidden') %}
 
-        <div class="relative z-10">
-            <h1 class="text-8xl font-black mb-2 animate-glitch text-black" style="text-shadow: 4px 4px 0px #a3e635;">404
-            </h1>
-            <h2
-                class="text-2xl font-bold uppercase tracking-widest bg-black text-white inline-block px-4 py-1 mb-8 transform -rotate-2">
-                Signal Lost</h2>
+    <!-- Glitch Overlay -->
+    <div class="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
 
-            <div class="flex justify-center mb-8">
-                <img src="/static/images/cat_404.png" alt="Confused Cat"
-                    class="w-64 h-64 object-contain filter contrast-125 border-4 border-black shadow-hard transform rotate-2 hover:-rotate-2 transition-transform duration-300">
-            </div>
+    <div class="relative z-10">
+        <h1 class="text-8xl font-black mb-2 animate-glitch text-black" style="text-shadow: 4px 4px 0px #a3e635;">404
+        </h1>
+        <h2
+            class="text-2xl font-bold uppercase tracking-widest bg-black text-white inline-block px-4 py-1 mb-8 transform -rotate-2">
+            Signal Lost</h2>
 
-            <p class="font-mono text-lg mb-8 max-w-md mx-auto">
-                The requested frequency does not exist. The cat has chewed through the uplink cable.
-            </p>
-
-            <a href="/"
-                class="nb-button inline-block px-8 py-3 bg-acid-green hover:bg-hot-pink text-black text-xl flex items-center justify-center gap-2 mx-auto w-max">
-                <i class="ph-bold ph-arrow-u-up-left"></i> Return to Grid
-            </a>
+        <div class="flex justify-center mb-8">
+            <img src="/static/images/cat_404.png" alt="Confused Cat"
+                class="w-64 h-64 object-contain filter contrast-125 border-4 border-black shadow-hard transform rotate-2 hover:-rotate-2 transition-transform duration-300">
         </div>
 
-        <!-- Decorative elements -->
-        <div class="absolute top-4 left-4 w-4 h-4 bg-black"></div>
-        <div class="absolute top-4 right-4 w-4 h-4 bg-black"></div>
-        <div class="absolute bottom-4 left-4 w-4 h-4 bg-black"></div>
-        <div class="absolute bottom-4 right-4 w-4 h-4 bg-black"></div>
+        <p class="font-mono text-lg mb-8 max-w-md mx-auto">
+            The requested frequency does not exist. The cat has chewed through the uplink cable.
+        </p>
+
+        {{ button(text="Return to Grid", href="/", icon="ph-bold ph-arrow-u-up-left", class="mx-auto w-max text-xl px-8
+        py-3") }}
     </div>
+
+    <!-- Decorative elements -->
+    <div class="absolute top-4 left-4 w-4 h-4 bg-black"></div>
+    <div class="absolute top-4 right-4 w-4 h-4 bg-black"></div>
+    <div class="absolute bottom-4 left-4 w-4 h-4 bg-black"></div>
+    <div class="absolute bottom-4 right-4 w-4 h-4 bg-black"></div>
+    {% endcall %}
 </div>
 {% endblock %}

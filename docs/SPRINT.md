@@ -11,11 +11,14 @@
 ## Backlog
 
 ### 🎨 Visual Consistency ("The Audit")
-- [ ] **Tailwind Config Review**: Unify color palette and spacing tokens in `tailwind.config.js`.
-- [ ] **Component Standardization**:
-  - [ ] Buttons (Primary, Secondary, Danger, Ghost).
-  - [ ] Inputs (Text, Textarea, Select, Checkbox).
-  - [ ] Cards/Containers (Border widths, shadows).
+- [x] **Sidebar Refactor**: Reorganized navigation and added "Review" / "Features" sections.
+- [x] **User Directory**: Wired up `/directory` to show users by default.
+- [x] **Tailwind Config Review**: Unified color palette and type scale in `ui/js/tailwind_config.js` (Runtime) & `tailwind.config.js`.
+- [x] **Component Standardization**: Created `ui_macros.html` library.
+  - [x] Buttons (Primary, Secondary, Danger, Ghost, Outline).
+  - [x] Inputs (Standardized with Neobrutalist borders).
+  - [x] Cards/Containers (Hard shadows and consistent padding).
+  - [x] Badges (Variant support added).
 - [ ] **Typography**: Verify font weights and line heights across headers and body.
 
 ### ✨ Micro-interactions ("The Juice")

@@ -1,0 +1,40 @@
+/* --- PROJECT CONCRETE: NEUBRUTALISM --- */
+/* Utilities */
+.nb-card {
+    background-color: #FFFFFF;
+    border: 2px solid #000000;
+    box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.nb-button {
+    border: 2px solid #000000;
+    box-shadow: 4px 4px 0px 0px #000000;
+    transition: all 0.1s;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.nb-button:active {
+    transform: translate(2px, 2px);
+    /* Standardized to 2px */
+    box-shadow: none;
+}
+
+.nb-input {
+    background-color: #FFFFFF;
+    border: 2px solid #000000;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    font-family: monospace;
+    box-shadow: 4px 4px 0px 0px #000000;
+    transition: all 0.2s;
+}
+
+.nb-input:focus {
+    outline: none;
+    background-color: #fff1f2;
+    /* pink-50 */
+    box-shadow: 2px 2px 0px 0px #000000;
+    /* Standardized to 2px/translate */
+    transform: translate(2px, 2px);
+}

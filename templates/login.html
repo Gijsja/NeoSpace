@@ -15,11 +15,13 @@
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
     <script src="/static/vendor/tailwindcss.js"></script>
     <script defer src="/static/vendor/alpine.min.js"></script>
+    <link rel="stylesheet" href="/static/css/neospace.css">
 
     {% from "components/ghettoblaster.html" import ghettoblaster %}
     {% from "components/tooltip.html" import tooltip %}
     {% from "components/progress.html" import progress %}
-    {% from "components/badge.html" import badge %}
+    <!-- UI Macros -->
+    {% from "components/ui_macros.html" import button, input, card, badge %}
 
     <script>
         tailwind.config = {
@@ -46,43 +48,6 @@
             }
         }
     </script>
-    <style>
-        .nb-input {
-            background-color: #FFFFFF;
-            border: 2px solid #000000;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            font-family: monospace;
-            box-shadow: 4px 4px 0px 0px #000000;
-            transition: all 0.1s;
-        }
-
-        .nb-input:focus {
-            outline: none;
-            box-shadow: 2px 2px 0px 0px #000000;
-            transform: translate(2px, 2px);
-        }
-
-        .nb-button {
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px 0px #000000;
-            transition: all 0.1s;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .nb-button:active,
-        .nb-button:hover {
-            box-shadow: 2px 2px 0px 0px #000000;
-            transform: translate(2px, 2px);
-        }
-
-        .nb-card {
-            background-color: #FFFFFF;
-            border: 2px solid #000000;
-            box-shadow: 8px 8px 0px 0px #000000;
-        }
-    </style>
     <style>
         .bg-gradient-overlay {
             background: linear-gradient(to bottom, rgba(255, 250, 240, 0.2) 0%, rgba(255, 250, 240, 0.8) 100%);
@@ -187,126 +152,101 @@
     {% include "components/toast.html" %}
 
     <!-- Auth Card -->
-    <div x-data="{ isLogin: true }"
-        class="w-full max-w-md nb-card p-8 mt-12 bg-white/90 backdrop-blur-sm relative z-10">
+    {% call card(class="w-full max-w-md mt-12 bg-white/90 backdrop-blur-sm relative z-10") %}
 
-        <!-- Header -->
-        <div class="text-center mb-8 relative">
-            <div class="absolute -top-10 -left-12 transform -rotate-12">
-                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-20 h-20 object-contain opacity-80">
-            </div>
-            <div
-                class="inline-flex items-center justify-center w-24 h-24 bg-black text-white mb-4 border-2 border-black shadow-hard overflow-hidden">
-                <img src="/static/images/cats/login_cat.png" alt="NeoSpace Cat" class="w-full h-full object-cover">
-            </div>
-            <h1 class="text-3xl font-black uppercase tracking-tighter mb-1">NeoSpace</h1>
-            <p class="text-sm font-mono text-gray-600">Access the Meow-Grid</p>
+    <!-- Header -->
+    <div class="text-center mb-8 relative">
+        <div class="absolute -top-10 -left-12 transform -rotate-12">
+            <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-20 h-20 object-contain opacity-80">
         </div>
-
-        <!-- Tab Toggle -->
-        <div class="flex border-2 border-black mb-6">
-            <button @click="isLogin = true"
-                :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
-                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
-                <i class="ph-bold ph-sign-in"></i> Sign In
-            </button>
-            <button @click="isLogin = false"
-                :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
-                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-                <i class="ph-bold ph-user-plus"></i> Register
-            </button>
+        <div
+            class="inline-flex items-center justify-center w-24 h-24 bg-black text-white mb-4 border-2 border-black shadow-hard overflow-hidden">
+            <img src="/static/images/cats/login_cat.png" alt="NeoSpace Cat" class="w-full h-full object-cover">
         </div>
-
-        <!-- Login Form -->
-        <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5">
-            <div>
-                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
-                    <i class="ph-bold ph-user"></i> Username
-                </label>
-                <input type="text" x-model="username" required class="nb-input" placeholder="your_handle" />
-            </div>
-            <div>
-                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
-                    <i class="ph-bold ph-lock"></i> Password
-                </label>
-                <input type="password" x-model="password" required class="nb-input" placeholder="••••••••" />
-            </div>
-
-            <!-- Progress -->
-            <div x-show="loading" x-transition class="pt-2">
-                {{ progress(0, label="Authenticating...", variant='striped', attrs='x-effect="pVal = progressValue"') }}
-            </div>
-
-            <!-- Error -->
-            <div x-show="error" x-text="error" x-transition
-                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
-            </div>
-
-            <button type="submit" :disabled="loading"
-                class="w-full py-4 nb-button bg-acid-green text-black flex items-center justify-center gap-2 disabled:opacity-50">
-                <span class="flex items-center gap-2"><i class="ph-bold ph-sign-in"></i> Enter Grid</span>
-            </button>
-            <div class="absolute -bottom-6 -right-6 transform rotate-12 z-0">
-                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-16 h-16 object-contain">
-            </div>
-        </form>
-
-        <!-- Register Form -->
-        <form x-show="!isLogin" x-data="registerForm()" @submit.prevent="submit()" x-cloak x-transition
-            class="space-y-5">
-            <div>
-                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
-                    <i class="ph-bold ph-user"></i> Username
-                </label>
-                <div class="relative group">
-                    <input type="text" x-model="username" required class="nb-input" placeholder="new_handle" />
-                    {% call tooltip("Alphanumeric only, 3-15 chars", position='right') %}
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <i class="ph-bold ph-question"></i>
-                    </div>
-                    {% endcall %}
-                </div>
-            </div>
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
-                        <i class="ph-bold ph-lock"></i> Password
-                    </label>
-                    <input type="password" x-model="password" required class="nb-input" placeholder="••••••••" />
-                </div>
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
-                        <i class="ph-bold ph-shield-check"></i> Confirm Password
-                    </label>
-                    <input type="password" x-model="confirmPassword" required class="nb-input" placeholder="••••••••" />
-                </div>
-            </div>
-
-            <!-- Progress -->
-            <div x-show="loading" x-transition class="pt-2">
-                {{ progress(0, label="Creating Identity...", variant='striped', attrs='x-effect="pVal = progressValue"')
-                }}
-            </div>
-
-            <!-- Error -->
-            <div x-show="error" x-text="error" x-transition
-                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
-            </div>
-
-            <button type="submit" :disabled="loading"
-                class="w-full py-4 nb-button bg-electric-blue text-black flex items-center justify-center gap-2 disabled:opacity-50">
-                <span class="flex items-center gap-2"><i class="ph-bold ph-user-plus"></i> Create Identity</span>
-            </button>
-        </form>
-
-        <!-- Footer -->
-        <div class="flex items-center justify-center gap-2 mt-6 border-t-2 border-black pt-4">
-            <i class="ph-bold ph-cat text-xl"></i>
-            <p class="text-center text-xs font-mono text-gray-500">
-                NeoSpace v1.0.cat // Project Purrcrete
-            </p>
-        </div>
+        <h1 class="text-3xl font-black uppercase tracking-tighter mb-1">NeoSpace</h1>
+        <p class="text-sm font-mono text-gray-600">Access the Meow-Grid</p>
     </div>
+
+    <!-- Tab Toggle -->
+    <div class="flex border-2 border-black mb-6">
+        <button @click="isLogin = true"
+            :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+            class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
+            <i class="ph-bold ph-sign-in"></i> Sign In
+        </button>
+        <button @click="isLogin = false"
+            :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+            class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+            <i class="ph-bold ph-user-plus"></i> Register
+        </button>
+    </div>
+
+    <!-- Login Form -->
+    <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5">
+        {{ input('username', 'Username', placeholder='your_handle', attrs='x-model="username" required') }}
+        {{ input('password', 'Password', type='password', placeholder='••••••••', attrs='x-model="password" required')
+        }}
+
+        <!-- Progress -->
+        <div x-show="loading" x-transition class="pt-2">
+            {{ progress(0, label="Authenticating...", variant='striped', attrs='x-effect="pVal = progressValue"') }}
+        </div>
+
+        <!-- Error -->
+        <div x-show="error" x-text="error" x-transition
+            class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+        </div>
+
+        {{ button('Enter Grid', variant='primary', class='w-full py-4', icon='ph-bold ph-sign-in', attrs='type="submit"
+        :disabled="loading"') }}
+
+        <div class="absolute -bottom-6 -right-6 transform rotate-12 z-0">
+            <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-16 h-16 object-contain">
+        </div>
+    </form>
+
+    <!-- Register Form -->
+    <form x-show="!isLogin" x-data="registerForm()" @submit.prevent="submit()" x-cloak x-transition class="space-y-5">
+        <div>
+            <div class="relative group">
+                {{ input('username', 'Username', placeholder='new_handle', attrs='x-model="username" required') }}
+                {% call tooltip("Alphanumeric only, 3-15 chars", position='right') %}
+                <div class="absolute right-3 top-9 text-gray-400">
+                    <i class="ph-bold ph-question"></i>
+                </div>
+                {% endcall %}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+            {{ input('password', 'Password', type='password', placeholder='••••••••', attrs='x-model="password"
+            required') }}
+            {{ input('confirmPassword', 'Confirm Password', type='password', placeholder='••••••••',
+            attrs='x-model="confirmPassword" required') }}
+        </div>
+
+        <!-- Progress -->
+        <div x-show="loading" x-transition class="pt-2">
+            {{ progress(0, label="Creating Identity...", variant='striped', attrs='x-effect="pVal = progressValue"')
+            }}
+        </div>
+
+        <!-- Error -->
+        <div x-show="error" x-text="error" x-transition
+            class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+        </div>
+
+        {{ button('Create Identity', variant='primary', class='w-full py-4 bg-electric-blue', icon='ph-bold
+        ph-user-plus', attrs='type="submit" :disabled="loading"') }}
+    </form>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-center gap-2 mt-6 border-t-2 border-black pt-4">
+        <i class="ph-bold ph-cat text-xl"></i>
+        <p class="text-center text-xs font-mono text-gray-500">
+            NeoSpace v1.0.cat // Project Purrcrete
+        </p>
+    </div>
+    {% endcall %}
 
     <!-- Cat Companion Widget -->
     {% from "components/cat_widget.html" import cat_widget %}

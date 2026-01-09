@@ -1,5 +1,5 @@
 import functools
-from flask import Blueprint, g, render_template
+from flask import Blueprint, g, render_template, abort
 from db import get_db
 from mutations.moderation import resolve_report, submit_report as submit_report_mutation
 

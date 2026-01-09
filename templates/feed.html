@@ -8,25 +8,28 @@
 {% endblock %}
 
 {% block content %}
+{% from "components/ui_macros.html" import button, card, input, badge %}
+{% from "components/avatar.html" import avatar %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-    
+
     <!-- Main Feed Column -->
     <div class="lg:col-span-8">
-        
+
         <!-- Feed Wrapper -->
-        <div id="feed-container" class="space-y-6 min-h-[400px]" x-data="{ hasPosts: false }" x-init="$watch('$el.children.length', count => hasPosts = count > 0)">
+        <div id="feed-container" class="space-y-6 min-h-[400px]" x-data="{ hasPosts: false }"
+            x-init="$watch('$el.children.length', count => hasPosts = count > 0)">
             <!-- JS inserts posts here -->
-            <!-- We will check if children are empty via JS or server-side, 
-                 but since load is async JS, we can just put a default message that gets overwritten or hidden -->
             <div id="feed-empty-state" class="hidden flex flex-col items-center justify-center py-20 opacity-60">
-                <div class="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-4xl mb-4 animate-bounce">
+                <div
+                    class="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-4xl mb-4 animate-bounce">
                     <i class="ph-bold ph-broadcast"></i>
                 </div>
                 <h3 class="font-black uppercase text-xl text-center">Static Silence...</h3>
-                <p class="font-mono text-sm text-center max-w-xs mt-2">No signals detected in the stream. Be the first to broadcast.</p>
+                <p class="font-mono text-sm text-center max-w-xs mt-2">No signals detected in the stream. Be the first
+                    to broadcast.</p>
             </div>
         </div>
-        
+
         <!-- Loader / Trigger -->
         <div id="load-more-trigger" class="h-20 flex items-center justify-center">
             <div id="feed-loader" class="hidden">
@@ -35,32 +38,28 @@
         </div>
 
     </div>
-    
+
     <!-- Sidebar -->
     <div class="lg:col-span-4 space-y-6 hidden lg:block">
-        
+
         <!-- Mini Profile Card -->
-        <div class="nb-card p-6 bg-white">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {{ (g.user.display_name or g.user.username)[0] | upper }}
-                </div>
-                <div>
-                   <h3 class="font-bold">{{ g.user.display_name or g.user.username }}</h3>
-                   <span class="text-xs text-gray-500">@{{ g.user.username }}</span>
-                </div>
+        {% call card(class="bg-white") %}
+        <div class="flex items-center gap-4 mb-4">
+            {{ avatar(text=(g.user.display_name or g.user.username), size='md') }}
+            <div>
+                <h3 class="font-bold">{{ g.user.display_name or g.user.username }}</h3>
+                <span class="text-xs text-gray-500">@{{ g.user.username }}</span>
             </div>
-            <a href="/wall" class="block w-full text-center py-2 border-2 border-black hover:bg-black hover:text-white transition uppercase text-xs font-bold">
-                Go to Wall
-            </a>
         </div>
-        
+        {{ button('Go to Wall', variant='outline', href='/wall', class='w-full', size='sm') }}
+        {% endcall %}
+
         <!-- Discovery Hint -->
-        <div class="nb-card p-6 bg-acid-green/20 border-dashed">
-            <h3 class="font-black uppercase text-sm mb-2">Explore</h3>
-            <p class="text-sm text-slate-600 mb-4">Find artists, coders, and strange signals around the network.</p>
-            <a href="/directory" class="text-sm font-bold underline hover:text-hot-pink">Browse Directory →</a>
-        </div>
+        {% call card(class="bg-acid-green/20 border-dashed") %}
+        <h3 class="font-black uppercase text-sm mb-2">Explore</h3>
+        <p class="text-sm text-slate-600 mb-4">Find artists, coders, and strange signals around the network.</p>
+        <a href="/directory" class="text-sm font-bold underline hover:text-hot-pink">Browse Directory →</a>
+        {% endcall %}
 
     </div>
 

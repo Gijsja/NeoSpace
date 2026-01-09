@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
     <script src="/static/vendor/tailwindcss.js"></script>
     <script defer src="/static/vendor/alpine.min.js"></script>
+    <link rel="stylesheet" href="/static/css/neospace.css">
     <script>
         tailwind.config = {
             theme: {
@@ -57,14 +58,11 @@
     </script>
 
     <!-- Imports -->
-    {% from "components/button.html" import button %}
-    {% from "components/input.html" import input %}
-    {% from "components/card.html" import card %}
+    {% from "components/ui_macros.html" import button, input, card, badge, textarea, select %}
     {% from "components/dialog.html" import dialog %}
     {% from "components/dropdown.html" import dropdown, dropdown_item %}
     {% from "components/command.html" import command_palette %}
     {% from "components/avatar.html" import avatar %}
-    {% from "components/badge.html" import badge %}
     {% from "components/skeleton.html" import skeleton %}
     {% from "components/switch.html" import switch %}
     {% from "components/tabs.html" import tabs, tab_panel %}
@@ -81,8 +79,8 @@
         <div>
             <h1 class="text-4xl font-black uppercase tracking-tighter mb-2">NeoSpace UI Kit</h1>
             <p class="font-mono text-sm text-gray-500">Reactive Component Library (Alpine.js + Tailwind)</p>
-            <p class="font-mono text-xs text-acid-green font-bold bg-black inline-block px-2 py-0.5 mt-2">v2.1 EXPANDED
-            </p>
+            <p class="font-mono text-xs text-acid-green font-bold bg-black inline-block px-2 py-0.5 mt-2">v2.5
+                STANDARDIZED</p>
         </div>
         <div class="text-right">
             <p class="text-sm font-bold uppercase">Press <span class="bg-gray-200 px-1 border border-black">CMD+K</span>
@@ -92,7 +90,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
 
-        <!-- MEDIA (NEW) -->
+        <!-- MEDIA -->
         <section class="space-y-4 md:col-span-2 lg:col-span-1">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Media</h2>
             {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Neon City.mp3")
@@ -114,16 +112,15 @@
                     {{ button('Ghost', variant='ghost') }}
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    {{ button('Destructive', variant='destructive', size='sm') }}
-                    {{ button('Outline', variant='outline', size='sm') }}
+                    {{ button('Danger', variant='danger') }}
                 </div>
 
                 <div class="pt-4 border-t border-gray-100 w-full mt-4">
                     <p class="font-mono text-xs mb-2">Interactive Counter:</p>
                     <div class="flex items-center gap-4">
-                        {{ button('-', variant='secondary', size='sm', attrs='@click="count--"') }}
+                        {{ button('-', variant='secondary', attrs='@click="count--"') }}
                         <span class="font-black text-2xl w-8 text-center" x-text="count"></span>
-                        {{ button('+', variant='primary', size='sm', attrs='@click="count++"') }}
+                        {{ button('+', variant='primary', attrs='@click="count++"') }}
                     </div>
                 </div>
             </div>
@@ -134,8 +131,9 @@
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Inputs</h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4">
                 {{ input('email', 'Email Address', type='email', placeholder='user@example.com') }}
-                {{ input('password', 'Password', type='password', required=True) }}
-                {{ input('error_example', 'With Error', error='Invalid username') }}
+                {{ input('password', 'Password', type='password') }}
+                {{ textarea('bio', 'Bio', placeholder='Tell us about yourself...', class='h-24') }}
+                {{ select('role', [('dev', 'Developer'), ('des', 'Designer'), ('mgr', 'Manager')], label='Role') }}
             </div>
         </section>
 
@@ -143,7 +141,7 @@
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Cards</h2>
 
-            {% call card(title="System Status", description="Real-time metrics") %}
+            {% call card(title="System Status") %}
             <div class="flex items-center justify-between mb-2">
                 <span class="font-mono text-xs">CPU Usage</span>
                 <span class="font-bold text-acid-green bg-black px-1 text-xs">42%</span>
@@ -153,8 +151,9 @@
             </div>
             {% endcall %}
 
-            {% call card(title="Login", footer=button("Sign In", class="w-full")) %}
+            {% call card(title="Login") %}
             {{ input('u', 'Username', class="mb-3") }}
+            {{ button("Sign In", class="w-full mt-4") }}
             {% endcall %}
         </section>
 

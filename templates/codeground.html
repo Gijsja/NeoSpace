@@ -77,6 +77,7 @@
 {% endblock %}
 
 {% block main_container %}
+{% from "components/ui_macros.html" import button, input, textarea %}
 <div class="flex h-full overflow-hidden bg-bbs-bg" x-data="codeground()">
 
     <!-- LEFT: Script Manager Sidebar -->
@@ -127,8 +128,8 @@
                     <i class="ph-bold ph-sidebar-simple"></i>
                 </button>
 
-                <input type="text" x-model="currentTitle" class="nb-input h-8 w-64 font-bold text-sm"
-                    placeholder="Untitled Script" @input="docDirty = true">
+                {{ input('currentTitle', attrs='x-model="currentTitle" @input="docDirty = true"', wrapper_class='w-64',
+                class='h-8 font-bold text-sm', placeholder='Untitled Script') }}
 
                 <span x-show="docDirty" class="text-xs font-mono text-red-500 animate-pulse font-bold uppercase">*
                     Unsaved</span>
@@ -136,24 +137,19 @@
 
             <div class="flex items-center gap-2">
                 <!-- Save Draft -->
-                <button @click="saveScript()"
-                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-white hover:bg-acid-green transition shadow-hard-sm flex items-center gap-2"
-                    :disabled="isSaving">
-                    <i class="ph-bold ph-floppy-disk"></i>
-                    <span x-text="isSaving ? 'Saving...' : 'Save Draft'"></span>
-                </button>
+                {% call button(None, variant='secondary', class='border-black hover:bg-acid-green shadow-hard-sm',
+                attrs='@click="saveScript()" :disabled="isSaving" type="button"') %}
+                <i class="ph-bold ph-floppy-disk"></i>
+                <span x-text="isSaving ? 'Saving...' : 'Save Draft'"></span>
+                {% endcall %}
 
                 <!-- Run -->
-                <button @click="runCode()"
-                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-electric-blue hover:bg-cyan-300 transition shadow-hard-sm flex items-center gap-2">
-                    <i class="ph-bold ph-play"></i> Run
-                </button>
+                {{ button('Run', variant='primary', class='bg-electric-blue hover:bg-cyan-300 shadow-hard-sm',
+                icon='ph-bold ph-play', attrs='@click="runCode()"') }}
 
                 <!-- Publish -->
-                <button @click="openPublishModal()"
-                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-purple-600 text-white hover:bg-purple-500 transition shadow-hard-sm flex items-center gap-2">
-                    <i class="ph-bold ph-upload-simple"></i> Publish
-                </button>
+                {{ button('Publish', variant='primary', class='bg-purple-600 text-white hover:bg-purple-500
+                shadow-hard-sm', icon='ph-bold ph-upload-simple', attrs='@click="openPublishModal()"') }}
             </div>
         </div>
 
@@ -191,13 +187,13 @@
         <div class="bg-white border-2 border-black p-6 w-96 shadow-hard-xl" @click.away="showPublishModal = false">
             <h2 class="text-xl font-black uppercase mb-4">Publish to Wall</h2>
             <div class="space-y-3">
-                <input type="text" x-model="currentTitle" class="nb-input w-full" placeholder="Title">
-                <textarea x-model="publishDesc" class="nb-input w-full h-24" placeholder="Description..."></textarea>
+                {{ input('publishTitle', attrs='x-model="currentTitle"', placeholder='Title') }}
+                {{ textarea('publishDesc', attrs='x-model="publishDesc"', class='h-24', placeholder='Description...') }}
                 <div class="flex gap-2 pt-2">
-                    <button @click="showPublishModal = false"
-                        class="flex-1 py-2 border-2 border-black font-bold hover:bg-gray-100">CANCEL</button>
-                    <button @click="publishToWall()"
-                        class="flex-1 py-2 bg-black text-white border-2 border-black font-bold hover:bg-gray-800">PUBLISH</button>
+                    {{ button('CANCEL', variant='secondary', class='flex-1 border-black hover:bg-gray-100',
+                    attrs='@click="showPublishModal = false"') }}
+                    {{ button('PUBLISH', variant='primary', class='flex-1 bg-black text-white hover:bg-gray-800',
+                    attrs='@click="publishToWall()"') }}
                 </div>
             </div>
         </div>

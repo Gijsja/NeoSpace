@@ -19,78 +19,7 @@
 
     <!-- Tailwind CSS (Vendored) -->
     <script src="/static/vendor/tailwindcss.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'], // Keep Inter but will use heavier weights
-                        mono: ['monospace'], // For that raw feel
-                    },
-                    colors: {
-                        'bbs-bg': '#FFFAF0', // Floral White
-                        'bbs-surface': '#FFFFFF',
-                        'bbs-border': '#000000', // Hard Black
-                        'bbs-shadow': '#000000',
-
-                        // Accents (Clashing)
-                        'acid-green': '#a3e635',
-                        'hot-pink': '#ff6b6b',
-                        'construction-orange': '#fb923c',
-                        'electric-blue': '#22d3ee',
-                        'warm-beige': '#f5f5dc',
-
-                        // Penguin UI / Neo-Brutalism Palette
-                        'neo-bg': '#0a0f1a',
-                        'neo-surface': 'rgba(30, 41, 59, 0.85)',
-                        'neo-border': 'rgba(71, 85, 105, 0.5)',
-                        'neo-accent': '#60a5fa',
-                        'neo-accent-glow': 'rgba(96, 165, 250, 0.4)',
-                        'neo-yellow': '#F3F722', // Acid Yellow
-                        'neo-pink': '#FF69B4',   // Hot Pink
-                        'neo-green': '#A3E635',  // Lime Green
-                        'neo-black': '#000000',
-                        'neo-white': '#FFFFFF',
-                    },
-                    boxShadow: {
-                        'hard': '4px 4px 0px 0px #000000',
-                        'hard-sm': '2px 2px 0px 0px #000000',
-                        'hard-xl': '8px 8px 0px 0px #000000',
-                        'glow': '0 0 20px rgba(96, 165, 250, 0.5)',
-                    },
-                    animation: {
-                        'marquee': 'marquee 20s linear infinite',
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'pop': 'pop 0.2s ease-out',
-                        'glitch': 'glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite',
-                    },
-                    keyframes: {
-                        marquee: {
-                            '0%': { transform: 'translateX(100%)' },
-                            '100%': { transform: 'translateX(-100%)' }
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(15px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        pop: {
-                            '0%': { transform: 'scale(0.95)' },
-                            '50%': { transform: 'scale(1.02)' },
-                            '100%': { transform: 'scale(1)' },
-                        },
-                        glitch: {
-                            '0%': { transform: 'translate(0)' },
-                            '20%': { transform: 'translate(-2px, 2px)' },
-                            '40%': { transform: 'translate(-2px, -2px)' },
-                            '60%': { transform: 'translate(2px, 2px)' },
-                            '80%': { transform: 'translate(2px, -2px)' },
-                            '100%': { transform: 'translate(0)' },
-                        },
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="/ui/js/tailwind_config.js"></script>
 
     <!-- Alpine.js -->
     <script defer src="/static/vendor/alpine.min.js"></script>
@@ -99,6 +28,9 @@
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
+
+    <!-- NeoSpace Utilities -->
+    <link rel="stylesheet" href="/static/css/neospace.css">
 
     <!-- ApexCharts -->
     <script src="/static/vendor/apexcharts.min.js"></script>
@@ -151,42 +83,8 @@
             overflow: hidden;
         }
 
-        /* Utilities */
-        .nb-card {
-            background-color: #FFFFFF;
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px 0px #000000;
-        }
+        /* Utilities Moved to neospace.css */
 
-        .nb-button {
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px 0px #000000;
-            transition: all 0.1s;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .nb-button:active {
-            transform: translate(4px, 4px);
-            box-shadow: none;
-        }
-
-        .nb-input {
-            background-color: #FFFFFF;
-            border: 2px solid #000000;
-            padding: 0.5rem 1rem;
-            width: 100%;
-            font-family: monospace;
-            box-shadow: 4px 4px 0px 0px #000000;
-            transition: all 0.2s;
-        }
-
-        .nb-input:focus {
-            outline: none;
-            background-color: #fff1f2;
-            /* pink-50 */
-            box-shadow: 6px 6px 0px 0px #000000;
-        }
 
         /* Custom Brutalist Scrollbar */
         ::-webkit-scrollbar {
@@ -424,6 +322,9 @@
                     <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Features</span>
                 </div>
                 {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}
+                {{ nav_link('/lobby', 'ph-bold ph-users-three', 'Visual Lobby', class='sidebar-link') }}
+                {{ nav_link('/messages', 'ph-bold ph-chat-centered-text', 'Communications', class='sidebar-link') }}
+                {{ nav_link('/notifications/center', 'ph-bold ph-bell-ringing', 'Live Wire', class='sidebar-link') }}
                 {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice', class='sidebar-link opacity-50
                 cursor-not-allowed', badge=False) }}
 

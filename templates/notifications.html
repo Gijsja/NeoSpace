@@ -4,13 +4,13 @@
 {% block page_title %}Alert Center{% endblock %}
 
 {% block content %}
+{% from "components/ui_macros.html" import button %}
 <div class="max-w-3xl mx-auto space-y-6">
-    
+
     <!-- Header Controls -->
     <div class="flex justify-end">
-        <button onclick="NotificationManager.markAllRead()" class="nb-button bg-white px-4 py-2 hover:bg-black hover:text-white flex items-center gap-2 text-sm">
-            <i class="ph-bold ph-checks"></i> Mark All Read
-        </button>
+        {{ button('Mark All Read', variant='secondary', class='hover:bg-black hover:text-white', icon='ph-bold
+        ph-checks', attrs='onclick="NotificationManager.markAllRead()"') }}
     </div>
 
     <!-- Notifications List -->
@@ -30,26 +30,26 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('notifications-list');
         const loader = document.getElementById('loading-notifs');
-        
+
         try {
             const res = await fetch('/notifications/'); // Assuming GET /notifications/ returns list? 
             // Checking routes/notifications.py ...
             // Sprint 15 implementation: GET /notifications/ returns { ok: true, notifications: [...] }
-            
+
             const data = await res.json();
-            
+
             loader.remove();
-            
+
             if (data.ok && data.notifications.length > 0) {
                 list.innerHTML = data.notifications.map(n => {
                     const icon = n.type === 'follow' ? 'ph-user-plus' : 'ph-bell';
                     const bg = n.is_read ? 'bg-white opacity-60' : 'bg-white border-l-8 border-l-acid-green';
-                    
+
                     // Construct Message
                     let msg = "";
                     if (n.type === 'follow') msg = `started following you.`;
                     else msg = n.message || "New interaction";
-                    
+
                     return `
                     <div class="nb-card p-4 ${bg} flex items-center gap-4 transition hover:opacity-100 relative group">
                         <div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shrink-0">

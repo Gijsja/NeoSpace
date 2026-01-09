@@ -4,44 +4,42 @@
 
 {% block content %}
 <div class="min-h-screen flex items-center justify-center p-4">
-    <div
-        class="nb-card p-8 bg-white max-w-2xl w-full text-center space-y-8 relative overflow-hidden border-red-500 shadow-[4px_4px_0px_0px_#ef4444]">
+    {% from "components/ui_macros.html" import card, button %}
 
-        <!-- Glitch Overlay -->
-        <div class="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
+    {% call card(class='max-w-2xl w-full text-center space-y-8 relative overflow-hidden border-red-500
+    shadow-[4px_4px_0px_0px_#ef4444]') %}
 
-        <div class="relative z-10">
-            <h1 class="text-8xl font-black mb-2 animate-pulse text-red-500" style="text-shadow: 4px 4px 0px #000;">500
-            </h1>
-            <h2
-                class="text-2xl font-bold uppercase tracking-widest bg-red-500 text-white inline-block px-4 py-1 mb-8 transform rotate-1">
-                System Meltdown</h2>
+    <!-- Glitch Overlay -->
+    <div class="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
 
-            <div class="flex justify-center mb-8">
-                <img src="/static/images/cat_500.png" alt="Server Fire Cat"
-                    class="w-64 h-64 object-contain filter contrast-125 border-4 border-black shadow-hard transform -rotate-2 hover:rotate-2 transition-transform duration-300">
-            </div>
+    <div class="relative z-10">
+        <h1 class="text-8xl font-black mb-2 animate-pulse text-red-500" style="text-shadow: 4px 4px 0px #000;">500
+        </h1>
+        <h2
+            class="text-2xl font-bold uppercase tracking-widest bg-red-500 text-white inline-block px-4 py-1 mb-8 transform rotate-1">
+            System Meltdown</h2>
 
-            <p class="font-mono text-lg mb-8 max-w-md mx-auto">
-                Critical error detected. The server is overheating (literally). We have dispatched a team of
-                cyber-firefighters.
-            </p>
-
-            <div class="flex gap-4 justify-center">
-                <a href="/"
-                    class="nb-button inline-block px-8 py-3 bg-white hover:bg-gray-100 text-black text-xl flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-house"></i> Home
-                </a>
-                <button onclick="window.location.reload()"
-                    class="nb-button inline-block px-8 py-3 bg-red-500 hover:bg-red-400 text-white text-xl flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-arrows-clockwise"></i> Retry
-                </button>
-            </div>
+        <div class="flex justify-center mb-8">
+            <img src="/static/images/cat_500.png" alt="Server Fire Cat"
+                class="w-64 h-64 object-contain filter contrast-125 border-4 border-black shadow-hard transform -rotate-2 hover:rotate-2 transition-transform duration-300">
         </div>
 
-        <!-- Decorative elements -->
-        <div class="absolute top-4 left-4 text-xs font-mono font-bold text-red-500">ERROR_CODE: CRITICAL</div>
-        <div class="absolute bottom-4 right-4 text-xs font-mono font-bold text-red-500">STACK_TRACE: NULL</div>
+        <p class="font-mono text-lg mb-8 max-w-md mx-auto">
+            Critical error detected. The server is overheating (literally). We have dispatched a team of
+            cyber-firefighters.
+        </p>
+
+        <div class="flex gap-4 justify-center">
+            {{ button(text="Home", href="/", variant="secondary", icon="ph-bold ph-house", class="px-8 py-3 text-xl") }}
+            {{ button(text="Retry", attrs="onclick='window.location.reload()'", variant="danger", icon="ph-bold
+            ph-arrows-clockwise", class="px-8 py-3 text-xl bg-red-500 hover:bg-red-400 border-red-500
+            shadow-[4px_4px_0px_0px_#000000]") }}
+        </div>
     </div>
+
+    <!-- Decorative elements -->
+    <div class="absolute top-4 left-4 text-xs font-mono font-bold text-red-500">ERROR_CODE: CRITICAL</div>
+    <div class="absolute bottom-4 right-4 text-xs font-mono font-bold text-red-500">STACK_TRACE: NULL</div>
+    {% endcall %}
 </div>
 {% endblock %}

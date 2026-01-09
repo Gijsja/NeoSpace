@@ -6,9 +6,15 @@
 {% block head %}
 <script src="/static/vendor/htmx.min.js"></script>
 <style>
-    .htmx-request { opacity: 0.5; transition: opacity 200ms; }
-    .htmx-request .htmx-indicator { display: inline-block; }
-    
+    .htmx-request {
+        opacity: 0.5;
+        transition: opacity 200ms;
+    }
+
+    .htmx-request .htmx-indicator {
+        display: inline-block;
+    }
+
     /* User Card Styling */
     .user-card {
         background-color: #FFFFFF;
@@ -16,10 +22,12 @@
         box-shadow: 4px 4px 0px 0px #000000;
         transition: all 0.1s;
     }
+
     .user-card:hover {
         transform: translate(-2px, -2px);
         box-shadow: 6px 6px 0px 0px #000000;
     }
+
     .user-card:active {
         transform: translate(2px, 2px);
         box-shadow: 2px 2px 0px 0px #000000;
@@ -28,41 +36,36 @@
 {% endblock %}
 
 {% block content %}
+{% from "components/ui_macros.html" import button, input %}
 <div class="space-y-6">
-    
+
     <!-- Header & Search Controls -->
     <div class="flex flex-col gap-4">
         <!-- Search Bar -->
         <div class="nb-card p-4 flex items-center gap-4">
             <i class="ph-bold ph-magnifying-glass text-xl"></i>
-            <input type="search" 
-                   name="search"
-                   placeholder="SEARCH..." 
-                   class="nb-input flex-1 border-none focus:ring-0 text-lg"
-                   autocomplete="off" />
+            {{ input('search', class='flex-1 border-none focus:ring-0 text-lg shadow-none p-0', placeholder='SEARCH...',
+            attrs='type="search" autocomplete="off"', wrapper_class='flex-1') }}
         </div>
-        
+
         <!-- Type Toggles -->
         <div class="flex gap-2">
-            <button class="search-type-toggle nb-button px-6 py-2 bg-black text-white hover:translate-x-0 hover:translate-y-0" data-type="users">
-                PEOPLE
-            </button>
-            <button class="search-type-toggle nb-button px-6 py-2 bg-white text-black hover:bg-gray-100 hover:translate-x-0 hover:translate-y-0" data-type="posts">
-                POSTS
-            </button>
+            {{ button('PEOPLE', variant='primary', class='search-type-toggle bg-black text-white hover:translate-x-0
+            hover:translate-y-0', attrs='data-type="users"') }}
+            {{ button('POSTS', variant='secondary', class='search-type-toggle bg-white text-black hover:bg-gray-100
+            hover:translate-x-0 hover:translate-y-0', attrs='data-type="posts"') }}
         </div>
     </div>
 
     <!-- Results Grid -->
-    <div id="search-results" 
-         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px]">
-        
+    <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px]">
+
         <!-- Empty State -->
         <div class="col-span-full text-center p-8 opacity-50">
             <i class="ph-bold ph-magnifying-glass text-4xl mb-2"></i>
             <p>SEARCH THE NETWORK</p>
         </div>
-        
+
     </div>
 
 </div>

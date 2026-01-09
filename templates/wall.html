@@ -30,6 +30,7 @@
 {% endblock %}
 
 {% block content %}
+{% from "components/ui_macros.html" import button, input, card, badge, textarea, select %}
 <!-- Loading State -->
 <div id="loading" class="flex flex-col items-center justify-center py-20 min-h-[50vh]">
     <div class="animate-spin text-4xl mb-4">
@@ -83,15 +84,11 @@
                         id="display-name">Loading...</h1>
                     <div class="flex items-center gap-3">
                         <p class="text-lg font-mono font-bold bg-black text-white px-2" id="username-handle">@...</p>
-                        <button id="edit-profile-btn"
-                            class="px-3 py-1 bg-white border-2 border-black hover:bg-yellow-300 text-xs font-bold uppercase transition hidden flex items-center gap-2 shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                            <i class="ph-bold ph-pencil-simple"></i> Edit Identity
-                        </button>
+                        {{ button('Edit Identity', variant='secondary', size='sm', icon='ph-bold ph-pencil-simple',
+                        attrs='id="edit-profile-btn"', class='hidden flex hover:bg-yellow-300') }}
                         <!-- Follow Button (Sprint 20) -->
-                        <button id="follow-btn"
-                            class="px-3 py-1 bg-black text-white border-2 border-black hover:bg-neutral-800 text-xs font-bold uppercase transition hidden shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
-                            FOLLOW
-                        </button>
+                        {{ button('FOLLOW', variant='primary', size='sm', attrs='id="follow-btn"', class='bg-black
+                        text-white hover:bg-neutral-800 hidden') }}
                         <!-- Voice Intro Section -->
                         <div id="voice-intro-section" class="hidden"></div>
                     </div>
@@ -144,10 +141,8 @@
                     Loading...
                 </p>
 
-                <button id="edit-now-btn"
-                    class="w-full mt-4 py-1.5 text-xs font-bold bg-white border-2 border-black hover:bg-black hover:text-white transition hidden uppercase">
-                    Update
-                </button>
+                {{ button('Update', variant='secondary', size='sm', attrs='id="edit-now-btn"', class='w-full mt-4 hidden
+                hover:bg-black hover:text-white uppercase') }}
             </div>
 
             <!-- Top 8 Grid (Sprint 20) -->
@@ -303,37 +298,33 @@
                         <i class="ph-bold ph-clock"></i> The "Now" Block
                     </label>
                     <div class="grid grid-cols-3 gap-2">
-                        <select name="now_activity_type" id="input-now-type"
-                            class="col-span-1 bg-white border-2 border-black h-10 px-2 text-xs font-bold focus:outline-none">
-                            <option value="thinking">Thinking</option>
-                            <option value="listening">Listening</option>
-                            <option value="working">Working</option>
-                            <option value="playing">Playing</option>
-                            <option value="reading">Reading</option>
-                            <option value="watching">Watching</option>
-                        </select>
-                        <input type="text" name="now_activity" id="input-now-activity" class="col-span-2 nb-input h-10"
-                            placeholder="e.g. Creating art..." maxlength="50" />
+                        <div class="col-span-1">
+                            {{ select('now_activity_type', [
+                            ('thinking', 'Thinking'),
+                            ('listening', 'Listening'),
+                            ('working', 'Working'),
+                            ('playing', 'Playing'),
+                            ('reading', 'Reading'),
+                            ('watching', 'Watching')
+                            ], id='input-now-type', class='text-xs font-bold') }}
+                        </div>
+                        <div class="col-span-2">
+                            {{ input('now_activity', id='input-now-activity', placeholder='e.g. Creating art...',
+                            attrs='maxlength="50"') }}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Basic Info -->
                 <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="block text-xs uppercase font-bold mb-1.5">Display Name</label>
-                        <input type="text" name="display_name" id="input-name" class="nb-input" required
-                            maxlength="50" />
-                    </div>
+                    {{ input('display_name', 'Display Name', id='input-name', attrs='required maxlength="50"') }}
                     <input type="hidden" name="bio" id="input-bio">
                 </div>
 
                 <!-- Anthem -->
                 <div class="p-4 border-2 border-black bg-white space-y-2 shadow-hard-sm">
-                    <label class="block text-xs uppercase font-bold flex items-center gap-2">
-                        <i class="ph-bold ph-music-notes"></i> Anthem (MP3/URL)
-                    </label>
-                    <input type="url" name="anthem_url" id="input-anthem-url" class="nb-input"
-                        placeholder="https://example.com/song.mp3" />
+                    {{ input('anthem_url', 'Anthem (MP3/URL)', id='input-anthem-url', type='url',
+                    placeholder='https://example.com/song.mp3') }}
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="anthem_autoplay" id="input-anthem-autoplay"
                             class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
@@ -360,30 +351,26 @@
                         <label class="block text-xs uppercase font-bold mb-2 flex items-center gap-2">
                             <i class="ph-bold ph-paint-brush"></i> Wall Theme
                         </label>
-                        <select name="theme_preset" id="input-theme" class="nb-input h-10 bg-white">
-                            <option value="default">Default (Brutalist)</option>
-                            <option value="hacker">🖥️ Hacker Terminal</option>
-                        </select>
+                        {{ select('theme_preset', [
+                        ('default', 'Default (Brutalist)'),
+                        ('hacker', '🖥️ Hacker Terminal')
+                        ], id='input-theme') }}
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-2">
-                    <button type="button"
-                        class="close-modal px-4 py-2 text-sm font-bold uppercase border-2 border-transparent hover:border-black transition">Cancel</button>
-                    <button type="submit"
-                        class="nb-button px-6 py-2 bg-acid-green hover:bg-hot-pink flex items-center gap-2">
-                        Save Changes
-                    </button>
+                    {{ button('Cancel', variant='ghost', class='close-modal border-2 border-transparent
+                    hover:border-black', attrs='type="button"') }}
+                    {{ button('Save Changes', variant='primary', class='hover:bg-hot-pink', icon='ph-bold ph-check',
+                    attrs='type="submit"') }}
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Add Module FAB (Brutalist Square) -->
-    <button id="add-module-btn"
-        class="fixed bottom-8 right-8 z-40 w-14 h-14 bg-electric-blue border-2 border-black hover:bg-hot-pink flex items-center justify-center shadow-hard transition-transform active:translate-x-[4px] active:translate-y-[4px] active:shadow-none group hidden">
-        <i class="ph-bold ph-plus text-2xl"></i>
-    </button>
+    {{ button(None, icon='ph-bold ph-plus', size='fab', attrs='id="add-module-btn"', class='fixed bottom-8 right-8 z-40
+    bg-electric-blue hover:bg-hot-pink hidden group !text-black !border-black') }}
 
     <!-- Add Module Modal -->
     <div id="add-module-modal"
@@ -426,45 +413,35 @@
                 <input type="hidden" name="module_type" id="new-module-type" value="text">
 
                 <div id="fields-text" class="space-y-2">
-                    <label class="block text-xs uppercase font-bold">Content (Markdown)</label>
-                    <textarea name="text_content" class="nb-input h-32 custom-scrollbar"
-                        placeholder="# Hello World..."></textarea>
+                    {{ textarea('text_content', 'Content (Markdown)', class='h-32 custom-scrollbar', placeholder='#
+                    Hello World...') }}
                 </div>
 
                 <div id="fields-image" class="space-y-2 hidden">
-                    <label class="block text-xs uppercase font-bold">Image URL</label>
-                    <input type="url" name="image_url" class="nb-input" placeholder="https://..." />
+                    {{ input('image_url', 'Image URL', type='url', placeholder='https://...') }}
                 </div>
 
                 <div id="fields-link" class="space-y-2 hidden">
-                    <label class="block text-xs uppercase font-bold">Link URL</label>
-                    <input type="url" name="link_url" class="nb-input" placeholder="https://..." />
-                    <label class="block text-xs uppercase font-bold">Title (Optional)</label>
-                    <input type="text" name="link_title" class="nb-input" placeholder="Link Title" />
+                    {{ input('link_url', 'Link URL', type='url', placeholder='https://...') }}
+                    {{ input('link_title', 'Title (Optional)', placeholder='Link Title') }}
+                    {{ input('link_thumb', 'Thumbnail URL (Optional)', type='url',
+                    placeholder='https://example.com/image.jpg') }}
 
-                    <label class="block text-xs uppercase font-bold">Thumbnail URL (Optional)</label>
-                    <input type="url" name="link_thumb" class="nb-input" placeholder="https://example.com/image.jpg" />
-
-                    <label class="block text-xs uppercase font-bold">Display Style</label>
-                    <select name="link_style" class="nb-input h-10 bg-white border-2 border-black focus:outline-none">
-                        <option value="simple">Simple Row</option>
-                        <option value="button">Button</option>
-                        <option value="card">Card (Large Image)</option>
-                    </select>
+                    {{ select('link_style', [
+                    ('simple', 'Simple Row'),
+                    ('button', 'Button'),
+                    ('card', 'Card (Large Image)')
+                    ], label='Display Style') }}
                 </div>
 
                 <div id="fields-audio" class="space-y-2 hidden">
-                    <label class="block text-xs uppercase font-bold">Audio URL (MP3)</label>
-                    <input type="url" name="audio_url" class="nb-input" placeholder="https://..." />
-                    <label class="block text-xs uppercase font-bold">Caption (Optional)</label>
-                    <input type="text" name="audio_title" class="nb-input" placeholder="Song Title" />
+                    {{ input('audio_url', 'Audio URL (MP3)', type='url', placeholder='https://...') }}
+                    {{ input('audio_title', 'Caption (Optional)', placeholder='Song Title') }}
                 </div>
 
                 <div class="flex justify-end pt-2">
-                    <button type="submit"
-                        class="nb-button px-6 py-2 bg-electric-blue hover:bg-hot-pink flex items-center gap-2">
-                        <i class="ph-bold ph-plus"></i> Add
-                    </button>
+                    {{ button('Add', variant='primary', class='bg-electric-blue hover:bg-hot-pink', icon='ph-bold
+                    ph-plus', attrs='type="submit"') }}
                 </div>
             </form>
         </div>

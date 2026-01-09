@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "components/ui_macros.html" import button %}
 {% from "components/accordion.html" import accordion, accordion_item %}
 {% from "components/alert.html" import alert, alert_info, alert_success, alert_warning, alert_danger %}
 {% from "components/range_slider.html" import range_slider %}
@@ -123,24 +124,10 @@
     <section>
         <h2 class="text-3xl font-black mb-6 border-l-8 border-gray-500 pl-4 text-black">07. Original Components</h2>
         <div class="flex flex-wrap gap-6 p-6 bg-white border-2 border-black shadow-hard text-black">
-
-            <!-- Primary Button -->
-            <button
-                class="px-8 py-3 bg-neo-green border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-neo-pink">
-                Primary Action
-            </button>
-
-            <!-- Secondary Button -->
-            <button
-                class="px-8 py-3 bg-white border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:bg-gray-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
-                Secondary
-            </button>
-
-            <!-- Glitch Button -->
-            <button
-                class="px-8 py-3 bg-neo-black text-neo-yellow border-2 border-white font-black uppercase tracking-wider shadow-glow hover:animate-glitch">
-                GLITCH_MODE
-            </button>
+            {{ button('Primary Action', variant='primary', class='px-8 py-3') }}
+            {{ button('Secondary', variant='secondary', class='px-8 py-3') }}
+            {{ button('GLITCH_MODE', class='px-8 py-3 bg-black text-yellow-300 border-white shadow-glow
+            hover:animate-glitch', variant='custom') }}
         </div>
     </section>
 
