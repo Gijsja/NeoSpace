@@ -89,6 +89,9 @@ def create_app(test_config=None):
     from routes.admin import bp as admin_bp
     app.register_blueprint(admin_bp)
 
+    from routes.cats import cats_bp
+    app.register_blueprint(cats_bp)
+
     # =============================================
     # ERROR HANDLERS (Cat Error Pages)
     # =============================================

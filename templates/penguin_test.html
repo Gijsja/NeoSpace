@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% from "components/accordion.html" import accordion, accordion_item %}
+{% from "components/alert.html" import alert, alert_info, alert_success, alert_warning, alert_danger %}
+{% from "components/range_slider.html" import range_slider %}
+{% from "components/spinner.html" import spinner, spinner_block %}
+{% from "components/radio.html" import radio_group, radio %}
+{% from "components/checkbox.html" import checkbox, checkbox_card %}
 
 {% block title %}Penguin UI Check{% endblock %}
 
 {% block head %}
-    <!-- Tailwind and Alpine are already loaded in base.html -->
+<!-- Alpine Collapse plugin for accordion -->
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
 {% block main_container %}
@@ -12,67 +19,128 @@
     <!-- Header -->
     <div class="border-b-4 border-neo-black pb-6 mb-10 bg-neo-yellow text-neo-black p-6 shadow-hard-xl">
         <h1 class="text-6xl font-black uppercase tracking-tighter">Penguin UI</h1>
-        <p class="font-mono text-xl mt-2 font-bold">Integration Status: <span class="bg-neo-black text-white px-2">ACTIVE</span></p>
+        <p class="font-mono text-xl mt-2 font-bold">Integration Status: <span
+                class="bg-neo-black text-white px-2">EXPANDED</span></p>
+        <p class="font-mono text-sm mt-2 opacity-70">24 Components • Alpine.js + Tailwind CSS</p>
     </div>
 
-    <!-- Buttons Section -->
+    <!-- Section: Accordion -->
     <section>
-        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-pink pl-4">01. Buttons & Interaction</h2>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-pink pl-4 text-black">01. Accordion</h2>
+        <div class="max-w-xl">
+            {{ accordion_item("What is NeoSpace?", "NeoSpace is the anti-social network. No algorithms, no likes, just
+            vibes.") }}
+            <div class="h-3"></div>
+            {{ accordion_item("How do I customize my Wall?", "Visit your profile and click 'Edit Wall Style'. You can
+            add modules, stickers, and change colors.") }}
+            <div class="h-3"></div>
+            {{ accordion_item("Is my data private?", "Yes. Your data is yours. We don't sell it, track it, or optimize
+            it for engagement.") }}
+        </div>
+    </section>
+
+    <!-- Section: Alerts -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-accent pl-4 text-black">02. Alerts</h2>
+        <div class="space-y-4 max-w-xl">
+            {{ alert_info("System Update", "A new version is available. Refresh to apply.") }}
+            {{ alert_success("Welcome!", "Your account has been created successfully.") }}
+            {{ alert_warning("Connection Unstable", "Your connection is experiencing issues.") }}
+            {{ alert_danger("Error", "Failed to save changes. Please try again.") }}
+        </div>
+    </section>
+
+    <!-- Section: Range Slider -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-green pl-4 text-black">03. Range Slider</h2>
+        <div class="p-6 bg-white border-2 border-black shadow-hard max-w-md">
+            {{ range_slider("volume", "Volume Level", 0, 100, 75) }}
+            <div class="h-6"></div>
+            {{ range_slider("brightness", "Brightness", 0, 100, 50) }}
+        </div>
+    </section>
+
+    <!-- Section: Spinners -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-pink pl-4 text-black">04. Spinners</h2>
+        <div class="p-6 bg-white border-2 border-black shadow-hard flex items-center gap-8">
+            <div class="text-center">
+                <p class="text-xs font-bold uppercase mb-2 text-black">SM</p>
+                {{ spinner("sm") }}
+            </div>
+            <div class="text-center">
+                <p class="text-xs font-bold uppercase mb-2 text-black">MD</p>
+                {{ spinner("md") }}
+            </div>
+            <div class="text-center">
+                <p class="text-xs font-bold uppercase mb-2 text-black">LG</p>
+                {{ spinner("lg") }}
+            </div>
+            <div class="border-l-2 border-black pl-6">
+                {{ spinner_block("md", "Processing...") }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Radio Buttons -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-accent pl-4 text-black">05. Radio Buttons</h2>
+        <div class="p-6 bg-white border-2 border-black shadow-hard max-w-sm">
+            <p class="font-bold uppercase text-sm mb-4 text-black">Select Theme</p>
+            {{ radio_group("theme", [
+            {"value": "light", "label": "Light Mode"},
+            {"value": "dark", "label": "Dark Mode"},
+            {"value": "system", "label": "System Default"}
+            ], "dark") }}
+        </div>
+    </section>
+
+    <!-- Section: Checkboxes -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-green pl-4 text-black">06. Checkboxes</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Simple checkboxes -->
+            <div class="p-6 bg-white border-2 border-black shadow-hard">
+                <p class="font-bold uppercase text-sm mb-4 text-black">Preferences</p>
+                <div class="space-y-3">
+                    {{ checkbox("notifications", "Enable Notifications", True) }}
+                    <br>
+                    {{ checkbox("sounds", "Play Sounds") }}
+                    <br>
+                    {{ checkbox("animations", "Enable Animations", True) }}
+                </div>
+            </div>
+
+            <!-- Card checkboxes -->
+            <div class="space-y-3">
+                {{ checkbox_card("privacy_public", "Public Profile", "Anyone can view your wall") }}
+                {{ checkbox_card("privacy_dm", "Open DMs", "Anyone can send you messages", True) }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Original Components -->
+    <section>
+        <h2 class="text-3xl font-black mb-6 border-l-8 border-gray-500 pl-4 text-black">07. Original Components</h2>
         <div class="flex flex-wrap gap-6 p-6 bg-white border-2 border-black shadow-hard text-black">
-            
+
             <!-- Primary Button -->
-            <button class="px-8 py-3 bg-neo-green border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-neo-pink">
+            <button
+                class="px-8 py-3 bg-neo-green border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:bg-neo-pink">
                 Primary Action
             </button>
 
             <!-- Secondary Button -->
-            <button class="px-8 py-3 bg-white border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:bg-gray-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
+            <button
+                class="px-8 py-3 bg-white border-2 border-black font-black uppercase tracking-wider shadow-hard transition-all hover:bg-gray-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none">
                 Secondary
             </button>
 
-             <!-- Glitch Button -->
-             <button class="px-8 py-3 bg-neo-black text-neo-yellow border-2 border-white font-black uppercase tracking-wider shadow-glow hover:animate-glitch">
+            <!-- Glitch Button -->
+            <button
+                class="px-8 py-3 bg-neo-black text-neo-yellow border-2 border-white font-black uppercase tracking-wider shadow-glow hover:animate-glitch">
                 GLITCH_MODE
             </button>
-        </div>
-    </section>
-
-    <!-- Cards Section -->
-    <section>
-        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-accent pl-4">02. Cards & Content</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            <!-- Standard Card -->
-            <div class="bg-white border-2 border-black p-6 shadow-hard relative group">
-                <div class="absolute -top-3 -right-3 bg-neo-pink border-2 border-black px-2 py-1 font-bold text-xs shadow-hard-sm transform rotate-12 group-hover:rotate-0 transition-transform">
-                    NEW
-                </div>
-                <h3 class="text-2xl font-black text-black mb-2">The Standard</h3>
-                <p class="text-black font-mono leading-relaxed">
-                    This is a standard content card using the "Hard" shadow utility.
-                    It mimics the print-design aesthetic of Neo-Brutalism.
-                </p>
-            </div>
-
-            <!-- Dark Card -->
-            <div class="bg-neo-black border-2 border-neo-pink p-6 shadow-[8px_8px_0_0_#FF69B4] text-white">
-                <h3 class="text-2xl font-black text-neo-pink mb-2">Dark Mode</h3>
-                <p class="font-mono leading-relaxed">
-                    Using inverse colors. High contrast is key.
-                    <br>
-                    <span class="bg-neo-green text-black px-1">console.log('Hello');</span>
-                </p>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Inputs Section -->
-    <section>
-        <h2 class="text-3xl font-black mb-6 border-l-8 border-neo-green pl-4">03. Forms</h2>
-        <div class="p-6 bg-neo-surface border-2 border-white shadow-hard">
-            <label class="block font-black uppercase text-sm mb-2">Username</label>
-            <input type="text" class="w-full h-12 border-2 border-black p-4 font-mono focus:outline-none focus:shadow-hard focus:bg-neo-yellow transition-all" placeholder="Enter codename...">
         </div>
     </section>
 

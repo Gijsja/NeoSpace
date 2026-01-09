@@ -1,17 +1,28 @@
 # Archive Index
 
-> This directory contains historical documentation. Key content has been consolidated into the main docs.
+> Historical documentation. Key content has been consolidated into `NEOSPACE.md`.
 
 ---
 
-## Consolidated Content
+## Recently Archived (2026-01-09)
+
+| Archived File                | Previously               | Reason                          |
+| ---------------------------- | ------------------------ | ------------------------------- |
+| `BLUEPRINT.md`               | `docs/BLUEPRINT.md`      | Consolidated into NEOSPACE.md   |
+| `PROTOCOL.md`                | `docs/PROTOCOL.md`       | Consolidated into NEOSPACE.md   |
+| `NEOSPACE_ARCHITECTURE.md`   | `docs/`                  | Consolidated into NEOSPACE.md   |
+| `SPRINT_23.md`               | `docs/SPRINT.md`         | Sprint 100% complete            |
+| `QUICK_WINS_JAN_2026.md`     | `docs/QUICK_WINS.md`     | All items complete              |
+
+---
+
+## Previously Consolidated
 
 | Archived File               | Consolidated Into             | Section Added                        |
 | --------------------------- | ----------------------------- | ------------------------------------ |
-| `ROADMAP.md`                | `../BLUEPRINT.md`             | Legacy Sprints (Historical)          |
-| `KNOWN_ISSUES.md`           | `../BLUEPRINT.md`             | Known Trade-offs                     |
-| `STACK_AND_ARCHITECTURE.md` | `../PROTOCOL.md`              | Real-Time Protocol (Socket.IO)       |
-| `STACK_AND_ARCHITECTURE.md` | `../NEOSPACE_ARCHITECTURE.md` | Database Schema, Directory Structure |
+| `ROADMAP.md`                | `../NEOSPACE.md`              | Legacy Sprints (Historical)          |
+| `KNOWN_ISSUES.md`           | `../NEOSPACE.md`              | Known Trade-offs                     |
+| `STACK_AND_ARCHITECTURE.md` | `../NEOSPACE.md`              | Technology Stack, Database Config    |
 
 ---
 
@@ -20,10 +31,10 @@
 | File                      | Purpose                              |
 | ------------------------- | ------------------------------------ |
 | `ARCHITECTURE.md`         | Original architecture overview       |
-| `PRINCIPLES.md`           | Core invariants (now in PROTOCOL.md) |
+| `PRINCIPLES.md`           | Core invariants (now in NEOSPACE.md) |
 | `DEVLOG.md`               | Developer session log                |
 | `ROAST.md`                | Critical self-assessment             |
-| `QUICK_WINS.md`           | Completed quick wins checklist       |
+| `QUICK_WINS.md`           | Original quick wins checklist        |
 | `HISTORY.md`              | Project era history                  |
 | `CORPORATE_EVALUATION.md` | Original business evaluation         |
 | `CRITIC_ANALYSIS.md`      | Code quality analysis                |
@@ -42,4 +53,4 @@
 
 ---
 
-_Last consolidated: 2026-01-08_
+_Last updated: 2026-01-09_

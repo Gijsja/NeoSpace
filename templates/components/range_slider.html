@@ -1,0 +1,47 @@
+{% macro range_slider(name, label="", min=0, max=100, value=50, step=1, show_value=True) %}
+{#
+Neubrutalist Range Slider Component
+Uses Alpine.js for live value display
+#}
+<div x-data="{ value: {{ value }} }" class="space-y-2">
+    {% if label %}
+    <div class="flex justify-between items-center">
+        <label for="{{ name }}" class="font-bold uppercase text-sm tracking-wide">{{ label }}</label>
+        {% if show_value %}
+        <span class="font-mono text-sm bg-black text-white px-2 py-0.5" x-text="value"></span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="relative">
+        <input type="range" id="{{ name }}" name="{{ name }}" x-model="value" min="{{ min }}" max="{{ max }}"
+            step="{{ step }}" class="w-full h-3 bg-gray-200 border-2 border-black appearance-none cursor-pointer
+                   [&::-webkit-slider-thumb]:appearance-none
+                   [&::-webkit-slider-thumb]:w-6
+                   [&::-webkit-slider-thumb]:h-6
+                   [&::-webkit-slider-thumb]:bg-acid-green
+                   [&::-webkit-slider-thumb]:border-2
+                   [&::-webkit-slider-thumb]:border-black
+                   [&::-webkit-slider-thumb]:shadow-hard-sm
+                   [&::-webkit-slider-thumb]:cursor-grab
+                   [&::-webkit-slider-thumb]:active:cursor-grabbing
+                   [&::-webkit-slider-thumb]:hover:bg-yellow-400
+                   [&::-webkit-slider-thumb]:transition-colors
+                   [&::-moz-range-thumb]:w-6
+                   [&::-moz-range-thumb]:h-6
+                   [&::-moz-range-thumb]:bg-acid-green
+                   [&::-moz-range-thumb]:border-2
+                   [&::-moz-range-thumb]:border-black
+                   [&::-moz-range-thumb]:rounded-none">
+    </div>
+
+    <!-- Optional tick marks -->
+    {% if step >= 10 %}
+    <div class="flex justify-between px-1">
+        {% for i in range(min, max + 1, step) %}
+        <span class="text-[10px] text-gray-400 font-mono">{{ i }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}

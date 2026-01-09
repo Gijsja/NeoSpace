@@ -1,0 +1,47 @@
+{% macro accordion(items) %}
+{#
+Neubrutalist Accordion Component
+Usage: {{ accordion([
+{ "title": "Question 1", "content": "Answer 1" },
+{ "title": "Question 2", "content": "Answer 2" }
+]) }}
+#}
+<div class="space-y-3">
+    {% for item in items %}
+    <div x-data="{ isOpen: false }" class="border-2 border-black bg-white shadow-hard overflow-hidden">
+        <!-- Header -->
+        <button @click="isOpen = !isOpen"
+            class="w-full flex items-center justify-between p-4 text-left font-bold uppercase tracking-wide hover:bg-gray-50 transition-colors"
+            :class="isOpen ? 'bg-acid-green' : 'bg-white'" :aria-expanded="isOpen">
+            <span>{{ item.title }}</span>
+            <i class="ph-bold ph-caret-down text-xl transition-transform duration-200"
+                :class="isOpen && 'rotate-180'"></i>
+        </button>
+        <!-- Content -->
+        <div x-show="isOpen" x-collapse x-cloak class="border-t-2 border-black">
+            <div class="p-4 font-mono text-sm leading-relaxed bg-gray-50">
+                {{ item.content | safe }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro accordion_item(title, content, open=False) %}
+{# Single accordion item for manual composition #}
+<div x-data="{ isOpen: {{ 'true' if open else 'false' }} }"
+    class="border-2 border-black bg-white shadow-hard overflow-hidden">
+    <button @click="isOpen = !isOpen"
+        class="w-full flex items-center justify-between p-4 text-left font-bold uppercase tracking-wide hover:bg-gray-50 transition-colors"
+        :class="isOpen ? 'bg-acid-green' : 'bg-white'">
+        <span>{{ title }}</span>
+        <i class="ph-bold ph-caret-down text-xl transition-transform duration-200" :class="isOpen && 'rotate-180'"></i>
+    </button>
+    <div x-show="isOpen" x-collapse x-cloak class="border-t-2 border-black">
+        <div class="p-4 font-mono text-sm leading-relaxed bg-gray-50">
+            {{ content | safe }}
+        </div>
+    </div>
+</div>
+{% endmacro %}

@@ -308,6 +308,10 @@
         </div>
     </div>
 
+    <!-- Cat Companion Widget -->
+    {% from "components/cat_widget.html" import cat_widget %}
+    {{ cat_widget() }}
+
     <script>
         function getCsrfToken() {
             return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -346,10 +350,16 @@
 
                         if (res.ok && data.ok) {
                             this.progressValue = 100;
+                            // Trigger Cat
+                            this.$dispatch('login-success');
+
                             setTimeout(() => {
                                 window.location.href = data.redirect;
-                            }, 300);
+                            }, 2500); // Wait for cat to speak
                         } else {
+                            // Trigger Cat
+                            this.$dispatch('login-failure');
+
                             this.error = data.error || 'Authentication failed';
                             this.$dispatch('toast', {
                                 title: 'Access Denied',
@@ -411,6 +421,9 @@
 
                         if (res.ok && data.ok) {
                             this.progressValue = 100;
+                            // Trigger cat (using login success for now as welcome)
+                            this.$dispatch('login-success');
+
                             this.$dispatch('toast', {
                                 title: 'Identity Created',
                                 message: 'Welcome to the grid, ' + this.username,
@@ -418,8 +431,11 @@
                             });
                             setTimeout(() => {
                                 window.location.href = data.redirect;
-                            }, 500);
+                            }, 2500);
                         } else {
+                            // Trigger Cat
+                            this.$dispatch('login-failure');
+
                             this.error = data.error || 'Registration failed';
                             this.$dispatch('toast', {
                                 title: 'Registration Error',

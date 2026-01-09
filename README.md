@@ -33,10 +33,9 @@ The application will be available at: [http://localhost:5000](http://localhost:5
 
 Detailed documentation is located in the `docs/` directory.
 
-- **[Start Here: Documentation Overview](docs/README.md)**
-- [Roadmap & Backlog](docs/ROADMAP.md)
-- [Architecture & Philosophy](docs/ARCHITECTURE.md)
-- [Known Issues](docs/KNOWN_ISSUES.md)
+- **[NeoSpace Documentation](docs/NEOSPACE.md)** — Architecture, Philosophy, Roadmap
+- [UI Components](docs/ui_components.md)
+- [Archive](docs/archive/) — Historical docs and sprint logs
 
 ---
 

@@ -1,0 +1,41 @@
+{% macro radio_group(name, options, selected=None) %}
+{#
+Neubrutalist Radio Group Component
+Options: [{"value": "a", "label": "Option A"}, ...]
+#}
+<div x-data="{ selected: '{{ selected or '' }}' }" class="space-y-2">
+    {% for opt in options %}
+    <label class="flex items-center gap-3 p-3 border-2 border-black cursor-pointer transition-all"
+        :class="selected === '{{ opt.value }}' ? 'bg-acid-green shadow-hard' : 'bg-white hover:bg-gray-50'"
+        @click="selected = '{{ opt.value }}'">
+
+        <!-- Radio circle -->
+        <div class="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center bg-white flex-shrink-0">
+            <div class="w-2.5 h-2.5 bg-black rounded-full transition-transform"
+                :class="selected === '{{ opt.value }}' ? 'scale-100' : 'scale-0'">
+            </div>
+        </div>
+
+        <!-- Label -->
+        <span class="font-bold uppercase text-sm tracking-wide">{{ opt.label }}</span>
+
+        <!-- Hidden input for form submission -->
+        <input type="radio" name="{{ name }}" value="{{ opt.value }}" :checked="selected === '{{ opt.value }}'"
+            class="sr-only">
+    </label>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro radio(name, value, label, checked=False) %}
+{# Single radio button for manual composition #}
+<label class="inline-flex items-center gap-2 cursor-pointer group">
+    <div
+        class="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center bg-white group-hover:bg-gray-100 transition-colors">
+        <input type="radio" name="{{ name }}" value="{{ value }}" {{ 'checked' if checked else '' }}
+            class="sr-only peer">
+        <div class="w-2.5 h-2.5 bg-black rounded-full scale-0 peer-checked:scale-100 transition-transform"></div>
+    </div>
+    <span class="font-mono text-sm">{{ label }}</span>
+</label>
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% macro spinner(size="md", color="black") %}
+{#
+Neubrutalist Spinner Component
+Sizes: sm, md, lg
+#}
+{% set sizes = {
+"sm": "w-4 h-4 border-2",
+"md": "w-8 h-8 border-3",
+"lg": "w-12 h-12 border-4"
+} %}
+{% set s = sizes.get(size, sizes.md) %}
+
+<div class="inline-block {{ s }} border-{{ color }} border-t-transparent rounded-full animate-spin" role="status"
+    aria-label="Loading">
+    <span class="sr-only">Loading...</span>
+</div>
+{% endmacro %}
+
+{% macro spinner_block(size="md", text="Loading...") %}
+{# Spinner with text, centered in a block #}
+<div class="flex flex-col items-center justify-center gap-3 p-6">
+    {{ spinner(size) }}
+    <span class="font-mono text-sm uppercase tracking-wide text-gray-600">{{ text }}</span>
+</div>
+{% endmacro %}
+
+{% macro spinner_overlay() %}
+{# Full-screen loading overlay #}
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white border-2 border-black shadow-hard p-8 flex flex-col items-center gap-4">
+        {{ spinner("lg") }}
+        <span class="font-bold uppercase tracking-widest">LOADING</span>
+    </div>
+</div>
+{% endmacro %}

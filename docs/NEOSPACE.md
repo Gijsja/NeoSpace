@@ -291,31 +291,32 @@ SBBS/
 
 <!-- Refactored from: BLUEPRINT.md "Roadmap" -->
 
-**Sprint #23**: Feature Expansion & Hardening
+**Sprint #24**: _Planning Phase_
 
-**Goals**: Testing, Audio/Visual Polish, and Script Publishing.
+**Goals**: TBD - Previous sprint (23) completed all objectives.
 
 ## Recently Shipped
 
-| Sprint | Theme                   | Features                              |
-| ------ | ----------------------- | ------------------------------------- |
-| #22    | Live Wire UI            | Notification Center, Badges, Toasts   |
-| #21    | The Feed UI             | Home Stream, Infinite Scroll          |
-| #20    | Social Actions UI       | Follow/Unfollow, Top 8 Grid           |
-| #19    | Search UI               | Js-based Search, User/Post tabs       |
-| #18    | Security Hardening      | CSRF, CSP, Rate Limiting (Ironclad)   |
-| #17    | Search API              | User and Post search endpoints        |
-| #16    | Feed API                | `/feed` endpoint, Pagination          |
-| #15    | Live Wire               | Notifications API, Follow triggers    |
-| #14    | Social Graph            | Friends, Top 8, Follow/Unfollow       |
-| #13    | Speed Demon             | msgspec structs for hot paths         |
-| #12    | Modular Canvas          | Profile posts (text/image/link/audio) |
-| #11    | NeoSpace Foundations    | Audio Anthem, Identity First          |
-| #10    | Unified Desktop         | 3-pane layout, Tool Integration       |
-| #9     | Sonic Identity          | Voice Intros, Waveform Player         |
-| #8     | Creative Sandbox        | Scripts API, Code Editor              |
-| #7     | Identity & Transparency | Wall Stickers, System Internals       |
-| #6     | User Profiles           | Profile Wall, DMs, Directory          |
+| Sprint | Theme                      | Features                                              |
+| ------ | -------------------------- | ----------------------------------------------------- |
+| #23    | Feature Expansion          | Service tests, Alembic, Cat errors, Script publishing |
+| #22    | Live Wire UI               | Notification Center, Badges, Toasts                   |
+| #21    | The Feed UI                | Home Stream, Infinite Scroll                          |
+| #20    | Social Actions UI          | Follow/Unfollow, Top 8 Grid                           |
+| #19    | Search UI                  | Js-based Search, User/Post tabs                       |
+| #18    | Security Hardening         | CSRF, CSP, Rate Limiting (Ironclad)                   |
+| #17    | Search API                 | User and Post search endpoints                        |
+| #16    | Feed API                   | `/feed` endpoint, Pagination                          |
+| #15    | Live Wire                  | Notifications API, Follow triggers                    |
+| #14    | Social Graph               | Friends, Top 8, Follow/Unfollow                       |
+| #13    | Speed Demon                | msgspec structs for hot paths                         |
+| #12    | Modular Canvas             | Profile posts (text/image/link/audio)                 |
+| #11    | NeoSpace Foundations       | Audio Anthem, Identity First                          |
+| #10    | Unified Desktop            | 3-pane layout, Tool Integration                       |
+| #9     | Sonic Identity             | Voice Intros, Waveform Player                         |
+| #8     | Creative Sandbox           | Scripts API, Code Editor                              |
+| #7     | Identity & Transparency    | Wall Stickers, System Internals                       |
+| #6     | User Profiles              | Profile Wall, DMs, Directory                          |
 
 ## Legacy Sprints
 
@@ -338,16 +339,11 @@ SBBS/
 3. **Release** — Publish to room with caption
 4. **Resonance** — Receive sticker feedback, get forked
 
-## Sprint Backlog: Phase 4 (msgspec)
+## Completed: Phase 4 (msgspec) ✅
 
 <!-- Refactored from: NEOSPACE_ARCHITECTURE.md "Sprint Backlog: Phase 4 (msgspec)" -->
 
-Lazy adoption — apply as files are touched:
-
-- [x] `mutations/message_mutations.py` — Message struct
-- [x] `queries/backfill.py` — Backfill response
-- [x] `routes/wall.py` — Wall post payloads
-- [x] `sockets.py` — Socket event payloads
+100% of JSON endpoints now use `msgspec.Struct` for hot-path serialization.
 
 ## Versioning
 
@@ -421,4 +417,4 @@ The following passages were identified as duplicates and consolidated:
 
 ---
 
-_Last refactored: 2026-01-08_
+_Last refactored: 2026-01-09_

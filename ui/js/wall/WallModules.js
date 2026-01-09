@@ -481,6 +481,8 @@ export function setupModuleForm(callbacks) {
                     addModuleModal.classList.add('hidden');
                     addModuleForm.reset();
                     delete addModuleForm.dataset.editId;
+                    // Trigger Cat Event
+                    window.dispatchEvent(new CustomEvent('post-created'));
                     if (callbacks.onSuccess) callbacks.onSuccess();
                 } else {
                     alert(data.error || "Failed");

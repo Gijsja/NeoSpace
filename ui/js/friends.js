@@ -7,18 +7,18 @@ const FriendManager = {
     async toggleFollow(btn) {
         // Prevent double clicks
         if (btn.classList.contains('processing')) return;
-        
+
         const userId = btn.dataset.userId;
         const currentStatus = btn.dataset.status; // 'following' or 'not_following'
         const isFollowing = currentStatus === 'following';
-        
+
         // Optimistic UI Update
         btn.classList.add('processing');
         this.updateButtonState(btn, !isFollowing, true); // true = loading style
-        
+
         try {
             const endpoint = isFollowing ? '/friends/unfollow' : '/friends/follow';
-            
+
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -33,11 +33,16 @@ const FriendManager = {
             });
 
             const data = await res.json();
-            
+
             if (data.ok) {
                 // Success - Commit Update
                 btn.dataset.status = isFollowing ? 'not_following' : 'following';
                 this.updateButtonState(btn, !isFollowing, false); // false = not loading
+
+                // Trigger Cat Event
+                if (!isFollowing) {
+                    window.dispatchEvent(new CustomEvent('friend-added'));
+                }
             } else {
                 throw new Error(data.error);
             }
@@ -50,16 +55,16 @@ const FriendManager = {
             btn.classList.remove('processing');
         }
     },
-    
+
     updateButtonState(btn, isFollowing, isLoading) {
         if (isLoading) {
             btn.style.opacity = '0.5';
             btn.innerText = '...';
             return;
         }
-        
+
         btn.style.opacity = '1';
-        
+
         if (isFollowing) {
             // "Following" State
             btn.innerText = 'UNFOLLOW';
@@ -72,7 +77,7 @@ const FriendManager = {
             btn.classList.add('bg-black', 'text-white');
         }
     },
-    
+
     getCsrfToken() {
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta ? meta.getAttribute('content') : '';

@@ -24,10 +24,11 @@ export function setupChatInput() {
             e.preventDefault();
             const content = messageInput.value.trim();
             if (!content || state.isLoading) return;
-            
+
             setLoading(true);
             try {
                 sendMessage(content);
+                window.dispatchEvent(new CustomEvent('message-sent'));
                 messageInput.value = '';
                 // Stop typing immediately
                 clearTimeout(state.typingTimeout);
@@ -88,7 +89,7 @@ export function setupChatInput() {
 
     // 5. Drag & Drop
     const dropZone = document.body;
-    if(dragOverlay) {
+    if (dragOverlay) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
         });

@@ -1,0 +1,116 @@
+{#
+Cat Companion Widget
+
+A floating cat companion that appears during events.
+Import this component and it will automatically hook into page events.
+
+Usage:
+{% from "components/cat_widget.html" import cat_widget %}
+{{ cat_widget() }}
+#}
+
+{% macro cat_widget(default_mode="cute") %}
+<div x-data="catCompanion('{{ default_mode }}')" x-show="visible" x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="translate-y-4 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
+    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0" @login-success.window="speak('login_success')"
+    @login-failure.window="speak('login_failure')" @friend-added.window="speak('friend_added')"
+    @post-created.window="speak('post_created')" @message-sent.window="speak('message_sent')"
+    class="fixed bottom-4 right-4 z-50 max-w-xs">
+    <!-- Cat Card -->
+    <div class="nb-card p-0 overflow-hidden shadow-lg animate-bounce-subtle">
+        <!-- Header with cat face -->
+        <div class="bg-acid-green border-b-2 border-black p-2 flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full border-2 border-black overflow-hidden bg-white">
+                <img :src="avatar || '/static/images/cats/cat_stickers.png'" :alt="cat"
+                    class="w-full h-full object-cover" onerror="this.src='/static/images/cats/cat_stickers.png'">
+            </div>
+            <div class="flex-1">
+                <span class="font-bold text-sm uppercase tracking-tight" x-text="cat || 'cat'"></span>
+                <span class="text-xs opacity-60 block">cat companion</span>
+            </div>
+            <button @click="dismiss()" class="p-1 hover:bg-black hover:text-acid-green transition-colors">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <!-- Speech bubble -->
+        <div class="p-3 bg-white">
+            <p class="font-mono text-sm" x-text="line || '...'"></p>
+        </div>
+
+        <!-- Mode switcher -->
+        <div class="bg-gray-100 border-t-2 border-black p-2 flex gap-1">
+            <button @click="mode = 'cute'" :class="mode === 'cute' ? 'bg-pink-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🥰 cute</button>
+            <button @click="mode = 'pirate'" :class="mode === 'pirate' ? 'bg-purple-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🏴‍☠️ pirate</button>
+            <button @click="mode = 'formal'" :class="mode === 'formal' ? 'bg-blue-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🎩 formal</button>
+        </div>
+    </div>
+
+    <!-- Tail decoration -->
+    <div class="absolute -bottom-2 right-8 w-4 h-4 bg-white border-2 border-black rotate-45"></div>
+</div>
+
+<style>
+    @keyframes bounce-subtle {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    .animate-bounce-subtle {
+        animation: bounce-subtle 2s ease-in-out infinite;
+    }
+</style>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('catCompanion', (defaultMode = 'cute') => ({
+            visible: false,
+            cat: null,
+            avatar: null,
+            line: null,
+            mode: defaultMode,
+            timeout: null,
+
+            async speak(event) {
+                try {
+                    const res = await fetch('/cats/speak', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ event, mode: this.mode })
+                    });
+                    const data = await res.json();
+
+                    if (data.cat && data.line) {
+                        this.cat = data.cat;
+                        this.avatar = data.avatar;
+                        this.line = data.line;
+                        this.visible = true;
+
+                        // Auto-dismiss after 6 seconds
+                        clearTimeout(this.timeout);
+                        this.timeout = setTimeout(() => this.dismiss(), 6000);
+                    }
+                } catch (err) {
+                    console.warn('[CatCompanion] Error:', err);
+                }
+            },
+
+            dismiss() {
+                this.visible = false;
+                clearTimeout(this.timeout);
+            }
+        }));
+    });
+</script>
+{% endmacro %}
