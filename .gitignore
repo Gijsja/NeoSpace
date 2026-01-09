@@ -62,3 +62,6 @@ COMMIT_MSG.txt
 *.db
 *.db-shm
 *.db-wal
+
+# --- Large Assets ---
+static/catsounds/
