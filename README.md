@@ -1,7 +1,7 @@
 # NeoSpace
 
 [![CI](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml/badge.svg)](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml)
-![Version](https://img.shields.io/badge/version-0.4.0-blue)
+![Version](https://img.shields.io/badge/version-0.4.1-blue)
 ![Status](https://img.shields.io/badge/status-pre--alpha-orange)
 
 > **Development Workspace / Unstable Snapshot**
