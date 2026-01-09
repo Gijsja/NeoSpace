@@ -24,18 +24,23 @@ def init_security(app):
             "'self'",
             "'unsafe-inline'",  # Needed for Alpine/Tailwind config in HTML
             "'unsafe-eval'",    # Needed for standard Alpine.js
-            "https://cdn.jsdelivr.net"  # Fallback for emoji-picker only
+            "https://cdn.jsdelivr.net",  # Fallback for emoji-picker only
+            "https://cdnjs.cloudflare.com",
+            "https://cdn.tailwindcss.com"
         ],
         'style-src': [
             "'self'",
             "'unsafe-inline'",
-            "https://fonts.googleapis.com"
+            "https://fonts.googleapis.com",
+            "https://cdnjs.cloudflare.com",
+            "https://cdn.tailwindcss.com"
         ],
         'font-src': [
             "'self'",
-            "https://fonts.gstatic.com"
+            "https://fonts.gstatic.com",
+            "https://cdnjs.cloudflare.com"
         ],
-        'connect-src': ["'self'", "wss:", "ws:"],  # WebSocket for Socket.IO
+        'connect-src': ["'self'", "wss:", "ws:", "https://*"],  # Allow outgoing API/Websocket
         'media-src': ["'self'", "blob:", "data:", "https://*", "http://*"],  # Allow external audio streams
         'frame-src': ["'self'", "blob:"]  # For script sandboxes
     }

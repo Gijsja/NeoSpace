@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Song - NeoSpace Prototype</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="/static/vendor/tailwindcss.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-black': '#050505',
+                        'cyber-grid': '#1a1a1a',
+                        'cyber-neon': '#ccff00',
+                        'cyber-hot': '#ff0055',
+                        'cyber-blue': '#00ccff',
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .step-btn {
+            transition: all 0.1s;
+        }
+
+        .step-btn.active {
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .step-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Playing indicator */
+        .step-col.playing {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Track Colors */
+        .track-kick .active {
+            background-color: #ff0055;
+            color: #ff0055;
+        }
+
+        .track-snare .active {
+            background-color: #00ccff;
+            color: #00ccff;
+        }
+
+        .track-hihat .active {
+            background-color: #ccff00;
+            color: #ccff00;
+        }
+
+        .track-bass .active {
+            background-color: #9d00ff;
+            color: #9d00ff;
+        }
+    </style>
+</head>
+
+<body class="bg-cyber-black text-white font-mono h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header
+        class="h-14 border-b border-cyber-grid flex items-center justify-between px-6 bg-cyber-black shrink-0 relative z-10">
+        <div class="flex items-center gap-4">
+            <a href="/ui/views/app.html"
+                class="text-cyber-grid hover:text-white transition uppercase font-bold text-xs tracking-widest">←
+                Exit</a>
+            <div class="h-6 w-px bg-cyber-grid"></div>
+            <h1 class="text-xl font-black italic tracking-tighter uppercase">
+                THE<span class="text-cyber-hot">SONG</span><span class="text-xs align-top opacity-50 ml-1">v0.1</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="text-xs text-gray-500 uppercase tracking-widest">
+                <span id="transport-time">0:0:0</span>
+            </div>
+            <button id="btn-play"
+                class="bg-cyber-neon text-cyber-black px-6 py-2 font-black uppercase tracking-widest hover:bg-white transition flex items-center gap-2">
+                <span>► Play</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sequencer Area -->
+    <main
+        class="flex-1 flex items-center justify-center p-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9IiMwNTA1MDUiLz4KPHBhdGggZD0iTTAgNDBMMTQwIDBoMSB2MUwwIDQxeiIgc3Ryb2tlPSIjMWExYTFhIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')]">
+
+        <div class="w-full max-w-4xl bg-black border border-cyber-grid shadow-2xl p-8 relative">
+            <div
+                class="absolute top-0 left-0 px-2 py-1 bg-cyber-grid text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                pattern_01</div>
+
+            <!-- Controls -->
+            <div class="flex justify-between mb-8">
+                <div class="flex gap-4">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 uppercase font-bold mb-1">BPM</label>
+                        <input type="number" id="bpm-input" value="128" min="60" max="200"
+                            class="bg-cyber-grid border border-gray-700 text-white px-2 py-1 w-20 text-center font-bold focus:outline-none focus:border-cyber-neon">
+                    </div>
+                </div>
+                <button id="btn-clear"
+                    class="text-xs text-gray-500 hover:text-red-500 uppercase font-bold tracking-widest">X Clear
+                    Pattern</button>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-[auto_1fr] gap-4">
+
+                <!-- Track Headers -->
+                <div class="space-y-3 pt-1">
+                    <div
+                        class="h-10 flex items-center text-right justify-end pr-4 text-xs font-bold text-cyber-hot uppercase tracking-widest">
+                        Kick</div>
+                    <div
+                        class="h-10 flex items-center text-right justify-end pr-4 text-xs font-bold text-cyber-blue uppercase tracking-widest">
+                        Snare</div>
+                    <div
+                        class="h-10 flex items-center text-right justify-end pr-4 text-xs font-bold text-cyber-neon uppercase tracking-widest">
+                        HiHat</div>
+                    <div
+                        class="h-10 flex items-center text-right justify-end pr-4 text-xs font-bold text-[#9d00ff] uppercase tracking-widest">
+                        Bass</div>
+                </div>
+
+                <!-- Steps Container -->
+                <div class="grid grid-cols-16 gap-1" id="sequencer-grid">
+                    <!-- Javascript will populate this -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- STATE ---
+        const TRACKS = ['kick', 'snare', 'hihat', 'bass'];
+        const STEPS = 16;
+        let isPlaying = false;
+        let currentStep = 0;
+
+        // Initial Pattern (Random junk)
+        const pattern = {
+            kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+            snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            bass: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0]
+        };
+
+        // --- AUDIO ENGINE ---
+        let kit = {};
+
+        async function initAudio() {
+            await Tone.start();
+            Tone.Transport.bpm.value = 128;
+
+            // Instruments
+            kit.kick = new Tone.MembraneSynth({
+                pitchDecay: 0.05,
+                octaves: 10,
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: "exponential" }
+            }).toDestination();
+
+            kit.snare = new Tone.NoiseSynth({
+                noise: { type: "white" },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0 }
+            }).toDestination();
+
+            kit.hihat = new Tone.MetalSynth({
+                frequency: 200, envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+                harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+            }).toDestination();
+            kit.hihat.volume.value = -15;
+
+            kit.bass = new Tone.MonoSynth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.1 }
+            }).toDestination();
+            kit.bass.volume.value = -6;
+
+            // The Loop
+            Tone.Transport.scheduleRepeat((time) => {
+                const step = currentStep % STEPS;
+
+                // Visual Update
+                Tone.Draw.schedule(() => {
+                    updateVisuals(step);
+                }, time);
+
+                // Trigger Sounds
+                if (pattern.kick[step]) kit.kick.triggerAttackRelease("C1", "8n", time);
+                if (pattern.snare[step]) kit.snare.triggerAttackRelease("8n", time);
+                if (pattern.hihat[step]) kit.hihat.triggerAttackRelease("32n", time);
+                if (pattern.bass[step]) {
+                    // Simple arpeggio logic based on step index
+                    const note = ["C2", "C2", "E2", "F2", "G2", "C2", "Bb1", "G1"][step % 8];
+                    kit.bass.triggerAttackRelease(note, "16n", time);
+                }
+
+                currentStep++;
+            }, "16n");
+        }
+
+        // --- UI LOGIC ---
+        const grid = document.getElementById('sequencer-grid');
+
+        function renderGrid() {
+            grid.innerHTML = '';
+
+            // For each track, create a row of steps
+            TRACKS.forEach(track => {
+                for (let i = 0; i < STEPS; i++) {
+                    const btn = document.createElement('div');
+                    btn.className = `h-10 bg-cyber-grid cursor-pointer border border-black step-btn relative track-${track} step-col-${i}`;
+                    if (pattern[track][i]) btn.classList.add('active');
+
+                    // Beat markers
+                    if (i % 4 === 0) btn.classList.add('border-l-gray-600');
+
+                    btn.onclick = () => {
+                        pattern[track][i] = !pattern[track][i];
+                        btn.classList.toggle('active');
+                    };
+
+                    grid.appendChild(btn);
+                }
+            });
+        }
+
+        function updateVisuals(step) {
+            // Remove playing class from all
+            document.querySelectorAll('.step-col-playing').forEach(el => el.classList.remove('step-col-playing', 'opacity-80'));
+
+            // Add custom highlight logic via CSS classes on columns?
+            // Since it's CSS Grid, we can't easily highlight a "column" div.
+            // We highlight the specific cells.
+
+            // Clear previous highlights
+            document.querySelectorAll('.brightness-150').forEach(el => el.classList.remove('brightness-150', 'bg-white/10'));
+
+            // Highlight new column
+            const cells = document.querySelectorAll(`.step-col-${step}`);
+            cells.forEach(cell => {
+                cell.classList.add('brightness-150', 'bg-white/10');
+                if (cell.classList.contains('active')) {
+                    // extra flash
+                    cell.style.transform = "scale(0.95)";
+                    setTimeout(() => cell.style.transform = "scale(1)", 100);
+                }
+            });
+
+            document.getElementById('transport-time').innerText = Tone.Transport.position.split(':')[0] + ':' + Tone.Transport.position.split(':')[1];
+        }
+
+        // --- CONTROLS ---
+
+        const btnPlay = document.getElementById('btn-play');
+        btnPlay.onclick = async () => {
+            if (!kit.kick) await initAudio();
+
+            if (isPlaying) {
+                Tone.Transport.stop();
+                btnPlay.innerHTML = '<span>► Play</span>';
+                currentStep = 0;
+            } else {
+                Tone.Transport.start();
+                btnPlay.innerHTML = '<span>■ Stop</span>';
+            }
+            isPlaying = !isPlaying;
+        };
+
+        const bpmInput = document.getElementById('bpm-input');
+        bpmInput.onchange = () => {
+            Tone.Transport.bpm.value = bpmInput.value;
+        };
+
+        document.getElementById('btn-clear').onclick = () => {
+            TRACKS.forEach(t => pattern[t].fill(0));
+            renderGrid();
+        };
+
+        // Init
+        renderGrid();
+
+    </script>
+</body>
+
+</html>

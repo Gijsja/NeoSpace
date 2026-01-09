@@ -109,3 +109,9 @@ def lobby_users():
             }
     
     return {"users": list(unique_users.values())}
+
+@bp.route("/song")
+def song():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return send_from_directory("ui/views", "song.html")

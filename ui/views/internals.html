@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/static/vendor/tailwindcss.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -90,7 +91,7 @@
       background: #ff00ff;
     }
   </style>
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/vendor/socket.io.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const socket = io();
@@ -99,6 +100,74 @@
       const syncDot = document.getElementById('sync-dot');
       const syncText = document.getElementById('sync-text');
 
+      // --- AUDIO / PURR ENGINE ---
+      let audioInitialized = false;
+      let purrNoise, purrFilter, purrLFO, chirpSynth;
+
+      async function initAudio() {
+        if (audioInitialized) return;
+        await Tone.start();
+
+        // 1. PURR GENERATOR
+        // Brown noise -> Lowpass -> Tremolo (25Hz)
+        purrFilter = new Tone.Filter(200, "lowpass").toDestination();
+        purrLFO = new Tone.Tremolo(25, 1).connect(purrFilter).start(); // 25Hz is avg cat purr
+        purrNoise = new Tone.Noise("brown").connect(purrLFO);
+        purrNoise.volume.value = -20; // Start quiet
+
+        // 2. DATA CHIRPS
+        // Simple FM synth for "packet sounds"
+        chirpSynth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: {
+            type: "sine"
+          },
+          envelope: {
+            attack: 0.01,
+            decay: 0.1,
+            sustain: 0,
+            release: 0.1
+          }
+        }).toDestination();
+        chirpSynth.volume.value = -12;
+
+        // Start Purring
+        purrNoise.start();
+
+        audioInitialized = true;
+        document.getElementById('btn-audio').innerHTML = '🔊 Mute Engine';
+        document.getElementById('btn-audio').classList.replace('text-cat-neon', 'text-cat-pink');
+        document.getElementById('btn-audio').classList.replace('border-cat-neon', 'border-cat-pink');
+
+        appendLog('SYS', 'AUDIO', {
+          status: 'PURR_ENGINE_STARTED',
+          freq: '25Hz'
+        });
+      }
+
+      function toggleAudio() {
+        if (!audioInitialized) {
+          initAudio();
+        } else {
+          if (Tone.Destination.mute) {
+            Tone.Destination.mute = false;
+            document.getElementById('btn-audio').innerHTML = '🔊 Mute Engine';
+          } else {
+            Tone.Destination.mute = true;
+            document.getElementById('btn-audio').innerHTML = '🔈 Unmute Engine';
+          }
+        }
+      }
+
+      function playChirp(type) {
+        if (!audioInitialized || Tone.Destination.mute) return;
+        // Pentatonic scale for pleasing blips
+        const notes = ["C6", "D6", "E6", "G6", "A6"];
+        const note = notes[Math.floor(Math.random() * notes.length)];
+
+        if (type === 'IN') chirpSynth.triggerAttackRelease(note, "32n");
+        if (type === 'OUT') chirpSynth.triggerAttackRelease(note.replace('6', '5'), "32n"); // Lower octave for out
+      }
+
       // --- LOG LOGIC ---
       function appendLog(direction, type, data) {
         const row = document.createElement('div');
@@ -106,8 +175,14 @@
 
         let color = 'text-gray-500';
         let icon = '•';
-        if (direction === 'IN') { color = 'text-cat-neon'; icon = '◄'; }
-        if (direction === 'OUT') { color = 'text-cat-pink'; icon = '►'; }
+        if (direction === 'IN') {
+          color = 'text-cat-neon';
+          icon = '◄';
+        }
+        if (direction === 'OUT') {
+          color = 'text-cat-pink';
+          icon = '►';
+        }
 
         // Format data object
         let dataStr = JSON.stringify(data);
@@ -136,6 +211,7 @@
       EVENTS.forEach(evt => {
         socket.on(evt, (data) => {
           appendLog('IN', evt, data || {});
+          playChirp('IN');
         });
       });
 
@@ -144,6 +220,7 @@
       socket.emit = function (event, ...args) {
         if (event !== 'latency_check') { // ignore internal noise
           appendLog('OUT', event, args[0] || {});
+          playChirp('OUT');
         }
         return originalEmit.apply(this, arguments);
       };
@@ -165,7 +242,9 @@
       setInterval(() => {
         if (socket.connected) {
           const start = Date.now();
-          socket.volatile.emit('latency_check', { ts: start }, () => {
+          socket.volatile.emit('latency_check', {
+            ts: start
+          }, () => {
             const rtt = Date.now() - start;
             driftEl.textContent = `${rtt}ms`;
             if (rtt > 100) driftEl.className = "text-cat-pink font-bold";
@@ -179,6 +258,8 @@
         socket.disconnect();
         setTimeout(() => socket.connect(), 500);
       });
+
+      document.getElementById('btn-audio').addEventListener('click', toggleAudio);
 
       // Copy Diagnostics
       document.getElementById('btn-copy').addEventListener('click', async () => {
@@ -324,6 +405,10 @@ ZZZzz /,`.-'`'    -.  ;-;;,_
           Catnip Injection (Tools)
         </h3>
         <div class="space-y-2">
+          <button id="btn-audio"
+            class="w-full border-2 border-cat-neon text-cat-neon hover:bg-cat-neon hover:text-black font-bold text-xs uppercase py-3 px-4 transition-all active:translate-y-1">
+            ► Start Audio Engine
+          </button>
           <button id="btn-reconnect"
             class="w-full border-2 border-cat-pink text-cat-pink hover:bg-cat-pink hover:text-black font-bold text-xs uppercase py-3 px-4 transition-all active:translate-y-1">
             ► Wake Up Cat (Reconnect)

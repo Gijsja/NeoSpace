@@ -29,9 +29,8 @@
 
         <!-- Actions -->
         <div class="flex gap-3 pt-2">
-            {{ button(text="Go Home", href="/", icon="ph-bold ph-house", variant="primary") }}
-            {{ button(text="Go Back", attrs="onclick='history.back()'", icon="ph-bold ph-arrow-left",
-            variant="secondary") }}
+            {{ button('GO BACK HOME', variant='primary', class='px-8 py-3 bg-black text-white hover:bg-hot-pink
+            hover:text-black', icon='ph-bold ph-arrow-left', href='/') }}
         </div>
     </div>
     {% endcall %}

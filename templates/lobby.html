@@ -216,9 +216,16 @@
             }
         });
 
-        // If empty (dev mode), add some mock data if < 1
-        if (particles.length === 1 && Math.random() > 0.9) {
-            // Maybe spawn a ghost? Nah, stick to reality.
+        // If empty (dev mode), add some mock data if < 5
+        if (particles.length < 5) {
+            const count = 5 - particles.length;
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle({
+                    id: 'ghost-' + i,
+                    username: 'GHOST_' + i.toString(16).toUpperCase(),
+                    room: 'shadow-grid'
+                }));
+            }
         }
     }
 
