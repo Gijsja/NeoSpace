@@ -5,7 +5,7 @@ Fetch time-ordered feed of posts from followed users.
 """
 
 from db import get_db
-import json
+import msgspec
 
 
 def get_feed(user_id: int, limit: int = 20, before_id: int = None) -> list:
@@ -50,12 +50,12 @@ def get_feed(user_id: int, limit: int = 20, before_id: int = None) -> list:
         r = dict(row)
         # Parse JSON payloads
         try:
-            r["content"] = json.loads(r["content_payload"]) if r["content_payload"] else {}
+            r["content"] = msgspec.json.decode(r["content_payload"].encode('utf-8')) if r["content_payload"] else {}
         except Exception:
             r["content"] = {}
             
         try:
-            r["style"] = json.loads(r["style_payload"]) if r["style_payload"] else {}
+            r["style"] = msgspec.json.decode(r["style_payload"].encode('utf-8')) if r["style_payload"] else {}
         except Exception:
             r["style"] = {}
             

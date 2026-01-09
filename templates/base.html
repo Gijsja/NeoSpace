@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ sidebarOpen: true }" @keydown.window.ctrl.b.prevent="sidebarOpen = !sidebarOpen" @keydown.window.meta.b.prevent="sidebarOpen = !sidebarOpen">
+<html lang="en" x-data="{ sidebarOpen: true, doctorOpen: false }"
+    @keydown.window.ctrl.b.prevent="sidebarOpen = !sidebarOpen"
+    @keydown.window.meta.b.prevent="sidebarOpen = !sidebarOpen"
+    @keydown.window.ctrl.shift.d.prevent="doctorOpen = !doctorOpen"
+    @keydown.window.meta.shift.d.prevent="doctorOpen = !doctorOpen">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,7 +14,8 @@
     <!-- Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
 
     <!-- Tailwind CSS (Vendored) -->
     <script src="/static/vendor/tailwindcss.js"></script>
@@ -26,7 +32,7 @@
                         'bbs-surface': '#FFFFFF',
                         'bbs-border': '#000000', // Hard Black
                         'bbs-shadow': '#000000',
-                        
+
                         // Accents (Clashing)
                         'acid-green': '#a3e635',
                         'hot-pink': '#ff6b6b',
@@ -101,37 +107,46 @@
 
     <style>
         /* --- PROJECT CONCRETE: NEUBRUTALISM --- */
-      /* Custom Brutalist Scrollbar */
-    ::-webkit-scrollbar {
-        width: 16px;
-        height: 16px;
-        background: #f0f0f0;
-        border-left: 2px solid black;
-    }
-    ::-webkit-scrollbar-track {
-        background: #fff;
-        border-left: 2px solid black;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #000;
-        border: 2px solid black; /* Creates a padding effect if background is white, but here we want blocky */
-        box-shadow: inset 2px 2px 0px 0px #fff; /* Inner highlight */
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #FF00FF; /* Hot Pink on hover */
-    }
-    ::-webkit-scrollbar-corner {
-        background: #000;
-    }
+        /* Custom Brutalist Scrollbar */
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #f0f0f0;
+            border-left: 2px solid black;
+        }
 
-    /* Selection */
-    ::selection {
-        background: #a3e635; /* Acid Green */
-        color: black;
-    }
-        
+        ::-webkit-scrollbar-track {
+            background: #fff;
+            border-left: 2px solid black;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #000;
+            border: 2px solid black;
+            /* Creates a padding effect if background is white, but here we want blocky */
+            box-shadow: inset 2px 2px 0px 0px #fff;
+            /* Inner highlight */
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF00FF;
+            /* Hot Pink on hover */
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: #000;
+        }
+
+        /* Selection */
+        ::selection {
+            background: #a3e635;
+            /* Acid Green */
+            color: black;
+        }
+
         body {
-            background-color: #FFFAF0; /* bbs-bg */
+            background-color: #FFFAF0;
+            /* bbs-bg */
             color: #000000;
             overflow: hidden;
         }
@@ -150,11 +165,12 @@
             font-weight: 700;
             text-transform: uppercase;
         }
+
         .nb-button:active {
             transform: translate(4px, 4px);
             box-shadow: none;
         }
-        
+
         .nb-input {
             background-color: #FFFFFF;
             border: 2px solid #000000;
@@ -164,56 +180,112 @@
             box-shadow: 4px 4px 0px 0px #000000;
             transition: all 0.2s;
         }
+
         .nb-input:focus {
             outline: none;
-            background-color: #fff1f2; /* pink-50 */
+            background-color: #fff1f2;
+            /* pink-50 */
             box-shadow: 6px 6px 0px 0px #000000;
         }
 
         /* Custom Brutalist Scrollbar */
-        ::-webkit-scrollbar { width: 16px; height: 16px; background: #fff; border-left: 2px solid black; }
-        ::-webkit-scrollbar-track { background: #fff; border-left: 2px solid black; }
-        ::-webkit-scrollbar-thumb { background: #000; border: 2px solid black; box-shadow: inset 2px 2px 0px 0px #fff; }
-        ::-webkit-scrollbar-thumb:hover { background: #FF00FF; }
-        ::-webkit-scrollbar-corner { background: #000; }
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-left: 2px solid black;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #fff;
+            border-left: 2px solid black;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #000;
+            border: 2px solid black;
+            box-shadow: inset 2px 2px 0px 0px #fff;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF00FF;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: #000;
+        }
 
         /* Selection */
-        ::selection { background: #a3e635; color: black; }
+        ::selection {
+            background: #a3e635;
+            color: black;
+        }
 
         /* Animation: Equalizer */
         @keyframes equalize {
-            0% { height: 30%; }
-            50% { height: 100%; }
-            100% { height: 30%; }
+            0% {
+                height: 30%;
+            }
+
+            50% {
+                height: 100%;
+            }
+
+            100% {
+                height: 30%;
+            }
         }
-        
+
         /* Sidebar Hover Slide */
-        .sidebar-link:hover { padding-left: 1.5rem; }
+        .sidebar-link:hover {
+            padding-left: 1.5rem;
+        }
 
         /* --- SPRINT 21: VISUAL POLISH ANIMATIONS --- */
-        
+
         /* 1. Glitch Effect on Hover */
         .animate-glitch:hover {
             animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-            color: #FF00FF; /* Hot Pink */
+            color: #FF00FF;
+            /* Hot Pink */
         }
+
         @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
+            0% {
+                transform: translate(0);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+            }
+
+            40% {
+                transform: translate(-2px, -2px);
+            }
+
+            60% {
+                transform: translate(2px, 2px);
+            }
+
+            80% {
+                transform: translate(2px, -2px);
+            }
+
+            100% {
+                transform: translate(0);
+            }
         }
 
         /* 2. Button Spring Physics */
         .btn-spring {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+
         .btn-spring:hover {
             transform: translateY(-4px) scale(1.02);
             box-shadow: 6px 6px 0px 0px #000000;
         }
+
         .btn-spring:active {
             transform: translateY(2px) scale(0.98);
             box-shadow: 1px 1px 0px 0px #000000;
@@ -224,55 +296,73 @@
             opacity: 0;
             transform: translateY(10px);
         }
+
         .page-transition-enter-active {
             opacity: 1;
             transform: translateY(0);
             transition: opacity 300ms, transform 300ms;
         }
+
         .page-transition-exit {
             opacity: 1;
         }
+
         .page-transition-exit-active {
             opacity: 0;
             transition: opacity 300ms;
         }
-        
+
         /* Apply to main content */
-        #app-main > div {
+        #app-main>div {
             animation: fadeIn 0.4s ease-out;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
     {% block head %}{% endblock %}
 </head>
-<body class="flex flex-col h-screen overflow-hidden selection:bg-hot-pink selection:text-white font-sans bg-bbs-bg" 
-      hx-boost="true" hx-target="#app-main" hx-select="#app-main" hx-swap="outerHTML">
+
+<body class="flex flex-col h-screen overflow-hidden selection:bg-hot-pink selection:text-white font-sans bg-bbs-bg"
+    hx-boost="true" hx-target="#app-main" hx-select="#app-main" hx-swap="outerHTML">
 
     <!-- Marquee Header -->
     <div class="h-8 bg-yellow-400 border-b-2 border-black overflow-hidden flex items-center shrink-0 relative z-50">
-        <div class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-2 border-black">
-            *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** PROJECT CONCRETE v2.0 *** SYSTEM NOMINAL *** 
+        <div
+            class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-2 border-black">
+            *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** PROJECT CONCRETE v2.0 *** SYSTEM NOMINAL
+            ***
         </div>
-        <div class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-2 border-black absolute top-0 left-full">
-            *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** PROJECT CONCRETE v2.0 *** SYSTEM NOMINAL *** 
+        <div
+            class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-2 border-black absolute top-0 left-full">
+            *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** PROJECT CONCRETE v2.0 *** SYSTEM NOMINAL
+            ***
         </div>
     </div>
 
     <div class="flex flex-1 h-full overflow-hidden relative">
-        
+
         <!-- Sidebar ("Index Card Stack") -->
         <aside class="w-64 bg-white border-r-2 border-black flex flex-col z-40 relative shadow-[4px_0_0_0_#000]">
-            
+
             <!-- Logo Section -->
             <div class="h-16 flex items-center justify-center shrink-0 border-b-2 border-black bg-white">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold border-2 border-transparent">
+                    <div
+                        class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold border-2 border-transparent">
                         N
                     </div>
-                    <span class="text-xl font-black tracking-tighter uppercase italic transform -skew-x-6">NeoSpace</span>
+                    <span
+                        class="text-xl font-black tracking-tighter uppercase italic transform -skew-x-6">NeoSpace</span>
                 </div>
             </div>
 
@@ -280,7 +370,8 @@
             <nav class="flex-1 overflow-y-auto py-4 px-4 space-y-2 font-mono">
                 <!-- Helper Macro -->
                 {% macro nav_link(href, icon, label, badge=None, class='') %}
-                <a href="{{ href }}" class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 transition-all duration-100 text-black font-bold text-sm uppercase">
+                <a href="{{ href }}"
+                    class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 transition-all duration-100 text-black font-bold text-sm uppercase">
                     <i class="{{ icon }} text-lg"></i>
                     <span>{{ label }}</span>
                     {% if badge %}
@@ -289,16 +380,17 @@
                 </a>
                 {% endmacro %}
 
-                <!-- Active Link Example -->
-                <a href="/dashboard" class="group flex items-center gap-3 px-3 py-2 border-2 border-black bg-acid-green shadow-hard text-black font-bold text-sm uppercase transform -translate-y-1 -translate-x-1">
-                    <i class="ph-bold ph-squares-four text-lg"></i>
-                    <span>Dashboard</span>
-                </a>
+                {{ nav_link('/wall', 'ph-bold ph-user-square', 'Identity', class='sidebar-link') }}
+                {{ nav_link('/codeground', 'ph-bold ph-code', 'Codeground', class='sidebar-link') }}
+                {{ nav_link('/components', 'ph-bold ph-paint-brush', 'Edit Wall Style', class='sidebar-link') }}
+                {{ nav_link('/penguin', 'ph-bold ph-bird', 'Penguin UI', class='sidebar-link') }}
 
-                <!-- Channels Section (Dynamic) -->
-                <div class="px-4 py-2 mt-2 mb-1 flex items-center justify-between">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Channels</span>
+                <!-- Room Category -->
+                <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Room</span>
                 </div>
+
+                <!-- Regular Chat (Channels) -->
                 <div x-data="{ 
                     rooms: [],
                     currentRoom: new URLSearchParams(window.location.search).get('room') || 'general',
@@ -307,34 +399,35 @@
                             if(data.rooms) this.rooms = data.rooms;
                         });
                     }
-                }">
+                }" class="mb-2">
                     <template x-for="room in rooms" :key="room.id">
-                        <a :href="'/app?room=' + room.name" 
-                           class="sidebar-link group flex items-center gap-2 px-4 py-1.5 border-l-4 transition-all font-mono font-bold text-sm"
-                           :class="currentRoom === room.name 
+                        <a :href="'/app?room=' + room.name"
+                            class="sidebar-link group flex items-center gap-2 px-4 py-1.5 border-l-4 transition-all font-mono font-bold text-sm"
+                            :class="currentRoom === room.name 
                                ? 'border-black bg-black text-white' 
                                : 'border-transparent hover:border-black hover:bg-black/5 text-black'">
-                            <i class="ph-bold ph-hash" :class="currentRoom === room.name ? 'text-white' : 'text-gray-400 group-hover:text-black'"></i>
+                            <i class="ph-bold ph-hash"
+                                :class="currentRoom === room.name ? 'text-white' : 'text-gray-400 group-hover:text-black'"></i>
                             <span x-text="room.name"></span>
                         </a>
                     </template>
                 </div>
 
-                {{ nav_link('/feed/home', 'ph-bold ph-house-line', 'Stream', class='sidebar-link') }}
-                {{ nav_link('/wall', 'ph-bold ph-user-square', 'Identity', class='sidebar-link') }}
-                {{ nav_link('/codeground', 'ph-bold ph-code', 'Codeground', class='sidebar-link') }}
-                {{ nav_link('/components', 'ph-bold ph-swatches', 'UI Kit', class='sidebar-link') }}
-                {{ nav_link('/penguin', 'ph-bold ph-bird', 'Penguin UI', class='sidebar-link') }}
-                {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
-                
+                {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}
+                {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice', class='sidebar-link opacity-50
+                cursor-not-allowed', badge=False) }}
+
                 <div class="h-0.5 bg-black my-4 opacity-10 mx-4"></div>
-                
+
+                <!-- System / Network / Dashboard -->
+                {{ nav_link('/dashboard', 'ph-bold ph-squares-four', 'Dashboard', class='sidebar-link') }}
+                {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
                 {{ nav_link('/ui/views/internals.html', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link') }}
             </nav>
 
             <!-- Sidebar Footer (Music Player & Profile) -->
             <div class="p-4 border-t-2 border-black flex flex-col gap-4 bg-white">
-                
+
                 <!-- Music Player (Tape Deck Style) -->
                 <div class="nb-card p-2 flex items-center gap-3 bg-red-50" x-data="{ 
                     playing: false, 
@@ -342,23 +435,33 @@
                     init() { this.audio.loop = true; this.audio.volume = 0.5; },
                     toggle() { this.playing = !this.playing; this.playing ? this.audio.play() : this.audio.pause(); }
                 }">
-                    <button @click="toggle()" class="w-8 h-8 border-2 border-black flex items-center justify-center transition-colors" :class="playing ? 'bg-acid-green' : 'bg-white hover:bg-gray-100'">
-                         <i class="ph-bold text-lg" :class="playing ? 'ph-pause' : 'ph-play'"></i>
+                    <button @click="toggle()"
+                        class="w-8 h-8 border-2 border-black flex items-center justify-center transition-colors"
+                        :class="playing ? 'bg-acid-green' : 'bg-white hover:bg-gray-100'">
+                        <i class="ph-bold text-lg" :class="playing ? 'ph-pause' : 'ph-play'"></i>
                     </button>
                     <div class="flex-1 min-w-0">
                         <span class="text-[10px] font-bold uppercase tracking-widest block mb-1">Frequency</span>
                         <div class="flex gap-0.5 items-end h-3">
-                            <div class="w-1 bg-black" :style="{ height: playing ? '100%' : '30%', animation: 'equalize 0.8s infinite', animationPlayState: playing ? 'running' : 'paused' }"></div>
-                            <div class="w-1 bg-black" :style="{ height: playing ? '100%' : '50%', animation: 'equalize 1.1s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.1s' }"></div>
-                            <div class="w-1 bg-black" :style="{ height: playing ? '100%' : '40%', animation: 'equalize 0.9s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.2s' }"></div>
-                            <div class="w-1 bg-black" :style="{ height: playing ? '100%' : '20%', animation: 'equalize 1.2s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.3s' }"></div>
+                            <div class="w-1 bg-black"
+                                :style="{ height: playing ? '100%' : '30%', animation: 'equalize 0.8s infinite', animationPlayState: playing ? 'running' : 'paused' }">
+                            </div>
+                            <div class="w-1 bg-black"
+                                :style="{ height: playing ? '100%' : '50%', animation: 'equalize 1.1s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.1s' }">
+                            </div>
+                            <div class="w-1 bg-black"
+                                :style="{ height: playing ? '100%' : '40%', animation: 'equalize 0.9s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.2s' }">
+                            </div>
+                            <div class="w-1 bg-black"
+                                :style="{ height: playing ? '100%' : '20%', animation: 'equalize 1.2s infinite', animationPlayState: playing ? 'running' : 'paused', animationDelay: '0.3s' }">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Profile -->
                 <div class="flex items-center gap-3 p-2 border-2 border-transparent hover:border-black transition-colors cursor-pointer"
-                     x-data="{ 
+                    x-data="{ 
                          user: { username: 'Loading...', id: '---' }, 
                          avatar: null,
                          init() {
@@ -374,7 +477,7 @@
                          }
                      }">
                     <div class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold text-xs border-2 border-black shadow-hard-sm bg-cover bg-center"
-                         :style="avatar ? 'background-image: url(' + avatar + '); color: transparent;' : ''">
+                        :style="avatar ? 'background-image: url(' + avatar + '); color: transparent;' : ''">
                         <span x-text="user.username ? user.username.charAt(0).toUpperCase() : 'U'"></span>
                     </div>
                     <div class="overflow-hidden">
@@ -387,31 +490,31 @@
 
         <!-- Main Content Wrapper -->
         <main id="app-main" class="flex-1 flex flex-col min-w-0 h-full relative z-20">
-            
+
             <!-- Header (Brutalist Top Bar) -->
             <header class="h-16 flex items-center justify-between px-6 shrink-0 border-b-2 border-black bg-white">
                 <!-- Title / Breadcrumbs -->
                 <div class="flex flex-col justify-center">
-                    <h1 class="text-2xl font-black text-black uppercase tracking-tighter">{% block page_title %}Command Center{% endblock %}</h1>
+                    <h1 class="text-2xl font-black text-black uppercase tracking-tighter">{% block page_title %}Command
+                        Center{% endblock %}</h1>
                 </div>
 
                 <!-- Right Actions -->
                 <div class="flex items-center gap-4">
                     <!-- Brutalist Search -->
                     <div class="relative group">
-                        <input 
-                            type="text" 
-                            class="nb-input h-10 w-64"
-                            placeholder="SEARCH DATABASE..."
-                        >
+                        <input type="text" class="nb-input h-10 w-64" placeholder="SEARCH DATABASE...">
                     </div>
 
                     <!-- Action Icons -->
-                    <button id="notification-bell-btn" class="w-10 h-10 border-2 border-black flex items-center justify-center bg-white hover:bg-acid-green transition-colors shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none relative">
+                    <button id="notification-bell-btn"
+                        class="w-10 h-10 border-2 border-black flex items-center justify-center bg-white hover:bg-acid-green transition-colors shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none relative">
                         <i class="ph-bold ph-bell"></i>
-                        <span id="notification-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border border-black text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+                        <span id="notification-badge"
+                            class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border border-black text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
                     </button>
-                     <button class="w-10 h-10 border-2 border-black flex items-center justify-center bg-white hover:bg-yellow-400 transition-colors shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+                    <button
+                        class="w-10 h-10 border-2 border-black flex items-center justify-center bg-white hover:bg-yellow-400 transition-colors shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
                         <i class="ph-bold ph-gear"></i>
                     </button>
                 </div>
@@ -430,11 +533,15 @@
     </div>
 
     <!-- Scripts Block Moved Inside Main for Re-Execution -->
-    
+
     <script src="/ui/js/notifications.js"></script>
 
     <!-- Init Toast Container -->
     <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- System Internals Overlay -->
+    {% include "components/connection_doctor.html" %}
+
 </body>
+
 </html>

@@ -26,14 +26,7 @@ This system trades convenience for reliability. Every decision prioritizes corre
                                    └─────────────┘
 ```
 
-### Evolution Layers
 
-| Layer  | Name        | Status    | Scope                                 |
-| ------ | ----------- | --------- | ------------------------------------- |
-| **E1** | The Bedrock | 🛡️ Frozen | Backend semantics, DB schema, sockets |
-| **E2** | UX          | 🔄 Active | Layout, interactions, styling         |
-
----
 
 ## The NeoSpace Manifesto
 
@@ -57,15 +50,14 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ## Roadmap
 
-### Current: Stage 3 Planning
+### Current: Sprint 23 (Active)
 
-**Theme**: Feature Expansion & Testing
+**Theme**: Feature Expansion & Hardening
 
-**Next Options**:
-
-- Unit tests for service layer
-- Video/Omegle feature
-- Script publishing flow completion
+**Goals**:
+- **Testing**: Service Layer Tests & Database Migrations (Alembic)
+- **UI**: Neopunk Ghettoblaster, Cat Error Pages, Guestbook Collage
+- **Features**: Script Publishing, Video/Omegle Research
 
 ### Recently Shipped
 
@@ -126,14 +118,6 @@ This system trades convenience for reliability. Every decision prioritizes corre
 
 ---
 
-## User Flow: The Creator Journey
-
-1. **Spark** — Open NeoSpace, enter Code Mode
-2. **Studio** — Write code, hot-reload canvas, fix errors
-3. **Release** — Publish to room with caption
-4. **Resonance** — Receive sticker feedback, get forked
-
----
 
 ## Key Views
 

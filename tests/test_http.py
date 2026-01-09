@@ -64,9 +64,9 @@ def test_static_css_served(client):
 
 def test_static_js_served(client):
     """JS files should be served correctly."""
-    res = client.get("/ui/js/socket_glue.js")
+    res = client.get("/ui/js/chat/ChatSocket.js")
     assert res.status_code == 200
-    assert b"socket" in res.data
+    assert b"socket" in res.data.lower()
 
 
 def test_backfill_endpoint(auth_client, app):

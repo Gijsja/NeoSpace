@@ -86,6 +86,9 @@ def create_app(test_config=None):
     from routes.search import bp as search_bp
     app.register_blueprint(search_bp)
 
+    from routes.admin import bp as admin_bp
+    app.register_blueprint(admin_bp)
+
     # =============================================
     # ERROR HANDLERS (Cat Error Pages)
     # =============================================
@@ -100,6 +103,19 @@ def create_app(test_config=None):
     @app.errorhandler(403)
     def forbidden(e):
         return render_template('errors/403.html'), 403
+
+    @app.after_request
+    def add_header(response):
+        if request.path.startswith('/static/'):
+            # Default static cache: 1 week
+            response.cache_control.max_age = 604800
+            
+            # Avatars/Uploads with hash/UUIDs: 1 year
+            if request.path.startswith('/static/avatars/') or request.path.startswith('/static/uploads/'):
+                response.cache_control.max_age = 31536000
+                response.cache_control.public = True
+                
+        return response
 
     init_sockets(app)
     return app

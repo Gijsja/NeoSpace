@@ -186,3 +186,18 @@ class AddStickerRequest(msgspec.Struct):
     target_user_id: int
     x: int = 0
     y: int = 0
+
+
+# Script CRUD Operations
+class SaveScriptRequest(msgspec.Struct):
+    """Request to save or update a script."""
+    id: Optional[int] = None
+    title: str = "Untitled"
+    content: str = ""
+    script_type: str = "p5"
+    is_public: int = 1
+
+
+class DeleteScriptRequest(msgspec.Struct):
+    """Request to delete a script."""
+    id: int

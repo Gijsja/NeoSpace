@@ -3,7 +3,8 @@ Wall Service - Business logic for wall post operations.
 Extracted from mutations/wall.py for testability.
 """
 
-import json
+import msgspec
+import json  # Keep json for dumps/loads compatibility until full refactor
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
@@ -34,12 +35,14 @@ class ServiceResult:
 # WALL POST OPERATIONS
 # =============================================
 
-def get_posts_for_profile(profile_id: int) -> List[Dict[str, Any]]:
+def get_posts_for_profile(profile_id: int, limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
     """
-    Fetch all wall posts for a profile, ordered by display_order.
+    Fetch wall posts for a profile with pagination.
     
     Args:
         profile_id: Profile ID to fetch posts for
+        limit: Max posts to return
+        offset: Number of posts to skip
     
     Returns:
         List of post dictionaries with parsed JSON payloads
@@ -49,20 +52,21 @@ def get_posts_for_profile(profile_id: int) -> List[Dict[str, Any]]:
         """SELECT id, module_type, content_payload, style_payload, display_order, created_at
            FROM profile_posts
            WHERE profile_id = ?
-           ORDER BY display_order ASC, created_at DESC""",
-        (profile_id,)
+           ORDER BY display_order ASC, created_at DESC
+           LIMIT ? OFFSET ?""",
+        (profile_id, limit, offset)
     ).fetchall()
     
     posts = []
     for r in rows:
         post = dict(r)
         try:
-            post["content"] = json.loads(post["content_payload"])
+            post["content"] = msgspec.json.decode(post["content_payload"].encode('utf-8')) if post["content_payload"] else {}
         except Exception:
             post["content"] = {}
             
         try:
-            post["style"] = json.loads(post["style_payload"]) if post["style_payload"] else {}
+            post["style"] = msgspec.json.decode(post["style_payload"].encode('utf-8')) if post["style_payload"] else {}
         except Exception:
             post["style"] = {}
             
@@ -107,8 +111,8 @@ def add_post(
     profile_id = profile["id"]
     
     try:
-        content_json = json.dumps(content)
-        style_json = json.dumps(style)
+        content_json = msgspec.json.encode(content).decode('utf-8')
+        style_json = msgspec.json.encode(style).decode('utf-8')
     except:
         return ServiceResult(success=False, error="Invalid JSON content/style", status=400)
         
@@ -161,11 +165,11 @@ def update_post(
     
     if content is not None:
         updates.append("content_payload = ?")
-        values.append(json.dumps(content))
+        values.append(msgspec.json.encode(content).decode('utf-8'))
         
     if style is not None:
         updates.append("style_payload = ?")
-        values.append(json.dumps(style))
+        values.append(msgspec.json.encode(style).decode('utf-8'))
         
     if module_type is not None:
         if module_type in ALLOWED_TYPES:

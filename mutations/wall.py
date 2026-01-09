@@ -5,13 +5,13 @@ Delegates to wall_service.
 
 from flask import request, jsonify, g
 
-def get_wall_posts(profile_id):
+def get_wall_posts(profile_id, limit=20, offset=0):
     """
-    Fetch all wall posts for a profile, ordered by display_order.
+    Fetch wall posts for a profile, ordered by display_order.
     Delegates to wall_service.
     """
     from services import wall_service
-    return wall_service.get_posts_for_profile(profile_id)
+    return wall_service.get_posts_for_profile(profile_id, limit, offset)
 
 def add_wall_post():
     if g.user is None:

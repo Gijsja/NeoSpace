@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Ambient Lobby{% endblock %}
+{% block page_title %}Lobby{% endblock %}
+
+{% block main_container %}
+<div class="relative w-full h-full bg-black overflow-hidden select-none">
+    <!-- Canvas Layer -->
+    <canvas id="lobby-canvas" class="absolute inset-0 block"></canvas>
+
+    <!-- UI Overlay (Pointer Events None to let clicks pass to canvas if needed, but we want hover on text maybe? No, decorative) -->
+    <div class="absolute bottom-8 left-8 pointer-events-none z-10 mix-blend-difference">
+        <h2 class="text-6xl font-black text-white tracking-tighter opacity-80">LOBBY</h2>
+        <div class="flex items-center gap-4 mt-2 font-mono text-xs text-white">
+            <span class="px-2 py-1 border border-white/30 rounded backdrop-blur">
+                <span id="user-count" class="font-bold text-[#00ff88]">0</span> SOULS
+            </span>
+            <span class="animate-pulse text-white/50">LIVE SYSTEM</span>
+        </div>
+    </div>
+
+    <!-- Tip -->
+    <div class="absolute top-8 right-8 pointer-events-none z-10 text-right opacity-0 transition-opacity duration-1000"
+        id="intro-tip">
+        <p class="text-xs font-mono text-white/50">HOVER TO REVEAL IDENTITY</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const canvas = document.getElementById('lobby-canvas');
+    const ctx = canvas.getContext('2d');
+    const userCountEl = document.getElementById('user-count');
+    const introTip = document.getElementById('intro-tip');
+
+    // State
+    let width, height;
+    let users = [];
+    let particles = [];
+    let mouse = { x: -1000, y: -1000 };
+
+    // Configuration
+    const CONFIG = {
+        baseSpeed: 0.5,
+        connectionDistance: 150,
+        mouseRepelRadius: 200,
+        particleSize: 4
+    };
+
+    // Resize
+    function resize() {
+        width = canvas.width = canvas.offsetWidth;
+        height = canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Show tip
+    setTimeout(() => introTip.classList.remove('opacity-0'), 1000);
+    setTimeout(() => introTip.classList.add('opacity-0'), 8000); // Hide after a while
+
+    // Particle Class
+    class Particle {
+        constructor(user) {
+            this.user = user;
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * CONFIG.baseSpeed;
+            this.vy = (Math.random() - 0.5) * CONFIG.baseSpeed;
+
+            // Generate a unique color based on username hash
+            const hue = this.hashString(user.username) % 360;
+            this.color = `hsl(${hue}, 70%, 60%)`;
+            this.glow = `hsl(${hue}, 70%, 60%)`;
+
+            this.radius = CONFIG.particleSize;
+            this.hovered = false;
+        }
+
+        hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return Math.abs(hash);
+        }
+
+        update() {
+            // Mouse Interaction (Repel)
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < CONFIG.mouseRepelRadius) {
+                const force = (CONFIG.mouseRepelRadius - dist) / CONFIG.mouseRepelRadius;
+                const angle = Math.atan2(dy, dx);
+                this.vx -= Math.cos(angle) * force * 0.5;
+                this.vy -= Math.sin(angle) * force * 0.5;
+                this.hovered = dist < 20; // Hover triggered if very close
+            } else {
+                this.hovered = false;
+            }
+
+            // Normal Movement
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Friction/Recovery
+            // We want them to drift, so minimal friction, but clamp speed
+            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            if (speed > 2) {
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+            } else if (speed < 0.2) {
+                this.vx *= 1.05;
+                this.vy *= 1.05;
+            }
+
+            // Bounce off walls
+            if (this.x < 0 || this.x > width) this.vx *= -1;
+            if (this.y < 0 || this.y > height) this.vy *= -1;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.glow;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.closePath();
+
+            // Name label if hovered or close to mouse
+            if (this.hovered || Math.hypot(this.x - mouse.x, this.y - mouse.y) < 50) {
+                ctx.fillStyle = "white";
+                ctx.font = "10px monospace";
+                ctx.fillText(`@${this.user.username}`, this.x + 10, this.y - 10);
+
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.fillText(`in #${this.user.room || 'general'}`, this.x + 10, this.y);
+            }
+        }
+    }
+
+    // Loop
+    function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Trail effect
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw connections
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i < particles.length; i++) {
+            const p1 = particles[i];
+
+            /* Connect nearby particles */
+            for (let j = i + 1; j < particles.length; j++) {
+                const p2 = particles[j];
+                const dx = p1.x - p2.x;
+                const dy = p1.y - p2.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < CONFIG.connectionDistance) {
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+
+            p1.update();
+            p1.draw();
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    // Input Handling
+    window.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    // Fetch Data
+    async function fetchUsers() {
+        try {
+            const res = await fetch('/lobby/users');
+            if (res.ok) {
+                const data = await res.json();
+                updateParticles(data.users);
+                userCountEl.textContent = data.users.length;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    function updateParticles(newUsers) {
+        // Sync particle list with user list
+        // Strategy: 
+        // 1. Remove particles for users who left
+        // 2. Add particles for users who joined
+        // 3. Keep existing
+
+        const validIds = new Set(newUsers.map(u => u.id));
+
+        // Remove dead
+        particles = particles.filter(p => validIds.has(p.user.id));
+
+        // Add new
+        newUsers.forEach(u => {
+            if (!particles.find(p => p.user.id === u.id)) {
+                particles.push(new Particle(u));
+            }
+        });
+
+        // If empty (dev mode), add some mock data if < 1
+        if (particles.length === 1 && Math.random() > 0.9) {
+            // Maybe spawn a ghost? Nah, stick to reality.
+        }
+    }
+
+    // Init
+    fetchUsers();
+    setInterval(fetchUsers, 5000);
+    animate();
+
+</script>
+{% endblock %}

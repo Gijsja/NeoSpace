@@ -6,8 +6,9 @@
 
 import { state, setCurrentUserData } from './WallState.js';
 
-const loadingEl = document.getElementById('loading');
-const wallContainer = document.getElementById('wall-container');
+// DOM Elements are queried continuously to avoid stale references/nulls on early load
+function getLoadingEl() { return document.getElementById('loading'); }
+function getWallContainer() { return document.getElementById('wall-container'); }
 
 export async function fetchProfileData() {
     const endpoint = state.userId ? `/profile?user_id=${state.userId}` : '/profile';
@@ -17,29 +18,33 @@ export async function fetchProfileData() {
             window.location.href = '/auth/login';
             return null;
         }
-        
+
         let data;
         try {
             data = await res.json();
         } catch (jsonErr) {
-             throw new Error("Invalid JSON response from server");
+            throw new Error("Invalid JSON response from server");
         }
-        
+
         if (data.error) {
-            if(loadingEl) loadingEl.innerHTML = `<div class="text-red-400 font-bold border-2 border-red-500 p-4 bg-white shadow-hard">${data.error}</div>`;
+            const el = getLoadingEl();
+            if (el) el.innerHTML = `<div class="text-red-400 font-bold border-2 border-red-500 p-4 bg-white shadow-hard">${data.error}</div>`;
             return null;
         }
 
         setCurrentUserData(data);
-        
-        if(loadingEl) loadingEl.classList.add('hidden');
-        if(wallContainer) wallContainer.classList.remove('hidden');
+
+        const el = getLoadingEl();
+        const wc = getWallContainer();
+        if (el) el.classList.add('hidden');
+        if (wc) wc.classList.remove('hidden');
 
         return data;
 
     } catch (err) {
         console.error(err);
-        if(loadingEl) loadingEl.innerHTML = `
+        const el = getLoadingEl();
+        if (el) el.innerHTML = `
             <div class="text-red-500 font-bold border-2 border-red-500 p-4 bg-white shadow-hard flex flex-col items-center gap-2">
                 <i class="ph-bold ph-warning-octagon text-3xl"></i>
                 <span>CONNECTION LOST</span>
@@ -54,18 +59,28 @@ export async function deleteModule(moduleId) {
     try {
         const res = await fetch('/wall/post/delete', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: moduleId })
         });
         const data = await res.json();
         return data;
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         return { ok: false, error: 'Network error' };
     }
 }
 
 export async function fetchScriptContent(scriptId) {
-     const res = await fetch(`/scripts/get?id=${scriptId}`);
-     return await res.json();
+    const res = await fetch(`/scripts/get?id=${scriptId}`);
+    return await res.json();
+}
+
+export async function fetchMorePosts(profileId, page) {
+    try {
+        const res = await fetch(`/wall/posts/${profileId}?page=${page}&limit=20`);
+        return await res.json();
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
 }

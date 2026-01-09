@@ -44,6 +44,12 @@ def penguin():
          return redirect(url_for("auth.login"))
     return render_template("penguin_test.html")
 
+@bp.route("/messages")
+def messages():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return send_from_directory("ui/views", "messages.html")
+
 @bp.route("/desktop")
 def desktop():
     if g.user is None:
@@ -77,3 +83,29 @@ def serve_voice_intros(filename):
 @bp.route("/ui/prototypes/<path:filename>")
 def serve_prototypes(filename):
     return send_from_directory("ui/prototypes", filename)
+
+@bp.route("/lobby")
+def lobby():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("lobby.html")
+
+@bp.route("/lobby/users")
+def lobby_users():
+    if g.user is None:
+         return {"error": "Unauthorized"}, 401
+    
+    from sockets import authenticated_sockets
+    
+    # Deduplicate users (one user might have multiple tabs/sockets)
+    unique_users = {}
+    for sid, info in authenticated_sockets.items():
+        uid = info['user_id']
+        if uid not in unique_users:
+            unique_users[uid] = {
+                'id': uid,
+                'username': info['username'],
+                'room': info['room_name']
+            }
+    
+    return {"users": list(unique_users.values())}

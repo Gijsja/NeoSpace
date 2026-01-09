@@ -1,0 +1,170 @@
+/**
+ * Hacker Terminal Theme for NeoSpace Walls
+ * Apply via class "theme-hacker" on the wall-container
+ */
+
+.theme-hacker {
+    /* Override Brutalist with Matrix-style terminal */
+    --hacker-bg: #0a0f0a;
+    --hacker-surface: #0d1a0d;
+    --hacker-border: #0f3d0f;
+    --hacker-text: #00ff00;
+    --hacker-text-dim: #00aa00;
+    --hacker-accent: #33ff33;
+    --hacker-glow: rgba(0, 255, 0, 0.3);
+    
+    background-color: var(--hacker-bg) !important;
+    background-image: 
+        linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--hacker-text) !important;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace !important;
+}
+
+/* Scanlines Overlay */
+.theme-hacker::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    z-index: 9999;
+}
+
+/* Cards become terminal windows */
+.theme-hacker .nb-card {
+    background-color: var(--hacker-surface) !important;
+    border: 1px solid var(--hacker-border) !important;
+    box-shadow: 0 0 10px var(--hacker-glow), inset 0 0 20px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 0 !important;
+}
+
+.theme-hacker .nb-card::before {
+    content: '> ';
+    color: var(--hacker-accent);
+}
+
+/* All text goes green */
+.theme-hacker h1, 
+.theme-hacker h2, 
+.theme-hacker h3, 
+.theme-hacker p, 
+.theme-hacker span,
+.theme-hacker label {
+    color: var(--hacker-text) !important;
+}
+
+.theme-hacker .text-gray-500,
+.theme-hacker .text-slate-500 {
+    color: var(--hacker-text-dim) !important;
+}
+
+/* Inputs become terminal prompts */
+.theme-hacker .nb-input,
+.theme-hacker input,
+.theme-hacker textarea,
+.theme-hacker select {
+    background-color: #000 !important;
+    border: 1px solid var(--hacker-border) !important;
+    color: var(--hacker-text) !important;
+    box-shadow: none !important;
+    caret-color: var(--hacker-accent);
+}
+
+.theme-hacker .nb-input:focus,
+.theme-hacker input:focus,
+.theme-hacker textarea:focus {
+    border-color: var(--hacker-accent) !important;
+    box-shadow: 0 0 10px var(--hacker-glow) !important;
+}
+
+/* Buttons become command keys */
+.theme-hacker .nb-button,
+.theme-hacker button {
+    background-color: transparent !important;
+    border: 1px solid var(--hacker-border) !important;
+    color: var(--hacker-text) !important;
+    box-shadow: none !important;
+    text-transform: uppercase;
+}
+
+.theme-hacker button:hover,
+.theme-hacker .nb-button:hover {
+    background-color: var(--hacker-accent) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--hacker-glow) !important;
+}
+
+/* Override accent colors */
+.theme-hacker .bg-acid-green,
+.theme-hacker .bg-yellow-300,
+.theme-hacker .bg-yellow-400 {
+    background-color: var(--hacker-accent) !important;
+    color: #000 !important;
+}
+
+.theme-hacker .bg-hot-pink,
+.theme-hacker .bg-electric-blue {
+    background-color: var(--hacker-text-dim) !important;
+}
+
+/* Avatar glow */
+.theme-hacker #avatar-container {
+    border-color: var(--hacker-border) !important;
+    box-shadow: 0 0 20px var(--hacker-glow) !important;
+}
+
+/* Banner override */
+.theme-hacker .h-32.bg-slate-900 {
+    background: linear-gradient(135deg, #0a0f0a 0%, #0d1a0d 100%) !important;
+    border-color: var(--hacker-border) !important;
+}
+
+/* Sticker board */
+.theme-hacker #sticker-canvas {
+    background-color: var(--hacker-surface) !important;
+    border-color: var(--hacker-border) !important;
+}
+
+/* Blinking cursor effect on status */
+.theme-hacker #status-message::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+    color: var(--hacker-accent);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Hide emoji (not very hacker) */
+.theme-hacker #status-emoji {
+    font-family: monospace !important;
+    filter: grayscale(100%) brightness(2);
+}
+
+/* Scrollbar */
+.theme-hacker::-webkit-scrollbar {
+    width: 8px;
+    background: var(--hacker-bg);
+}
+
+.theme-hacker::-webkit-scrollbar-thumb {
+    background: var(--hacker-border);
+    box-shadow: none;
+}
+
+.theme-hacker::-webkit-scrollbar-thumb:hover {
+    background: var(--hacker-accent);
+}

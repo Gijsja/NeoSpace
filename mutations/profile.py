@@ -68,7 +68,11 @@ def get_profile():
             return jsonify(error="user_id required"), 400
     
     viewer_id = g.user["id"] if g.user else None
-    result = profile_service.get_profile_by_user_id(user_id, viewer_id)
+    
+    wall_page = request.args.get("page", 1, type=int)
+    wall_limit = request.args.get("limit", 20, type=int)
+    
+    result = profile_service.get_profile_by_user_id(user_id, viewer_id, wall_page, wall_limit)
     
     if not result.success:
         return jsonify(error=result.error), result.status

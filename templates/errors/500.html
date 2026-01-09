@@ -1,61 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>500 - Server Error | NeoSpace</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <script src="/static/vendor/tailwindcss.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        'bbs-bg': '#FFFAF0',
-                        'acid-green': '#a3e635',
-                    },
-                    boxShadow: {
-                        'hard': '4px 4px 0px 0px #000000',
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
-    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
-    
-    <style>
-        .nb-card {
-            background-color: #FFFFFF;
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px 0px #000000;
-        }
-        .nb-button {
-            border: 2px solid #000000;
-            box-shadow: 4px 4px 0px 0px #000000;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .nb-button:active {
-            transform: translate(4px, 4px);
-            box-shadow: none;
-        }
-    </style>
-</head>
-<body class="font-sans bg-bbs-bg min-h-screen">
-    {% from 'components/cat_error.html' import cat_error %}
-    {{ cat_error(
-        code=500,
-        title="Server Error",
-        message="Something spooked the server cat. Our team has been notified and we're working to fix it."
-    ) }}
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}500 - System Failure{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div
+        class="nb-card p-8 bg-white max-w-2xl w-full text-center space-y-8 relative overflow-hidden border-red-500 shadow-[4px_4px_0px_0px_#ef4444]">
+
+        <!-- Glitch Overlay -->
+        <div class="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <h1 class="text-8xl font-black mb-2 animate-pulse text-red-500" style="text-shadow: 4px 4px 0px #000;">500
+            </h1>
+            <h2
+                class="text-2xl font-bold uppercase tracking-widest bg-red-500 text-white inline-block px-4 py-1 mb-8 transform rotate-1">
+                System Meltdown</h2>
+
+            <div class="flex justify-center mb-8">
+                <img src="/static/images/cat_500.png" alt="Server Fire Cat"
+                    class="w-64 h-64 object-contain filter contrast-125 border-4 border-black shadow-hard transform -rotate-2 hover:rotate-2 transition-transform duration-300">
+            </div>
+
+            <p class="font-mono text-lg mb-8 max-w-md mx-auto">
+                Critical error detected. The server is overheating (literally). We have dispatched a team of
+                cyber-firefighters.
+            </p>
+
+            <div class="flex gap-4 justify-center">
+                <a href="/"
+                    class="nb-button inline-block px-8 py-3 bg-white hover:bg-gray-100 text-black text-xl flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-house"></i> Home
+                </a>
+                <button onclick="window.location.reload()"
+                    class="nb-button inline-block px-8 py-3 bg-red-500 hover:bg-red-400 text-white text-xl flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-arrows-clockwise"></i> Retry
+                </button>
+            </div>
+        </div>
+
+        <!-- Decorative elements -->
+        <div class="absolute top-4 left-4 text-xs font-mono font-bold text-red-500">ERROR_CODE: CRITICAL</div>
+        <div class="absolute bottom-4 right-4 text-xs font-mono font-bold text-red-500">STACK_TRACE: NULL</div>
+    </div>
+</div>
+{% endblock %}

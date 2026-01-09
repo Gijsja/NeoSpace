@@ -86,7 +86,7 @@ class TestFriendsAPI:
         
         # Set Top 8
         res = auth_client.post('/friends/top8', json={
-            'order': [2, 3, 4]
+            'friend_ids': [2, 3, 4]
         })
         assert res.status_code == 200
         
@@ -101,7 +101,7 @@ class TestFriendsAPI:
     def test_max_top8_limit(self, auth_client):
         """Test that Top 8 is limited to 8 users."""
         res = auth_client.post('/friends/top8', json={
-            'order': [1, 2, 3, 4, 5, 6, 7, 8, 9]  # 9 users
+            'friend_ids': [1, 2, 3, 4, 5, 6, 7, 8, 9]  # 9 users
         })
         data = res.get_json()
         

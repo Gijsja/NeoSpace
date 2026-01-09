@@ -291,7 +291,9 @@ SBBS/
 
 <!-- Refactored from: BLUEPRINT.md "Roadmap" -->
 
-**Sprint #23**: Optimization & Polish (TBD)
+**Sprint #23**: Feature Expansion & Hardening
+
+**Goals**: Testing, Audio/Visual Polish, and Script Publishing.
 
 ## Recently Shipped
 

@@ -4,23 +4,21 @@ from db import get_db
 
 def save_script():
     """
-    Create or update a script.
-    Expects JSON: { id (optional), title, content, script_type }
+    Create or update a script (Strict Validation).
     """
     db = get_db()
-    data = request.json
     user_id = g.user['id']
     
-    script_id = data.get('id')
-    title = data.get('title', 'Untitled')
-    content = data.get('content', '')
-    script_type = data.get('script_type', 'p5')
-    is_public = data.get('is_public', 1)
-    
-    if script_id:
+    try:
+        import msgspec
+        from msgspec_models import SaveScriptRequest
+        req = msgspec.json.decode(request.get_data(), type=SaveScriptRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(ok=False, error=str(e)), 400
+
+    if req.id:
         # Update existing
-        # Verify ownership
-        row = db.execute("SELECT user_id FROM scripts WHERE id=?", (script_id,)).fetchone()
+        row = db.execute("SELECT user_id FROM scripts WHERE id=?", (req.id,)).fetchone()
         if not row:
             return jsonify(ok=False, error="Script not found"), 404
         if row['user_id'] != user_id:
@@ -30,18 +28,18 @@ def save_script():
             """UPDATE scripts 
                SET title=?, content=?, script_type=?, is_public=?, updated_at=datetime('now') 
                WHERE id=?""",
-            (title, content, script_type, is_public, script_id)
+            (req.title, req.content, req.script_type, req.is_public, req.id)
         )
         db.commit()
-        return jsonify(ok=True, id=script_id, message="Updated")
+        return jsonify(ok=True, id=req.id, message="Updated")
     else:
-        # Create new (Using RETURNING for speed per Technical Director)
+        # Create new
         try:
             row = db.execute(
                 """INSERT INTO scripts (user_id, title, content, script_type, is_public) 
                    VALUES (?, ?, ?, ?, ?) 
                    RETURNING id""",
-                (user_id, title, content, script_type, is_public)
+                (user_id, req.title, req.content, req.script_type, req.is_public)
             ).fetchone()
             db.commit()
             return jsonify(ok=True, id=row['id'], message="Created")
@@ -80,11 +78,6 @@ def get_script():
     if not row:
         return jsonify(ok=False, error="Script not found"), 404
         
-    # Check execution permission (public or own)
-    # For now, if public=0 and not owner, deny?
-    # Roadmap says "Transparency", maybe all scripts are viewable? 
-    # Let's enforce owner check only for editing, but for viewing allow public.
-    
     is_owner = g.user and row['user_id'] == g.user['id']
     if not row['is_public'] and not is_owner:
          return jsonify(ok=False, error="Private script"), 403
@@ -92,21 +85,24 @@ def get_script():
     return jsonify(ok=True, script=dict(row))
 
 def delete_script():
-    """Delete a script."""
+    """Delete a script (Strict Validation)."""
     db = get_db()
-    script_id = request.json.get('id')
     user_id = g.user['id']
     
-    if not script_id:
-        return jsonify(ok=False, error="Missing ID"), 400
+    try:
+        import msgspec
+        from msgspec_models import DeleteScriptRequest
+        req = msgspec.json.decode(request.get_data(), type=DeleteScriptRequest)
+    except msgspec.ValidationError as e:
+        return jsonify(ok=False, error=str(e)), 400
 
     # Check ownership
-    row = db.execute("SELECT user_id FROM scripts WHERE id=?", (script_id,)).fetchone()
+    row = db.execute("SELECT user_id FROM scripts WHERE id=?", (req.id,)).fetchone()
     if not row:
         return jsonify(ok=False, error="Not found"), 404
     if row['user_id'] != user_id:
         return jsonify(ok=False, error="Not authorized"), 403
         
-    db.execute("DELETE FROM scripts WHERE id=?", (script_id,))
+    db.execute("DELETE FROM scripts WHERE id=?", (req.id,))
     db.commit()
-    return jsonify(ok=True, deleted=script_id)
+    return jsonify(ok=True, deleted=req.id)

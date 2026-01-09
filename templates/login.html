@@ -1,42 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <title>Login - NeoSpace</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
     <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
     <script src="/static/vendor/tailwindcss.js"></script>
     <script defer src="/static/vendor/alpine.min.js"></script>
+
+    {% from "components/ghettoblaster.html" import ghettoblaster %}
+    {% from "components/tooltip.html" import tooltip %}
+    {% from "components/progress.html" import progress %}
+    {% from "components/badge.html" import badge %}
+
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'bbs-bg': '#FFFAF0',
-              'bbs-surface': '#FFFFFF',
-              'bbs-border': '#000000',
-              'acid-green': '#a3e635',
-              'hot-pink': '#ff6b6b',
-              'electric-blue': '#22d3ee',
-            },
-            fontFamily: { 
-                sans: ['Inter', 'system-ui', 'sans-serif'],
-                mono: ['monospace']
-            },
-            boxShadow: {
-              'hard': '4px 4px 0px 0px #000000',
-              'hard-sm': '2px 2px 0px 0px #000000',
-              'hard-xl': '8px 8px 0px 0px #000000',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bbs-bg': '#FFFAF0',
+                        'bbs-surface': '#FFFFFF',
+                        'bbs-border': '#000000',
+                        'acid-green': '#a3e635',
+                        'hot-pink': '#ff6b6b',
+                        'electric-blue': '#22d3ee',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['monospace']
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px #000000',
+                        'hard-sm': '2px 2px 0px 0px #000000',
+                        'hard-xl': '8px 8px 0px 0px #000000',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <style>
         .nb-input {
@@ -48,11 +56,13 @@
             box-shadow: 4px 4px 0px 0px #000000;
             transition: all 0.1s;
         }
+
         .nb-input:focus {
             outline: none;
             box-shadow: 2px 2px 0px 0px #000000;
             transform: translate(2px, 2px);
         }
+
         .nb-button {
             border: 2px solid #000000;
             box-shadow: 4px 4px 0px 0px #000000;
@@ -60,144 +70,391 @@
             font-weight: 900;
             text-transform: uppercase;
         }
-        .nb-button:active, .nb-button:hover {
+
+        .nb-button:active,
+        .nb-button:hover {
             box-shadow: 2px 2px 0px 0px #000000;
             transform: translate(2px, 2px);
         }
+
         .nb-card {
             background-color: #FFFFFF;
             border: 2px solid #000000;
             box-shadow: 8px 8px 0px 0px #000000;
         }
     </style>
+    <style>
+        .bg-gradient-overlay {
+            background: linear-gradient(to bottom, rgba(255, 250, 240, 0.2) 0%, rgba(255, 250, 240, 0.8) 100%);
+        }
+
+        .bg-carousel-item {
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* CRT Effects */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .crt-scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+            z-index: 2;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
 </head>
+
 <body class="bg-bbs-bg text-black flex items-center justify-center min-h-screen px-4">
-    
+
     <!-- Marquee Banner -->
-    <div class="fixed top-0 left-0 right-0 h-8 bg-black text-white overflow-hidden z-50 flex items-center">
+    <div
+        class="fixed top-0 left-0 right-0 h-8 bg-black text-white overflow-hidden z-50 flex items-center border-b border-acid-green/30">
         <div class="animate-marquee whitespace-nowrap font-mono text-xs font-bold tracking-widest">
-            ★ NEOSPACE ★ WELCOME TO THE GRID ★ LOGIN OR REGISTER ★ PROJECT CONCRETE ★ NEOSPACE ★ WELCOME TO THE GRID ★ LOGIN OR REGISTER ★ PROJECT CONCRETE ★
+            ★ NEOSPACE ★ 🐱 WELCOME TO THE MEOW-GRID 🐱 ★ LOGIN OR REGISTER ★ 🐾 PURR-JECT CONCRETE 🐾 ★ NEOSPACE ★ 🐱
+            WELCOME TO THE MEOW-GRID 🐱 ★
+        </div>
+        <div class="absolute right-4 z-50 flex items-center gap-2">
+            <span class="flex h-2 w-2 rounded-full bg-acid-green animate-pulse"></span>
+            {{ badge('SERVER ONLINE', variant='acid') }}
         </div>
     </div>
     <style>
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { animation: marquee 20s linear infinite; }
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 20s linear infinite;
+        }
     </style>
 
+    <!-- Rotating Background -->
+    <div x-data="bgCarousel()" x-init="start()" class="fixed inset-0 -z-10 overflow-hidden">
+        <template x-for="(bg, index) in backgrounds" :key="index">
+            <div class="absolute inset-0 bg-carousel-item" :style="`background-image: url(${bg});`"
+                x-show="currentBg === index" x-transition:enter="transition ease-out duration-1000"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-1000" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+            </div>
+        </template>
+        <div class="absolute inset-0 bg-gradient-overlay backdrop-blur-[2px]"></div>
+        <div class="crt-overlay"></div>
+        <div class="crt-scanline"></div>
+    </div>
+
+    <!-- Floating Ghettoblaster -->
+    <div class="fixed bottom-6 left-6 w-72 z-50 hidden lg:block">
+        {{ ghettoblaster(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="NIGHT_DRIVE.mid")
+        }}
+    </div>
+
+    <!-- Global Toast Shell -->
+    {% include "components/toast.html" %}
+
     <!-- Auth Card -->
-    <div x-data="authForm()" class="w-full max-w-md nb-card p-8 mt-12">
-        
+    <div x-data="{ isLogin: true }"
+        class="w-full max-w-md nb-card p-8 mt-12 bg-white/90 backdrop-blur-sm relative z-10">
+
         <!-- Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-black text-white mb-4 border-2 border-black shadow-hard">
-                <i class="ph-bold ph-broadcast text-4xl"></i>
+        <div class="text-center mb-8 relative">
+            <div class="absolute -top-10 -left-12 transform -rotate-12">
+                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-20 h-20 object-contain opacity-80">
+            </div>
+            <div
+                class="inline-flex items-center justify-center w-24 h-24 bg-black text-white mb-4 border-2 border-black shadow-hard overflow-hidden">
+                <img src="/static/images/cats/login_cat.png" alt="NeoSpace Cat" class="w-full h-full object-cover">
             </div>
             <h1 class="text-3xl font-black uppercase tracking-tighter mb-1">NeoSpace</h1>
-            <p class="text-sm font-mono text-gray-600">Access the Grid</p>
+            <p class="text-sm font-mono text-gray-600">Access the Meow-Grid</p>
         </div>
 
         <!-- Tab Toggle -->
         <div class="flex border-2 border-black mb-6">
-            <button @click="isLogin = true" 
-                    :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
-                    class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
+            <button @click="isLogin = true"
+                :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
                 <i class="ph-bold ph-sign-in"></i> Sign In
             </button>
             <button @click="isLogin = false"
-                    :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
-                    class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                 <i class="ph-bold ph-user-plus"></i> Register
             </button>
         </div>
 
-        <!-- Form -->
-        <form @submit.prevent="submit" class="space-y-5">
+        <!-- Login Form -->
+        <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5">
             <div>
                 <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
                     <i class="ph-bold ph-user"></i> Username
                 </label>
-                <input type="text" x-model="username" required 
-                       class="nb-input" 
-                       placeholder="your_handle" />
+                <input type="text" x-model="username" required class="nb-input" placeholder="your_handle" />
             </div>
             <div>
                 <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
                     <i class="ph-bold ph-lock"></i> Password
                 </label>
-                <input type="password" x-model="password" required 
-                       class="nb-input" 
-                       placeholder="••••••••" />
+                <input type="password" x-model="password" required class="nb-input" placeholder="••••••••" />
             </div>
-            
-            <!-- Error Message -->
-            <div x-show="error" x-text="error" x-transition
-                 class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold"></div>
 
-            <!-- Submit Button -->
+            <!-- Progress -->
+            <div x-show="loading" x-transition class="pt-2">
+                {{ progress(0, label="Authenticating...", variant='striped', attrs='x-effect="pVal = progressValue"') }}
+            </div>
+
+            <!-- Error -->
+            <div x-show="error" x-text="error" x-transition
+                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+            </div>
+
             <button type="submit" :disabled="loading"
-                    class="w-full py-4 nb-button bg-acid-green text-black flex items-center justify-center gap-2 disabled:opacity-50">
-                <template x-if="isLogin">
-                    <span class="flex items-center gap-2"><i class="ph-bold ph-sign-in"></i> Enter Grid</span>
-                </template>
-                <template x-if="!isLogin">
-                    <span class="flex items-center gap-2"><i class="ph-bold ph-user-plus"></i> Create Identity</span>
-                </template>
+                class="w-full py-4 nb-button bg-acid-green text-black flex items-center justify-center gap-2 disabled:opacity-50">
+                <span class="flex items-center gap-2"><i class="ph-bold ph-sign-in"></i> Enter Grid</span>
+            </button>
+            <div class="absolute -bottom-6 -right-6 transform rotate-12 z-0">
+                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-16 h-16 object-contain">
+            </div>
+        </form>
+
+        <!-- Register Form -->
+        <form x-show="!isLogin" x-data="registerForm()" @submit.prevent="submit()" x-cloak x-transition
+            class="space-y-5">
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
+                    <i class="ph-bold ph-user"></i> Username
+                </label>
+                <div class="relative group">
+                    <input type="text" x-model="username" required class="nb-input" placeholder="new_handle" />
+                    {% call tooltip("Alphanumeric only, 3-15 chars", position='right') %}
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <i class="ph-bold ph-question"></i>
+                    </div>
+                    {% endcall %}
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <i class="ph-bold ph-lock"></i> Password
+                    </label>
+                    <input type="password" x-model="password" required class="nb-input" placeholder="••••••••" />
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <i class="ph-bold ph-shield-check"></i> Confirm Password
+                    </label>
+                    <input type="password" x-model="confirmPassword" required class="nb-input" placeholder="••••••••" />
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div x-show="loading" x-transition class="pt-2">
+                {{ progress(0, label="Creating Identity...", variant='striped', attrs='x-effect="pVal = progressValue"')
+                }}
+            </div>
+
+            <!-- Error -->
+            <div x-show="error" x-text="error" x-transition
+                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+            </div>
+
+            <button type="submit" :disabled="loading"
+                class="w-full py-4 nb-button bg-electric-blue text-black flex items-center justify-center gap-2 disabled:opacity-50">
+                <span class="flex items-center gap-2"><i class="ph-bold ph-user-plus"></i> Create Identity</span>
             </button>
         </form>
 
         <!-- Footer -->
-        <p class="text-center text-xs font-mono text-gray-500 mt-6 border-t-2 border-black pt-4">
-            NeoSpace v1.0 // Project Concrete
-        </p>
+        <div class="flex items-center justify-center gap-2 mt-6 border-t-2 border-black pt-4">
+            <i class="ph-bold ph-cat text-xl"></i>
+            <p class="text-center text-xs font-mono text-gray-500">
+                NeoSpace v1.0.cat // Project Purrcrete
+            </p>
+        </div>
     </div>
 
     <script>
-        function authForm() {
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        function loginForm() {
             return {
-                isLogin: true,
                 username: '',
                 password: '',
                 error: '',
                 loading: false,
-                
-                getCsrfToken() {
-                    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                },
-                
+                progressValue: 0,
+
                 async submit() {
                     this.loading = true;
                     this.error = '';
-                    
-                    const endpoint = this.isLogin ? '/auth/login' : '/auth/register';
-                    const token = this.getCsrfToken();
+                    this.progressValue = 0;
+
+                    let interval = setInterval(() => {
+                        if (this.progressValue < 90) this.progressValue += 5;
+                    }, 50);
 
                     try {
-                        const res = await fetch(endpoint, {
+                        const res = await fetch('/auth/login', {
                             method: 'POST',
-                            headers: { 
+                            headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRFToken': token 
+                                'X-CSRFToken': getCsrfToken()
                             },
-                            body: JSON.stringify({ 
-                                username: this.username, 
-                                password: this.password 
+                            body: JSON.stringify({
+                                username: this.username,
+                                password: this.password
                             })
                         });
                         const data = await res.json();
-                        
+
                         if (res.ok && data.ok) {
-                            window.location.href = data.redirect;
+                            this.progressValue = 100;
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 300);
                         } else {
                             this.error = data.error || 'Authentication failed';
+                            this.$dispatch('toast', {
+                                title: 'Access Denied',
+                                message: this.error,
+                                type: 'error'
+                            });
                         }
                     } catch (err) {
                         this.error = 'Network error: ' + err.message;
+                        this.$dispatch('toast', {
+                            title: 'System Failure',
+                            message: this.error,
+                            type: 'error'
+                        });
                     } finally {
+                        clearInterval(interval);
                         this.loading = false;
                     }
                 }
             }
         }
+
+        function registerForm() {
+            return {
+                username: '',
+                password: '',
+                confirmPassword: '',
+                error: '',
+                loading: false,
+                progressValue: 0,
+
+                async submit() {
+                    if (this.password !== this.confirmPassword) {
+                        this.error = "Passwords do not match.";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = '';
+                    this.progressValue = 0;
+
+                    let interval = setInterval(() => {
+                        if (this.progressValue < 90) this.progressValue += 5;
+                    }, 50);
+
+                    try {
+                        const res = await fetch('/auth/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken()
+                            },
+                            body: JSON.stringify({
+                                username: this.username,
+                                password: this.password
+                            })
+                        });
+                        const data = await res.json();
+
+                        if (res.ok && data.ok) {
+                            this.progressValue = 100;
+                            this.$dispatch('toast', {
+                                title: 'Identity Created',
+                                message: 'Welcome to the grid, ' + this.username,
+                                type: 'success'
+                            });
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 500);
+                        } else {
+                            this.error = data.error || 'Registration failed';
+                            this.$dispatch('toast', {
+                                title: 'Registration Error',
+                                message: this.error,
+                                type: 'error'
+                            });
+                        }
+                    } catch (err) {
+                        this.error = 'Network error: ' + err.message;
+                    } finally {
+                        clearInterval(interval);
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function bgCarousel() {
+            return {
+                currentBg: 0,
+                backgrounds: [
+                    '/static/images/backgrounds/bg1.png',
+                    '/static/images/backgrounds/bg2.png',
+                    '/static/images/backgrounds/bg3.png',
+                    '/static/images/backgrounds/bg4.png',
+                    '/static/images/backgrounds/bg5.png'
+                ],
+                start() {
+                    setInterval(() => {
+                        this.currentBg = (this.currentBg + 1) % this.backgrounds.length;
+                    }, 8000);
+                }
+            }
+        }
     </script>
 </body>
+
 </html>

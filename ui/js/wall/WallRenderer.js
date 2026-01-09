@@ -6,18 +6,19 @@
 import { state, themes } from './WallState.js';
 import { setupAnthem } from './WallAudio.js';
 import { openEditModal } from './WallEdit.js';
-import { renderWallModules } from './WallModules.js';
+import { renderWallModules, appendWallModules } from './WallModules.js';
+import { fetchMorePosts } from './WallNetwork.js';
 
 export function renderProfile(data) {
     document.title = `${data.display_name}'s Wall`;
-    
+
     // Text fields
     setText('display-name', data.display_name);
     setText('username-handle', `@${data.username}`);
     setText('status-message', data.status_message || "Just setting up my space...");
     setText('status-emoji', data.status_emoji || "👋");
     setText('now-activity', data.now_activity || "Just chilling...");
-    
+
     // Icon mapping
     const activityIcons = {
         'listening': 'ph-headphones',
@@ -54,41 +55,88 @@ export function renderProfile(data) {
     // Audio Anthem
     setupAnthem(data.anthem_url, data.anthem_autoplay);
 
-    // Theme & Accent
-    if (themes[data.theme_preset]) {
-        document.getElementById('wall-container').style.background = themes[data.theme_preset];
-    }
+    // Theme Application (Sprint 24: Hacker Terminal)
+    applyTheme(data.theme_preset);
     document.documentElement.style.setProperty('--color-accent', data.accent_color);
-    
+
     // Interaction
     if (data.is_own) {
         ['edit-avatar-btn', 'edit-profile-btn', 'edit-now-btn'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) {
+            if (el) {
                 el.classList.remove('hidden');
-                el.onclick = openEditModal; 
+                el.onclick = openEditModal;
             }
         });
         const addModBtn = document.getElementById('add-module-btn');
-        if(addModBtn) addModBtn.classList.remove('hidden');
+        if (addModBtn) addModBtn.classList.remove('hidden');
     }
-    
+
     if (data.show_online_status) {
         const onlineEl = document.getElementById('online-indicator');
         if (onlineEl) onlineEl.classList.remove('hidden');
     }
-    
+
     renderWallModules(data.wall_modules);
+    renderLoadMore(data);
     renderTop8(data.top8);
     renderFollowBtn(data);
-    
+
     // Stickers
     if (state.stickerManager) state.stickerManager.setStickers(data.stickers);
 }
 
+function renderLoadMore(data) {
+    const container = document.getElementById('wall-load-more-container');
+    const btn = document.getElementById('btn-load-more');
+    const loader = document.getElementById('loader-more');
+
+    if (!container || !btn || !loader) return;
+
+    // Pagination state is in data.wall_pagination { page, has_more }
+    const pag = data.wall_pagination || { page: 1, has_more: false };
+
+    if (pag.has_more) {
+        container.classList.remove('hidden');
+        btn.classList.remove('hidden');
+        loader.classList.add('hidden');
+
+        // Remove old listener to prevent duplicates (using onclick works for valid HTML elements, one handler)
+        btn.onclick = async () => {
+            btn.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            const nextPage = pag.page + 1;
+            const res = await fetchMorePosts(data.user_id, nextPage);
+
+            loader.classList.add('hidden');
+
+            if (res && res.posts) {
+                appendWallModules(res.posts);
+
+                // Update local state
+                pag.page = res.page;
+                pag.has_more = res.has_more;
+
+                if (res.has_more) {
+                    btn.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            } else {
+                // Error handled silently or retry
+                btn.classList.remove('hidden');
+                alert("Failed to load posts.");
+            }
+        };
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
 function setText(id, text) {
     const el = document.getElementById(id);
-    if(el) el.textContent = text;
+    if (el) el.textContent = text;
 }
 
 function renderVoiceIntro(data) {
@@ -99,14 +147,14 @@ function renderVoiceIntro(data) {
             let waveform = [];
             try {
                 waveform = JSON.parse(data.voice_waveform_json || '[]');
-            } catch(e) {}
-            
+            } catch (e) { }
+
             if (typeof VoicePlayer !== 'undefined') {
-                 new VoicePlayer('voice-intro-section', data.voice_intro_path, waveform);
+                new VoicePlayer('voice-intro-section', data.voice_intro_path, waveform);
             }
         } else {
             voiceSection.classList.add('hidden');
-            voiceSection.innerHTML = ''; 
+            voiceSection.innerHTML = '';
         }
     }
 }
@@ -138,11 +186,11 @@ function renderFollowBtn(data) {
     if (followBtn) {
         if (!data.is_own && data.viewer_id) {
             followBtn.classList.remove('hidden');
-            followBtn.dataset.userId = data.user_id; 
-            
+            followBtn.dataset.userId = data.user_id;
+
             const isFollowing = data.viewer_is_following;
             followBtn.dataset.status = isFollowing ? 'following' : 'not_following';
-            
+
             if (window.FriendManager) {
                 window.FriendManager.updateButtonState(followBtn, isFollowing, false);
                 followBtn.onclick = () => window.FriendManager.toggleFollow(followBtn);
@@ -156,7 +204,7 @@ function renderFollowBtn(data) {
 export function setupPalette() {
     const palette = document.getElementById('sticker-palette');
     if (palette) palette.classList.remove('hidden');
-    
+
     if (palette && window.STICKERS_PRESETS) {
         palette.innerHTML = '';
         window.STICKERS_PRESETS.forEach(char => {
@@ -174,5 +222,27 @@ export function setupPalette() {
             });
             palette.appendChild(el);
         });
+    }
+}
+
+// Theme Logic
+function applyTheme(preset) {
+    const container = document.getElementById('wall-container');
+    const hackerLink = document.getElementById('theme-hacker-css');
+
+    // Reset state
+    if (container) {
+        container.classList.remove('theme-hacker');
+        container.style.background = ''; // Clear inline styles
+    }
+    if (hackerLink) hackerLink.setAttribute('disabled', 'true');
+
+    // Apply specific theme
+    if (preset === 'hacker') {
+        if (container) container.classList.add('theme-hacker');
+        if (hackerLink) hackerLink.removeAttribute('disabled');
+    } else if (themes[preset]) {
+        // Legacy/Simple background gradients from WallState.js
+        if (container) container.style.background = themes[preset];
     }
 }

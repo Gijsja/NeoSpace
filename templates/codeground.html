@@ -1,57 +1,221 @@
 {% extends "base.html" %}
 
-{% block title %}Codeground - NeoSpace{% endblock %}
-{% block page_title %}CODEGROUND{% endblock %}
+{% block title %}Codeground v2.0 - NeoSpace{% endblock %}
+{% block page_title %}CODEGROUND v2.0{% endblock %}
 
 {% block head %}
-<!-- Tailwind already in base -->
 <style>
-    /* Custom editor styles */
-    .cm-editor { height: 100%; border: none; }
-    .cm-scroller { overflow: auto; }
+    /* Editor Gutter & Overlay */
+    .editor-wrapper {
+        position: relative;
+        counter-reset: line;
+        display: flex;
+        height: 100%;
+        background-color: #0f172a;
+        color: #e2e8f0;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .line-numbers {
+        width: 3rem;
+        padding: 1rem 0.5rem;
+        background-color: #1e293b;
+        color: #64748b;
+        text-align: right;
+        border-right: 1px solid #334155;
+        user-select: none;
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        overflow: hidden;
+    }
+
+    .line-numbers div {
+        height: 1.5rem;
+    }
+
+    #code-input {
+        flex: 1;
+        background: transparent;
+        color: inherit;
+        border: none;
+        padding: 1rem;
+        line-height: 1.5rem;
+        font-size: 0.875rem;
+        resize: none;
+        white-space: pre;
+        outline: none;
+        overflow: auto;
+        tab-size: 2;
+    }
+
+    /* Syntax Highlighting (Poor man's) */
+    .syntax-layer {
+        position: absolute;
+        top: 0;
+        left: 3rem;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        padding: 1rem;
+        line-height: 1.5rem;
+        font-size: 0.875rem;
+        white-space: pre;
+        color: transparent;
+        /* Text is transparent, we show background highlights/tokens? No, too complex for raw html. */
+        /* For v2.0 we stick to raw text but better DX */
+    }
+
+    /* Sidebar Transitions */
+    .sidebar-panel-enter {
+        transform: translateX(-100%);
+    }
+
+    .sidebar-panel-active {
+        transform: translateX(0);
+    }
 </style>
 {% endblock %}
 
 {% block main_container %}
-<!-- Override main container to be full height/width flex for the IDE feel -->
-<div class="flex flex-col h-full overflow-hidden bg-bbs-bg text-slate-200">
-    
-    <!-- Toolbar (Adapted from code_editor.html) -->
-    <div class="flex items-center justify-between px-4 py-2 bg-bbs-surface border-b-2 border-black shrink-0">
-        <div class="flex items-center gap-4">
-            <span class="text-emerald-400 text-sm flex items-center gap-1.5 font-mono font-bold uppercase">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Safe Mode
-            </span>
+<div class="flex h-full overflow-hidden bg-bbs-bg" x-data="codeground()">
+
+    <!-- LEFT: Script Manager Sidebar -->
+    <div class="w-64 flex flex-col border-r-2 border-black bg-white shrink-0 transform transition-transform duration-200"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64 absolute z-50 h-full shadow-hard-xl'">
+
+        <div class="h-10 flex items-center justify-between px-3 bg-black text-white shrink-0">
+            <span class="font-bold uppercase text-xs tracking-widest">My Scripts</span>
+            <button @click="createNewsScript()" class="hover:text-acid-green" title="New Script"><i
+                    class="ph-bold ph-plus"></i></button>
         </div>
-        <div class="flex items-center gap-3">
-            <!-- Library Selector -->
-            <div class="flex bg-bbs-bg border-2 border-black shadow-hard-sm">
-                <button class="px-3 py-1.5 text-xs font-bold uppercase bg-acid-green text-black border-r-2 border-black">Three.js</button>
-                <button class="px-3 py-1.5 text-xs font-bold uppercase text-slate-400 hover:text-white transition">p5.js</button>
+
+        <!-- Script List -->
+        <div class="flex-1 overflow-y-auto p-2 space-y-2">
+            <template x-if="loadingScripts">
+                <div class="text-center py-4 text-xs text-gray-500 font-mono animate-pulse">Loading...</div>
+            </template>
+
+            <template x-for="script in scripts" :key="script.id">
+                <div @click="loadScript(script.id)"
+                    class="p-2 border-2 border-transparent hover:border-black hover:bg-gray-50 cursor-pointer group transition-all"
+                    :class="currentScriptId === script.id ? 'bg-acid-green border-black shadow-hard-sm' : ''">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="font-bold text-sm truncate w-32" x-text="script.title || 'Untitled'"></span>
+                        <span class="text-[10px] font-mono text-gray-500"
+                            x-text="formatDate(script.last_modified)"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Toggle Handle (When closed) -->
+        <button x-show="!sidebarOpen" @click="sidebarOpen = true"
+            class="absolute -right-8 top-10 w-8 h-10 bg-black text-white flex items-center justify-center border-y-2 border-r-2 border-white cursor-pointer hover:bg-acid-green hover:text-black">
+            <i class="ph-bold ph-caret-right"></i>
+        </button>
+    </div>
+
+    <!-- CENTER: Main Area -->
+    <div class="flex-1 flex flex-col min-w-0 relative">
+
+        <!-- Toolbar -->
+        <div class="h-12 border-b-2 border-black bg-bbs-surface flex items-center justify-between px-4 shrink-0">
+            <div class="flex items-center gap-3">
+                <button @click="sidebarOpen = !sidebarOpen"
+                    class="w-8 h-8 border-2 border-black flex items-center justify-center hover:bg-yellow-300 transition-colors"
+                    :class="sidebarOpen ? 'bg-black text-white' : 'bg-white'">
+                    <i class="ph-bold ph-sidebar-simple"></i>
+                </button>
+
+                <input type="text" x-model="currentTitle" class="nb-input h-8 w-64 font-bold text-sm"
+                    placeholder="Untitled Script" @input="docDirty = true">
+
+                <span x-show="docDirty" class="text-xs font-mono text-red-500 animate-pulse font-bold uppercase">*
+                    Unsaved</span>
             </div>
-            <!-- Actions -->
-            <button id="run-btn" class="px-4 py-1.5 text-xs font-bold uppercase bg-electric-blue hover:bg-hot-pink border-2 border-black shadow-hard-sm transition flex items-center gap-2 text-black">
-                <i class="ph-bold ph-play"></i> Run
-            </button>
-            <button id="publish-btn" class="px-4 py-1.5 text-xs font-bold uppercase bg-purple-600 hover:bg-purple-500 border-2 border-black shadow-hard-sm transition flex items-center gap-2 text-white">
-                <i class="ph-bold ph-upload-simple"></i> Publish
-            </button>
+
+            <div class="flex items-center gap-2">
+                <!-- Save Draft -->
+                <button @click="saveScript()"
+                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-white hover:bg-acid-green transition shadow-hard-sm flex items-center gap-2"
+                    :disabled="isSaving">
+                    <i class="ph-bold ph-floppy-disk"></i>
+                    <span x-text="isSaving ? 'Saving...' : 'Save Draft'"></span>
+                </button>
+
+                <!-- Run -->
+                <button @click="runCode()"
+                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-electric-blue hover:bg-cyan-300 transition shadow-hard-sm flex items-center gap-2">
+                    <i class="ph-bold ph-play"></i> Run
+                </button>
+
+                <!-- Publish -->
+                <button @click="openPublishModal()"
+                    class="px-3 py-1.5 text-xs font-bold uppercase border-2 border-black bg-purple-600 text-white hover:bg-purple-500 transition shadow-hard-sm flex items-center gap-2">
+                    <i class="ph-bold ph-upload-simple"></i> Publish
+                </button>
+            </div>
+        </div>
+
+        <!-- Editor / Preview Split -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- IDE -->
+            <div class="w-1/2 flex flex-col relative border-r-2 border-black">
+                <div class="editor-wrapper group">
+                    <div class="line-numbers font-mono text-xs opacity-50" id="line-numbers">1</div>
+                    <textarea id="code-input" x-model="codeContent" @input="updateLines(); docDirty = true"
+                        @scroll="syncScroll($event)" @keydown.tab.prevent="insertTab($event)"
+                        spellcheck="false"></textarea>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="w-1/2 bg-black flex flex-col relative">
+                <iframe id="preview-frame" class="flex-1 border-none bg-white"></iframe>
+
+                <!-- Console Overlay -->
+                <div class="h-32 bg-gray-900 border-t-2 border-white/20 text-green-400 font-mono text-xs p-2 overflow-y-auto"
+                    id="console-logs">
+                    <div class="text-gray-500 mb-1 border-b border-gray-700 pb-1 flex justify-between">
+                        <span>CONSOLE OUTPUT</span>
+                        <span class="cursor-pointer hover:text-white" @click="clearConsole()">CLEAR</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Split Pane: Editor | Preview -->
-    <div class="flex-1 flex overflow-hidden">
-        
-        <!-- LEFT: Code Editor -->
-        <div class="w-1/2 flex flex-col border-r-2 border-black bg-[#0f172a]">
-            <div class="px-3 py-1 bg-black text-white border-b-2 border-black text-[10px] font-mono uppercase tracking-widest flex justify-between">
-                <span>sketch.js</span>
-                <span>JS</span>
+    <!-- Publish Modal -->
+    <div x-show="showPublishModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
+        style="display: none;">
+        <div class="bg-white border-2 border-black p-6 w-96 shadow-hard-xl" @click.away="showPublishModal = false">
+            <h2 class="text-xl font-black uppercase mb-4">Publish to Wall</h2>
+            <div class="space-y-3">
+                <input type="text" x-model="currentTitle" class="nb-input w-full" placeholder="Title">
+                <textarea x-model="publishDesc" class="nb-input w-full h-24" placeholder="Description..."></textarea>
+                <div class="flex gap-2 pt-2">
+                    <button @click="showPublishModal = false"
+                        class="flex-1 py-2 border-2 border-black font-bold hover:bg-gray-100">CANCEL</button>
+                    <button @click="publishToWall()"
+                        class="flex-1 py-2 bg-black text-white border-2 border-black font-bold hover:bg-gray-800">PUBLISH</button>
+                </div>
             </div>
-            <div class="flex-1 relative">
-                <textarea id="code-input" class="w-full h-full bg-[#0f172a] text-slate-300 font-mono text-sm p-4 resize-none focus:outline-none custom-scrollbar" spellcheck="false">
-const scene = new THREE.Scene();
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('codeground', () => ({
+            sidebarOpen: true,
+            scripts: [],
+            loadingScripts: false,
+            currentScriptId: null,
+            currentTitle: 'Untitled Script',
+            codeContent: `const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 camera.position.z = 5;
 
@@ -60,241 +224,204 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const geometry = new THREE.IcosahedronGeometry(1.5, 0);
-const material = new THREE.MeshBasicMaterial({ 
-    color: 0xa3e635, 
-    wireframe: true 
-});
+const material = new THREE.MeshBasicMaterial({ color: 0xa3e635, wireframe: true });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 
-const animate = function () {
+function animate() {
     requestAnimationFrame(animate);
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
     renderer.render(scene, camera);
-};
+}
+animate();`,
+            docDirty: false,
+            isSaving: false,
+            showPublishModal: false,
+            publishDesc: '',
 
-animate();
-                </textarea>
-            </div>
-        </div>
+            init() {
+                this.updateLines();
+                this.fetchScripts();
+                this.runCode(); // Initial run
 
-        <!-- RIGHT: Live Preview -->
-        <div class="w-1/2 flex flex-col bg-black relative">
-            <div class="px-3 py-1 bg-white border-b-2 border-black text-[10px] font-mono uppercase tracking-widest flex justify-between items-center text-black">
-                <span>Preview</span>
-                <span class="flex items-center gap-1 text-emerald-600 font-bold"><i class="ph-fill ph-circle"></i> Live</span>
-            </div>
-            <div class="flex-1 relative overflow-hidden" id="preview-container">
-                <iframe id="preview-frame" class="w-full h-full border-none"></iframe>
-            </div>
-            
-            <!-- Overlay Loader -->
-            <div id="preview-loader" class="absolute inset-0 bg-black/50 flex items-center justify-center hidden pointer-events-none">
-                <i class="ph-bold ph-spinner animate-spin text-white text-3xl"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Console -->
-    <div class="h-32 bg-bbs-surface border-t-2 border-black shrink-0 flex flex-col font-mono text-xs">
-        <div class="px-3 py-1 bg-black text-white border-b border-white/20 flex items-center justify-between">
-            <span class="uppercase tracking-widest">System Output</span>
-            <button class="hover:text-acid-green uppercase" onclick="document.getElementById('console-output').innerHTML = ''">Clear</button>
-        </div>
-        <div id="console-output" class="flex-1 overflow-auto p-2 space-y-1 text-slate-400">
-            <div class="text-emerald-400">[SYSTEM] Codeground initialized.</div>
-            <div>> Ready for input...</div>
-        </div>
-    </div>
-    <!-- Publish Modal -->
-    <div id="publish-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-white border-2 border-black shadow-hard p-6 w-full max-w-md transform scale-95 transition-transform duration-300" id="publish-modal-content">
-            <h2 class="text-2xl font-black uppercase mb-4 text-black">Publish to Grid</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase mb-1 text-gray-600">Script Title</label>
-                    <input type="text" id="script-title" class="w-full border-2 border-black p-2 font-mono text-sm focus:outline-none focus:shadow-hard-sm transition-all text-black" placeholder="My Awesome Glitch">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase mb-1 text-gray-600">Description</label>
-                    <textarea id="script-desc" class="w-full border-2 border-black p-2 font-mono text-sm focus:outline-none focus:shadow-hard-sm transition-all h-24 text-black" placeholder="What does this code do?"></textarea>
-                </div>
-                
-                <div class="flex gap-4 pt-4">
-                    <button id="cancel-publish" class="flex-1 py-3 font-bold uppercase border-2 border-black hover:bg-gray-100 text-black transition-colors">Cancel</button>
-                    <button id="confirm-publish" class="flex-1 py-3 font-bold uppercase bg-black text-white hover:bg-gray-800 transition-colors border-2 border-black">
-                        <i class="ph-bold ph-upload-simple"></i> Publish
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    // Simple Codeground Logic
-    const codeInput = document.getElementById('code-input');
-    const previewFrame = document.getElementById('preview-frame');
-    const runBtn = document.getElementById('run-btn');
-    const publishBtn = document.getElementById('publish-btn');
-    const consoleOutput = document.getElementById('console-output');
-    
-    // Modal Elements
-    const modal = document.getElementById('publish-modal');
-    const modalContent = document.getElementById('publish-modal-content');
-    const cancelBtn = document.getElementById('cancel-publish');
-    const confirmBtn = document.getElementById('confirm-publish');
-
-    function log(msg, type='info') {
-        const div = document.createElement('div');
-        div.textContent = `> ${msg}`;
-        if (type === 'error') div.className = "text-red-400";
-        else if (type === 'success') div.className = "text-emerald-400";
-        consoleOutput.appendChild(div);
-        consoleOutput.scrollTop = consoleOutput.scrollHeight;
-    }
-
-    function runCode() {
-        const code = codeInput.value;
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>body { margin: 0; overflow: hidden; background: transparent; }</style>
-                <script src="/static/vendor/three.min.js"></script>
-                <script src="/static/vendor/p5.min.js"></script>
-            </head>
-            <body>
-                <script>
-                    // Capture console
-                    window.console.log = function(...args) { 
-                        window.parent.postMessage({type: 'log', msg: args.join(' ')}, '*');
+                // Add keyboard shortcut for save
+                window.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                        e.preventDefault();
+                        this.saveScript();
                     }
-                    window.console.error = function(...args) { 
-                        window.parent.postMessage({type: 'error', msg: args.join(' ')}, '*');
-                    }
-                    window.onerror = function(msg, source, lineno, colno, error) {
-                         window.parent.postMessage({type: 'error', msg: msg}, '*');
-                    }
-                    
-                    try {
-                        ${code}
-                    } catch(e) {
-                        console.error(e);
-                    }
-                <\/script>
-            </body>
-            </html>
-        `;
-        
-        const blob = new Blob([html], { type: 'text/html' });
-        previewFrame.src = URL.createObjectURL(blob);
-        log("Executing...", 'success');
-    }
+                });
 
-    // -- Modal Logic --
-    publishBtn.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-        // Small delay for transition
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-        }, 10);
-    });
+                // Listen for iframe logs
+                window.addEventListener('message', (e) => {
+                    if (e.data.type === 'log') this.logToConsole(e.data.msg);
+                    if (e.data.type === 'error') this.logToConsole(e.data.msg, 'error');
+                });
+            },
 
-    function closeModal() {
-        modal.classList.add('opacity-0');
-        modalContent.classList.remove('scale-100');
-        modalContent.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-    
-    cancelBtn.addEventListener('click', closeModal);
+            async fetchScripts() {
+                this.loadingScripts = true;
+                const res = await fetch('/scripts/list');
+                const data = await res.json();
+                if (data.ok) this.scripts = data.scripts;
+                this.loadingScripts = false;
+            },
 
-    // -- Publish Logic --
-    confirmBtn.addEventListener('click', async () => {
-        const title = document.getElementById('script-title').value || "Untitled Script";
-        const desc = document.getElementById('script-desc').value || "";
-        const code = codeInput.value;
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            async createNewsScript() {
+                this.currentScriptId = null;
+                this.currentTitle = "Untitled Script";
+                this.codeContent = "// New Script\n";
+                this.docDirty = false;
+                this.runCode();
+            },
 
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
+            async loadScript(id) {
+                if (this.docDirty && !confirm("Unsaved changes! Discard?")) return;
 
-        try {
-            const res = await fetch('/wall/post/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
+                const res = await fetch('/scripts/get?id=' + id);
+                const data = await res.json();
+                if (data.ok) {
+                    this.currentScriptId = data.script.id;
+                    this.currentTitle = data.script.title;
+                    this.codeContent = data.script.content;
+                    this.docDirty = false;
+                    this.runCode();
+                    this.updateLines();
+                }
+            },
+
+            async saveScript() {
+                this.isSaving = true;
+                const payload = {
+                    id: this.currentScriptId,
+                    title: this.currentTitle,
+                    content: this.codeContent,
+                    script_type: 'p5', // or threejs, auto-detect later
+                    is_public: 1
+                };
+
+                const res = await fetch('/scripts/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    this.currentScriptId = data.id;
+                    this.docDirty = false;
+                    this.fetchScripts(); // Refresh list
+                    this.logToConsole("Saved successfully.", 'system');
+                } else {
+                    alert("Error saving: " + data.error);
+                }
+                this.isSaving = false;
+            },
+
+            runCode() {
+                const frame = document.getElementById('preview-frame');
+                const html = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>body { margin: 0; overflow: hidden; background: white; }</style>
+                        <script src="/static/vendor/three.min.js"><\/script>
+                        <script src="/static/vendor/p5.min.js"><\/script>
+                    </head>
+                    <body>
+                        <script>
+                            window.console.log = (...args) => window.parent.postMessage({type: 'log', msg: args.join(' ')}, '*');
+                            window.console.error = (...args) => window.parent.postMessage({type: 'error', msg: args.join(' ')}, '*');
+                            window.onerror = (msg) => window.parent.postMessage({type: 'error', msg}, '*');
+                            try { ${this.codeContent} } catch(e) { console.error(e); }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([html], { type: 'text/html' });
+                frame.src = URL.createObjectURL(blob);
+                this.clearConsole();
+                this.logToConsole("Running...", 'system');
+            },
+
+            openPublishModal() {
+                if (this.docDirty) {
+                    alert("Please save content first!");
+                    this.saveScript();
+                    return;
+                }
+                this.showPublishModal = true;
+            },
+
+            async publishToWall() {
+                if (!this.currentScriptId) { alert("Save the script first!"); return; }
+
+                const payload = {
                     module_type: 'script',
                     content: {
-                        code: code,
-                        title: title,
-                        description: desc,
-                        created_at: new Date().toISOString()
+                        script_id: this.currentScriptId, // Link to the real script!
+                        title: this.currentTitle,
+                        description: this.publishDesc,
+                        code: this.codeContent // Snapshot for fallback
                     },
-                    style: { theme: 'dark' } // Default style
-                })
-            });
-            
-            const data = await res.json();
-            
-            if (data.ok) {
-                log("Script Published Successfully!", 'success');
-                closeModal();
-                // Optional: ask to view it?
-                if(confirm("Script published! View on your wall?")) {
-                    window.location.href = '/wall';
+                    style: { theme: 'dark' }
+                };
+
+                const res = await fetch('/wall/post/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify(payload)
+                });
+
+                if ((await res.json()).ok) {
+                    alert("Published to Wall!");
+                    this.showPublishModal = false;
+                } else {
+                    alert("Publish failed");
                 }
-            } else {
-                log("Error: " + (data.error || "Unknown error"), 'error');
+            },
+
+            // Editor Utils
+            updateLines() {
+                const lines = this.codeContent.split('\n').length;
+                document.getElementById('line-numbers').innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
+            },
+
+            syncScroll(e) {
+                document.getElementById('line-numbers').scrollTop = e.target.scrollTop;
+            },
+
+            insertTab(e) {
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                this.codeContent = this.codeContent.substring(0, start) + "  " + this.codeContent.substring(end);
+                // Vue/Alpine reactivity might jerk cursor, need nextTick fix usually, but manual set works for basic
+                this.$nextTick(() => {
+                    e.target.selectionStart = e.target.selectionEnd = start + 2;
+                });
+            },
+
+            logToConsole(msg, type = 'info') {
+                const div = document.createElement('div');
+                div.textContent = `> ${msg}`;
+                if (type === 'error') div.className = "text-red-500 font-bold";
+                else if (type === 'system') div.className = "text-yellow-400";
+
+                const consoleLogs = document.getElementById('console-logs');
+                consoleLogs.appendChild(div);
+                consoleLogs.scrollTop = consoleLogs.scrollHeight;
+            },
+
+            clearConsole() {
+                document.getElementById('console-logs').innerHTML = '';
+            },
+
+            formatDate(iso) {
+                if (!iso) return '';
+                return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             }
-        } catch (err) {
-            log("Network Error: " + err.message, 'error');
-        } finally {
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="ph-bold ph-upload-simple"></i> Publish';
-        }
-    });
-
-    runBtn.addEventListener('click', runCode);
-
-    // Initial Run
-    runCode();
-
-    // Listen for logs from iframe
-    window.addEventListener('message', (e) => {
-        if (e.data.type === 'log') log(e.data.msg);
-        if (e.data.type === 'error') log(e.data.msg, 'error');
-    });
-
-    // Handle Tab in Textarea
-    codeInput.addEventListener('keydown', function(e) {
-        if (e.key == 'Tab') {
-            e.preventDefault();
-            var start = this.selectionStart;
-            var end = this.selectionEnd;
-            this.value = this.value.substring(0, start) + "  " + this.value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 2;
-        }
-    });
-
-    // Keybinds
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            e.preventDefault();
-            runCode();
-        }
+        }))
     });
 </script>
 {% endblock %}

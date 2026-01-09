@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,24 +11,26 @@
     <script src="/static/vendor/tailwindcss.js"></script>
     <script defer src="/static/vendor/alpine.min.js"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'acid-green': '#a3e635',
-            },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['monospace'],
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'acid-green': '#a3e635',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['monospace'],
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
+
 <body class="bg-slate-50 min-h-screen text-slate-800 p-8 font-sans selection:bg-acid-green selection:text-black pb-32">
     <!-- CDN Failure Detector -->
-    <div id="cdn-error" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,0,0,0.9); z-index:9999; padding:2rem; color:white; font-family:sans-serif;">
+    <div id="cdn-error"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,0,0,0.9); z-index:9999; padding:2rem; color:white; font-family:sans-serif;">
         <h1 style="font-size:3rem; font-weight:bold; text-transform:uppercase;">Critical System Failure</h1>
         <p style="font-size:1.5rem;">The styling engine (Tailwind) or logic core (Alpine.js) failed to load.</p>
         <p style="margin-top:1rem;">Possible causes:</p>
@@ -35,15 +38,17 @@
             <li>No internet connection (CDNs are unreachable)</li>
             <li>Ad-blocker or Firewall blocking `cdn.tailwindcss.com` or `unpkg.com`</li>
         </ul>
-        <button onclick="location.reload()" style="margin-top:2rem; padding:1rem 2rem; background:black; color:white; border:2px solid white; cursor:pointer; font-weight:bold; text-transform:uppercase;">Retry Connection</button>
+        <button onclick="location.reload()"
+            style="margin-top:2rem; padding:1rem 2rem; background:black; color:white; border:2px solid white; cursor:pointer; font-weight:bold; text-transform:uppercase;">Retry
+            Connection</button>
     </div>
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             // Check if Tailwind loaded (it adds a style tag or classes work)
             const tailwindLoaded = typeof tailwind !== 'undefined';
             // Check if Alpine loaded
             const alpineLoaded = typeof Alpine !== 'undefined';
-            
+
             if (!tailwindLoaded || !alpineLoaded) {
                 document.getElementById('cdn-error').style.display = 'block';
                 console.error('Critical: CDNs failed to load. Tailwind:', tailwindLoaded, 'Alpine:', alpineLoaded);
@@ -76,27 +81,33 @@
         <div>
             <h1 class="text-4xl font-black uppercase tracking-tighter mb-2">NeoSpace UI Kit</h1>
             <p class="font-mono text-sm text-gray-500">Reactive Component Library (Alpine.js + Tailwind)</p>
-            <p class="font-mono text-xs text-acid-green font-bold bg-black inline-block px-2 py-0.5 mt-2">v2.1 EXPANDED</p>
+            <p class="font-mono text-xs text-acid-green font-bold bg-black inline-block px-2 py-0.5 mt-2">v2.1 EXPANDED
+            </p>
         </div>
         <div class="text-right">
-            <p class="text-sm font-bold uppercase">Press <span class="bg-gray-200 px-1 border border-black">CMD+K</span> to search</p>
+            <p class="text-sm font-bold uppercase">Press <span class="bg-gray-200 px-1 border border-black">CMD+K</span>
+                to search</p>
         </div>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-        
+
         <!-- MEDIA (NEW) -->
         <section class="space-y-4 md:col-span-2 lg:col-span-1">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Media</h2>
-            {{ audio_player() }}
+            {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Neon City.mp3")
+            }}
+            <div class="h-4"></div>
+            {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Voice Note 001",
+            is_voice=True) }}
         </section>
 
         <!-- BUTTONS -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Buttons</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4 flex flex-col items-start" 
-                 x-data="{ count: 0 }">
-                
+            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4 flex flex-col items-start"
+                x-data="{ count: 0 }">
+
                 <div class="flex flex-wrap gap-2">
                     {{ button('Primary', variant='primary') }}
                     {{ button('Secondary', variant='secondary') }}
@@ -106,7 +117,7 @@
                     {{ button('Destructive', variant='destructive', size='sm') }}
                     {{ button('Outline', variant='outline', size='sm') }}
                 </div>
-                
+
                 <div class="pt-4 border-t border-gray-100 w-full mt-4">
                     <p class="font-mono text-xs mb-2">Interactive Counter:</p>
                     <div class="flex items-center gap-4">
@@ -131,19 +142,19 @@
         <!-- CARDS -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Cards</h2>
-            
+
             {% call card(title="System Status", description="Real-time metrics") %}
-                <div class="flex items-center justify-between mb-2">
-                    <span class="font-mono text-xs">CPU Usage</span>
-                    <span class="font-bold text-acid-green bg-black px-1 text-xs">42%</span>
-                </div>
-                <div class="w-full bg-gray-200 h-2 border border-black">
-                    <div class="bg-acid-green h-full w-[42%] border-r border-black"></div>
-                </div>
+            <div class="flex items-center justify-between mb-2">
+                <span class="font-mono text-xs">CPU Usage</span>
+                <span class="font-bold text-acid-green bg-black px-1 text-xs">42%</span>
+            </div>
+            <div class="w-full bg-gray-200 h-2 border border-black">
+                <div class="bg-acid-green h-full w-[42%] border-r border-black"></div>
+            </div>
             {% endcall %}
 
             {% call card(title="Login", footer=button("Sign In", class="w-full")) %}
-               {{ input('u', 'Username', class="mb-3") }} 
+            {{ input('u', 'Username', class="mb-3") }}
             {% endcall %}
         </section>
 
@@ -151,14 +162,15 @@
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Data Display</h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
-                
+
                 <div>
                     <h3 class="font-bold text-sm mb-2">Avatars</h3>
                     <div class="flex gap-4 items-center">
                         {{ avatar(src='https://i.pravatar.cc/150?u=neo', size='lg') }}
                         {{ avatar(text='JD', size='md') }}
                         {% call avatar(text='ON', size='md') %}
-                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-acid-green border-2 border-white rounded-full"></span>
+                        <span
+                            class="absolute bottom-0 right-0 w-3 h-3 bg-acid-green border-2 border-white rounded-full"></span>
                         {% endcall %}
                     </div>
                 </div>
@@ -188,30 +200,30 @@
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Navigation</h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
-                
+
                 <div>
                     <h3 class="font-bold text-sm mb-2">Switch</h3>
                     <div class="space-y-3">
-                         {{ switch('s1', 'Airplane Mode') }}
-                         {{ switch('s2', 'Dark Mode', checked=True) }}
+                        {{ switch('s1', 'Airplane Mode') }}
+                        {{ switch('s2', 'Dark Mode', checked=True) }}
                     </div>
                 </div>
 
                 <div>
                     <h3 class="font-bold text-sm mb-4">Tabs</h3>
                     {% call tabs('settings-tabs', [
-                        {'id': 'account', 'label': 'Account'},
-                        {'id': 'notifications', 'label': 'Alerts'}
+                    {'id': 'account', 'label': 'Account'},
+                    {'id': 'notifications', 'label': 'Alerts'}
                     ]) %}
-                        {% call tab_panel('account') %}
-                            <p class="text-sm text-gray-500 mb-2">Update your account settings here.</p>
-                            {{ input('display_name', 'Display Name', value='Neo') }}
-                        {% endcall %}
-                        
-                        {% call tab_panel('notifications') %}
-                            <p class="text-sm text-gray-500 mb-2">Manage your email alerts.</p>
-                            {{ switch('n1', 'Email Digests', checked=True) }}
-                        {% endcall %}
+                    {% call tab_panel('account') %}
+                    <p class="text-sm text-gray-500 mb-2">Update your account settings here.</p>
+                    {{ input('display_name', 'Display Name', value='Neo') }}
+                    {% endcall %}
+
+                    {% call tab_panel('notifications') %}
+                    <p class="text-sm text-gray-500 mb-2">Manage your email alerts.</p>
+                    {{ switch('n1', 'Email Digests', checked=True) }}
+                    {% endcall %}
                     {% endcall %}
                 </div>
 
@@ -222,22 +234,22 @@
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Overlays</h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
-                
+
                 <div>
                     <h3 class="font-bold text-sm mb-2">Modal Dialog</h3>
                     {% call dialog('demo-modal', 'Confirmation Required', trigger_text="Open Dialog") %}
-                        <p>Are you sure you want to delete the production database?</p>
-                        <p class="text-red-500 font-bold mt-2">This action cannot be undone.</p>
+                    <p>Are you sure you want to delete the production database?</p>
+                    <p class="text-red-500 font-bold mt-2">This action cannot be undone.</p>
                     {% endcall %}
                 </div>
 
                 <div>
                     <h3 class="font-bold text-sm mb-2">Dropdown Menu</h3>
                     {% call dropdown(label="Actions", icon="ph-list") %}
-                        {{ dropdown_item("Edit Profile", icon="ph-pencil") }}
-                        {{ dropdown_item("Settings", icon="ph-gear") }}
-                        <div class="border-t-2 border-black/10 my-1"></div>
-                        {{ dropdown_item("Delete Account", icon="ph-trash", destructive=True) }}
+                    {{ dropdown_item("Edit Profile", icon="ph-pencil") }}
+                    {{ dropdown_item("Settings", icon="ph-gear") }}
+                    <div class="border-t-2 border-black/10 my-1"></div>
+                    {{ dropdown_item("Delete Account", icon="ph-trash", destructive=True) }}
                     {% endcall %}
                 </div>
 
@@ -250,19 +262,20 @@
                 <i class="ph-fill ph-linux-logo"></i> Penguin UI
             </h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-8">
-                
+
                 <!-- Tooltips -->
                 <div>
                     <h3 class="font-bold text-sm mb-4">Tooltips</h3>
                     <div class="flex gap-4 justify-center">
                         {% call tooltip("I am above!") %}
-                            {{ button('Hover Me', size='sm', variant='secondary') }}
+                        {{ button('Hover Me', size='sm', variant='secondary') }}
                         {% endcall %}
-                        
+
                         {% call tooltip("Secret Info", position='right') %}
-                            <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-help">
-                                <i class="ph-bold ph-question"></i>
-                            </div>
+                        <div
+                            class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-help">
+                            <i class="ph-bold ph-question"></i>
+                        </div>
                         {% endcall %}
                     </div>
                 </div>
@@ -283,22 +296,22 @@
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Feedback</h2>
             <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4" x-data>
-                
+
                 <p class="font-mono text-sm text-gray-500 mb-2">Click to trigger toasts:</p>
-                
+
                 <div class="grid grid-cols-1 gap-2">
-                    <button class="nb-button px-4 py-2 bg-black text-white" 
-                            @click="$dispatch('toast', { title: 'Success', message: 'Variables updated successfully.', type: 'success' })">
+                    <button class="nb-button px-4 py-2 bg-black text-white"
+                        @click="$dispatch('toast', { title: 'Success', message: 'Variables updated successfully.', type: 'success' })">
                         Success Toast
                     </button>
-                    
-                    <button class="nb-button px-4 py-2 bg-white text-black border-2 border-black" 
-                            @click="$dispatch('toast', { title: 'Error', message: 'Connection lost to mainframe.', type: 'error' })">
+
+                    <button class="nb-button px-4 py-2 bg-white text-black border-2 border-black"
+                        @click="$dispatch('toast', { title: 'Error', message: 'Connection lost to mainframe.', type: 'error' })">
                         Error Toast
                     </button>
 
-                    <button class="nb-button px-4 py-2 bg-gray-100 text-black border-2 border-black" 
-                            @click="$dispatch('toast', { title: 'New Message', message: 'Neo sent you a file.', type: 'info' })">
+                    <button class="nb-button px-4 py-2 bg-gray-100 text-black border-2 border-black"
+                        @click="$dispatch('toast', { title: 'New Message', message: 'Neo sent you a file.', type: 'info' })">
                         Info Toast
                     </button>
                 </div>
@@ -309,5 +322,5 @@
     </div>
 
 </body>
-</html>
 
+</html>

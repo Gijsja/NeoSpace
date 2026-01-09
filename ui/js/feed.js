@@ -16,9 +16,9 @@ if (!window.FeedManager) {
         init() {
             this.container = document.getElementById('feed-container');
             this.observerTarget = document.getElementById('load-more-trigger');
-            
+
             if (!this.container) return;
-            
+
             // Clean up previous state if needed or reset
             this.state.loading = false;
             this.state.ended = false;
@@ -28,7 +28,7 @@ if (!window.FeedManager) {
 
             // Initial Load
             this.loadPosts();
-            
+
             // Infinite Scroll
             this.setupObserver();
         },
@@ -36,24 +36,24 @@ if (!window.FeedManager) {
         async loadPosts() {
             if (this.state.loading || this.state.ended) return;
             this.state.loading = true;
-            
+
             this.showLoader(true);
-            
+
             try {
                 let url = `/feed/?limit=${this.state.limit}`;
                 if (this.state.lastPostId) {
                     url += `&before_id=${this.state.lastPostId}`;
                 }
-                
+
                 const res = await fetch(url);
                 const data = await res.json();
-                
+
                 if (data.ok) {
                     if (data.posts.length < this.state.limit) {
                         this.state.ended = true;
                         this.showEndMessage();
                     }
-                    
+
                     if (data.posts.length > 0) {
                         this.renderPosts(data.posts);
                         this.state.lastPostId = data.posts[data.posts.length - 1].id;
@@ -74,31 +74,31 @@ if (!window.FeedManager) {
         renderPosts(posts) {
             // Reuse similar logic to Wall but with Author Header
             const html = posts.map(post => this.createPostHTML(post)).join('');
-            
+
             // Append before the loader/trigger
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html;
             this.container.appendChild(wrapper);
         },
-        
+
         createPostHTML(post) {
             // Safe defaults
             const author = post.author_name || "Unknown";
             const username = post.author_username || "anon";
             const avatar = post.author_avatar || "/static/img/default_avatar.png";
             const time = new Date(post.created_at).toLocaleDateString();
-            
+
             let contentHTML = "";
-            
+
             // -- Render Logic based on Module Type --
             if (post.module_type === 'text') {
                 let text = post.content.text || "";
                 if (typeof marked !== 'undefined') text = marked.parse(text);
                 contentHTML = `<div class="prose prose-sm prose-invert max-w-none text-slate-300 break-words">${text}</div>`;
-                
+
             } else if (post.module_type === 'image') {
                 contentHTML = `<img src="${post.content.url}" class="w-full h-auto rounded border border-white/10" loading="lazy">`;
-                
+
             } else if (post.module_type === 'link') {
                 contentHTML = `
                     <a href="${post.content.url}" target="_blank" class="block p-4 bg-slate-800 rounded border border-white/10 hover:bg-slate-700 transition">
@@ -124,12 +124,12 @@ if (!window.FeedManager) {
                     </div>
                 `;
             } else if (post.module_type === 'script') {
-                 // SCRIPT MODULE - Interactive Player
-                 const scriptId = `script-${post.id}`;
-                 const scriptCode = post.content.code ? encodeURIComponent(post.content.code) : '';
-                 const scriptTitle = post.content.title || "Untitled Script";
-                 
-                 contentHTML = `
+                // SCRIPT MODULE - Interactive Player
+                const scriptId = `script-${post.id}`;
+                const scriptCode = post.content.code ? encodeURIComponent(post.content.code) : '';
+                const scriptTitle = post.content.title || "Untitled Script";
+
+                contentHTML = `
                     <div class="relative group overflow-hidden bg-black border border-white/10 rounded-xl" id="${scriptId}-container">
                         
                         <!-- Thumbnail / Start Screen -->
@@ -155,7 +155,7 @@ if (!window.FeedManager) {
                     </div>
                  `;
             }
-    
+
             return `
                 <div class="nb-card p-0 mb-6 overflow-hidden animate-fade-in relative group">
                      <!-- Author Header -->
@@ -183,10 +183,10 @@ if (!window.FeedManager) {
                 </div>
             `;
         },
-    
+
         setupObserver() {
             if (!this.observerTarget) return;
-            
+
             // Disconnect precious observer if exists? 
             if (this.observer) this.observer.disconnect();
 
@@ -195,15 +195,15 @@ if (!window.FeedManager) {
                     this.loadPosts();
                 }
             }, { rootMargin: '200px' });
-            
+
             this.observer.observe(this.observerTarget);
         },
-        
+
         showLoader(show) {
             const el = document.getElementById('feed-loader');
             if (el) el.classList.toggle('hidden', !show);
         },
-        
+
         showEmptyState() {
             this.container.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-20 opacity-60 animate-fade-in">
@@ -218,23 +218,32 @@ if (!window.FeedManager) {
                 </div>
             `;
         },
-        
+
+        showEndMessage() {
+            if (document.getElementById('feed-end-msg')) return;
+            const msg = document.createElement('div');
+            msg.id = 'feed-end-msg';
+            msg.className = "text-center py-8 text-slate-500 font-mono text-xs uppercase tracking-widest";
+            msg.innerText = "// END OF STREAM //";
+            this.container.appendChild(msg);
+        },
+
         checkEmpty() {
-             if (this.state.posts.length === 0 && !this.state.loading) {
-                 this.showEmptyState();
-             }
+            if (this.state.posts.length === 0 && !this.state.loading) {
+                this.showEmptyState();
+            }
         },
 
         playScript(containerId, encodedCode) {
             const container = document.getElementById(containerId + '-container');
             if (!container) return;
-            
+
             const code = decodeURIComponent(encodedCode);
-            
+
             // iframe construction
             const iframe = document.createElement('iframe');
             iframe.className = "w-full aspect-video border-none bg-black animate-fade-in relative z-20";
-            
+
             const html = `
                 <!DOCTYPE html>
                 <html>
@@ -248,17 +257,17 @@ if (!window.FeedManager) {
                 </body>
                 </html>
             `;
-            
+
             // Replace content
             container.innerHTML = '';
             container.appendChild(iframe);
-            
+
             // Write to iframe
             const doc = iframe.contentWindow.document;
             doc.open();
             doc.write(html);
             doc.close();
-            
+
             // Add reset button overlay
             const resetBtn = document.createElement('button');
             resetBtn.className = "absolute top-2 right-2 z-30 p-2 bg-black/50 text-white hover:text-red-400 rounded transition";
@@ -285,5 +294,5 @@ if (window.FeedManager) {
 
 // Handle non-SPA legacy load
 document.addEventListener('DOMContentLoaded', () => {
-   if (window.FeedManager) window.FeedManager.init();
+    if (window.FeedManager) window.FeedManager.init();
 });

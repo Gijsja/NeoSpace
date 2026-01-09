@@ -73,13 +73,15 @@ def sanitize_bio(bio: str) -> str:
 # PROFILE OPERATIONS
 # =============================================
 
-def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None) -> ServiceResult:
+def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None, wall_page: int = 1, wall_limit: int = 20) -> ServiceResult:
     """
     Fetch a user's profile with all related data.
     
     Args:
         user_id: ID of the profile owner
         viewer_id: ID of the viewing user (for privacy checks)
+        wall_page: Pagination page (1-indexed)
+        wall_limit: Items per page
     
     Returns:
         ServiceResult with profile data or error
@@ -127,9 +129,19 @@ def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None) -> Ser
     
     # Get Modular Wall Posts
     wall_modules = []
+    has_more_wall = False
+    
     if row["profile_id"]:
         from mutations.wall import get_wall_posts
-        wall_modules = get_wall_posts(row["profile_id"])
+        offset = (wall_page - 1) * wall_limit
+        # Fetch one extra to check if more exist
+        fetched_modules = get_wall_posts(row["profile_id"], limit=wall_limit + 1, offset=offset)
+        
+        if len(fetched_modules) > wall_limit:
+            has_more_wall = True
+            wall_modules = fetched_modules[:wall_limit]
+        else:
+            wall_modules = fetched_modules
         
         # Enrich script modules with details
         script_ids = [m["content"].get("script_id") for m in wall_modules 
@@ -179,6 +191,10 @@ def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None) -> Ser
         "anthem_autoplay": bool(row["anthem_autoplay"]) if row["anthem_autoplay"] is not None else True,
         "stickers": stickers,
         "wall_modules": wall_modules,
+        "wall_pagination": {
+            "page": wall_page,
+            "has_more": has_more_wall
+        },
         "top8": top8,
         "follower_count": follower_count,
         "following_count": following_count,
