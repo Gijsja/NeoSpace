@@ -291,14 +291,15 @@ SBBS/
 
 <!-- Refactored from: BLUEPRINT.md "Roadmap" -->
 
-**Sprint #24**: _v0.4 Release_
+**Sprint #25**: _The Facelift (UI/UX)_
 
-**Goals**: Version Bump (0.4.0), Documentation Review, Tagging.
+**Goals**: Visual Consistency, Micro-interactions, Mobile Polish.
 
 ## Recently Shipped
 
 | Sprint | Theme                      | Features                                              |
 | ------ | -------------------------- | ----------------------------------------------------- |
+| #24    | v0.4 Release               | Version Bump, Docs, Tagging                           |
 | #23    | Feature Expansion          | Service tests, Alembic, Cat errors, Script publishing |
 | #22    | Live Wire UI               | Notification Center, Badges, Toasts                   |
 | #21    | The Feed UI                | Home Stream, Infinite Scroll                          |

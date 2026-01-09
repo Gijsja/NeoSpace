@@ -9,14 +9,14 @@ const SearchUI = {
         type: 'users', // 'users' or 'posts'
         results: []
     },
-    
+
     init() {
         const input = document.querySelector('input[name="search"]');
         const resultsContainer = document.getElementById('search-results');
         const typeToggles = document.querySelectorAll('.search-type-toggle');
-        
+
         if (!input || !resultsContainer) return;
-        
+
         // Debounced Input
         let timeout;
         input.addEventListener('input', (e) => {
@@ -24,35 +24,68 @@ const SearchUI = {
             clearTimeout(timeout);
             timeout = setTimeout(() => this.performSearch(), 300);
         });
-        
+
         // Type Toggles
         typeToggles.forEach(btn => {
             btn.addEventListener('click', () => {
                 // Update active state
                 typeToggles.forEach(b => b.classList.remove('bg-black', 'text-white'));
                 typeToggles.forEach(b => b.classList.add('bg-white', 'text-black'));
-                
+
                 btn.classList.remove('bg-white', 'text-black');
                 btn.classList.add('bg-black', 'text-white');
-                
+
                 this.state.type = btn.dataset.type;
                 this.performSearch();
             });
         });
 
-        // Check URL params for initial search
+        // Check URL params for initial search OR load directory
         const urlParams = new URLSearchParams(window.location.search);
         const initialQ = urlParams.get('q');
+
         if (initialQ) {
             input.value = initialQ;
             this.state.query = initialQ;
             this.performSearch();
+        } else {
+            // New: Load generic directory listing
+            this.loadDirectory();
         }
     },
-    
+
+    async loadDirectory() {
+        const container = document.getElementById('search-results');
+
+        // Loading State
+        container.innerHTML = `
+            <div class="col-span-full text-center p-8">
+                <i class="ph-bold ph-spinner animate-spin text-4xl mb-2"></i>
+                <p>LOADING NETWORK...</p>
+            </div>
+        `;
+
+        try {
+            // Hit the Directory API instead of Search API
+            const res = await fetch('/users/');
+            const data = await res.json();
+
+            if (data.users) {
+                // Determine if we need to adapt structure?
+                // Search expects: id, username, display_name, avatar_path, is_following
+                // Directory returns: id, username, display_name, avatar_path, is_following (now added)
+                // So we can feed it directly
+                this.renderResults(data.users);
+            }
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = `<p class="text-red-500">Failed to load directory.</p>`;
+        }
+    },
+
     async performSearch() {
         const container = document.getElementById('search-results');
-        
+
         if (this.state.query.length < 1) {
             container.innerHTML = `
                 <div class="col-span-full text-center p-8 opacity-50">
@@ -62,7 +95,7 @@ const SearchUI = {
             `;
             return;
         }
-        
+
         // Loading State
         container.innerHTML = `
             <div class="col-span-full text-center p-8">
@@ -70,11 +103,11 @@ const SearchUI = {
                 <p>SEARCHING...</p>
             </div>
         `;
-        
+
         try {
             const res = await fetch(`/search/?q=${encodeURIComponent(this.state.query)}&type=${this.state.type}`);
             const data = await res.json();
-            
+
             if (data.ok) {
                 this.renderResults(data.results);
             } else {
@@ -85,10 +118,10 @@ const SearchUI = {
             container.innerHTML = `<p class="text-red-500">Search failed</p>`;
         }
     },
-    
+
     renderResults(results) {
         const container = document.getElementById('search-results');
-        
+
         if (results.length === 0) {
             container.innerHTML = `
                 <div class="col-span-full text-center p-8 opacity-50">
@@ -97,7 +130,7 @@ const SearchUI = {
             `;
             return;
         }
-        
+
         if (this.state.type === 'users') {
             container.innerHTML = results.map(user => `
                 <div class="user-card p-4 flex flex-col items-center text-center gap-3">

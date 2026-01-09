@@ -73,15 +73,24 @@ def list_users():
         """
         rows = db.execute(query, (cursor_id, limit)).fetchall()
     
+    from queries.friends import is_following
+    
     users = []
+    current_uid = g.user["id"] if g.user else None
+    
     for row in rows:
+        uid = row["id"]
+        is_following_user = False
+        if current_uid and current_uid != uid:
+             is_following_user = is_following(current_uid, uid)
+             
         users.append({
             "id": row["id"],
             "username": row["username"],
             "display_name": row["display_name"] or row["username"],
             "avatar_path": row["avatar_path"],
-            "theme_preset": row["theme_preset"] or "default"
-            # Note: NOT exposing show_online_status value, just using it server-side
+            "theme_preset": row["theme_preset"] or "default",
+            "is_following": is_following_user
         })
     
     # Compute next cursor

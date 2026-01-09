@@ -381,8 +381,14 @@
                 {% endmacro %}
 
                 {{ nav_link('/wall', 'ph-bold ph-user-square', 'Identity', class='sidebar-link') }}
+                {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
                 {{ nav_link('/codeground', 'ph-bold ph-code', 'Codeground', class='sidebar-link') }}
-                {{ nav_link('/components', 'ph-bold ph-paint-brush', 'Edit Wall Style', class='sidebar-link') }}
+
+                <!-- Review Category -->
+                <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Review</span>
+                </div>
+                {{ nav_link('/components', 'ph-bold ph-paint-brush', 'Components', class='sidebar-link') }}
                 {{ nav_link('/penguin', 'ph-bold ph-bird', 'Penguin UI', class='sidebar-link') }}
 
                 <!-- Room Category -->
@@ -413,16 +419,19 @@
                     </template>
                 </div>
 
+                <!-- Features Category -->
+                <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Features</span>
+                </div>
                 {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}
                 {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice', class='sidebar-link opacity-50
                 cursor-not-allowed', badge=False) }}
 
                 <div class="h-0.5 bg-black my-4 opacity-10 mx-4"></div>
 
-                <!-- System / Network / Dashboard -->
-                {{ nav_link('/dashboard', 'ph-bold ph-squares-four', 'Dashboard', class='sidebar-link') }}
-                {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
+                <!-- System / Admin -->
                 {{ nav_link('/ui/views/internals.html', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link') }}
+                {{ nav_link('/dashboard', 'ph-bold ph-shield', 'Admin', class='sidebar-link') }}
             </nav>
 
             <!-- Sidebar Footer (Music Player & Profile) -->
