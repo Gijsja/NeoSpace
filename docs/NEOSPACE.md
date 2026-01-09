@@ -291,9 +291,9 @@ SBBS/
 
 <!-- Refactored from: BLUEPRINT.md "Roadmap" -->
 
-**Sprint #24**: _Planning Phase_
+**Sprint #24**: _v0.4 Release_
 
-**Goals**: TBD - Previous sprint (23) completed all objectives.
+**Goals**: Version Bump (0.4.0), Documentation Review, Tagging.
 
 ## Recently Shipped
 

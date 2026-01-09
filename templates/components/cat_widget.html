@@ -10,13 +10,13 @@ Usage:
 #}
 
 {% macro cat_widget(default_mode="cute") %}
-<div x-data="catCompanion('{{ default_mode }}')" x-show="visible" x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="translate-y-4 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
-    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0" @login-success.window="speak('login_success')"
-    @login-failure.window="speak('login_failure')" @friend-added.window="speak('friend_added')"
-    @post-created.window="speak('post_created')" @message-sent.window="speak('message_sent')"
-    class="fixed bottom-4 right-4 z-50 max-w-xs">
+<div id="cat-companion-widget" x-data="catCompanion('{{ default_mode }}')" x-show="visible"
+    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-4 opacity-0"
+    x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+    @login-success.window="speak('login_success')" @login-failure.window="speak('login_failure')"
+    @friend-added.window="speak('friend_added')" @post-created.window="speak('post_created')"
+    @message-sent.window="speak('message_sent')" class="fixed bottom-4 right-4 z-50 max-w-xs">
     <!-- Cat Card -->
     <div class="nb-card p-0 overflow-hidden shadow-lg animate-bounce-subtle">
         <!-- Header with cat face -->
