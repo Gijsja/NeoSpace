@@ -136,9 +136,13 @@ CREATE TABLE IF NOT EXISTS scripts (
     content TEXT NOT NULL,
     script_type TEXT DEFAULT 'p5', -- 'p5', 'three', 'vanilla'
     is_public INTEGER DEFAULT 1,
+    parent_id INTEGER REFERENCES scripts(id),
+    root_id INTEGER REFERENCES scripts(id),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_scripts_parent ON scripts(parent_id);
+CREATE INDEX IF NOT EXISTS idx_scripts_root ON scripts(root_id);
 CREATE INDEX IF NOT EXISTS idx_scripts_user ON scripts(user_id);
 
 -- Post Code on Profiles: Pinned Scripts

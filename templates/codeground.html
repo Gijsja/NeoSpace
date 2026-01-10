@@ -99,42 +99,70 @@
                         <div class="flex justify-between items-start mb-1">
                             {{ skeleton('h-4 w-24') }}
                             {{ skeleton('h-3 w-12') }}
-                        </div>
-                    </div>
-                    <div class="p-2 border-2 border-transparent">
-                        <div class="flex justify-between items-start mb-1">
-                            {{ skeleton('h-4 w-20') }}
-                            {{ skeleton('h-3 w-12') }}
-                        </div>
-                    </div>
-                    <div class="p-2 border-2 border-transparent">
-                        <div class="flex justify-between items-start mb-1">
-                            {{ skeleton('h-4 w-28') }}
-                            {{ skeleton('h-3 w-12') }}
-                        </div>
-                    </div>
-                </div>
+                            <div class="flex flex-col gap-2 p-2">
+                                <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
+                                <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
+                                <div class="h-8 bg-gray-200 animate-pulse rounded"></div>
+                            </div>
             </template>
-
             <template x-for="script in scripts" :key="script.id">
                 <div @click="loadScript(script.id)"
-                    class="p-2 border-2 border-transparent hover:border-black hover:bg-gray-50 cursor-pointer group transition-all active:bg-acid-green/20"
-                    :class="currentScriptId === script.id ? 'bg-acid-green border-black shadow-hard-sm' : ''">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="font-bold text-sm truncate w-32" x-text="script.title || 'Untitled'"></span>
-                        <span class="text-[10px] font-mono text-gray-500"
-                            x-text="formatDate(script.last_modified)"></span>
+                    class="p-3 border-2 border-transparent hover:border-black hover:bg-acid-green/20 cursor-pointer mb-1 group transition-all"
+                    :class="currentScriptId === script.id ? 'bg-acid-green border-black shadow-[4px_4px_0_0_#000]' : ''">
+                    <div class="flex justify-between items-start">
+                        <span class="font-bold text-sm truncate" x-text="script.title || 'Untitled'"></span>
+                        <span class="text-[10px] bg-black text-white px-1 font-mono" x-text="script.script_type"></span>
+                    </div>
+                    <div class="text-xs text-gray-500 font-mono mt-1 flex justify-between">
+                        <span x-text="formatDate(script.last_modified)"></span>
+                        <span x-show="!script.parent_id" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="ph-bold ph-trash hover:text-red-600" @click.stop="deleteScript(script.id)"></i>
+                        </span>
                     </div>
                 </div>
             </template>
         </div>
-
-        <!-- Toggle Handle (When closed) -->
-        <button x-show="!sidebarOpen" @click="sidebarOpen = true" x-transition.opacity
-            class="absolute -right-8 top-10 w-8 h-10 bg-black text-white flex items-center justify-center border-y-2 border-r-2 border-white cursor-pointer hover:bg-acid-green hover:text-black active:scale-95 origin-left transition-transform">
-            <i class="ph-bold ph-caret-right"></i>
-        </button>
     </div>
+
+    <!-- Toggle Handle (When closed) -->
+    <button x-show="!sidebarOpen" @click="sidebarOpen = true" x-transition.opacity
+        class="absolute -right-8 top-10 w-8 h-10 bg-black text-white flex items-center justify-center border-y-2 border-r-2 border-white cursor-pointer hover:bg-acid-green hover:text-black active:scale-95 origin-left transition-transform">
+        <i class="ph-bold ph-caret-right"></i>
+    </button>
+
+    {% call dialog('publish-modal', 'Release Script') %}
+    <div class="flex flex-col gap-4">
+        <p class="text-sm text-gray-600">Prepare your script for public release.</p>
+
+        <div class="flex flex-col gap-1">
+            <label class="font-bold text-xs uppercase">Title</label>
+            <input type="text" x-model="currentTitle"
+                class="border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-acid-green/10">
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="font-bold text-xs uppercase">Description</label>
+            <textarea x-model="publishDesc" rows="3"
+                class="border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-acid-green/10"
+                placeholder="What does this script do?"></textarea>
+        </div>
+
+        <div class="bg-gray-100 p-3 border border-gray-300 text-xs font-mono text-gray-500">
+            <p><strong>Note:</strong> This will post to your Wall and the public Feed. Code is viewable by everyone.</p>
+        </div>
+    </div>
+
+    <!-- Custom Footer -->
+    <div class="flex justify-end gap-3 pt-4 border-t-2 border-black/10 mt-4">
+        {{ button('Cancel', variant='ghost', class='border-2 border-transparent hover:border-black',
+        attrs='@click="$dispatch(\'close-dialog-publish-modal\')"') }}
+        {{ button('Publish to Wall', variant='primary', icon='ph-bold ph-paper-plane-tilt', class='bg-black text-white
+        hover:bg-mid-blue hover:text-black', attrs='@click="publishToWall()"') }}
+    </div>
+    {% endcall %}
+
+    <!-- Rest of the CodeGround Implementation -->
+    <!-- ... -->
 
     <!-- CENTER: Main Area -->
     <div class="flex-1 flex flex-col min-w-0 relative">
@@ -156,12 +184,30 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Save Draft -->
-                {% call button(None, variant='secondary', class='border-black hover:bg-acid-green shadow-hard-sm',
-                attrs='@click="saveScript()" :disabled="isSaving" type="button"') %}
-                <i class="ph-bold ph-floppy-disk"></i>
-                <span x-text="isSaving ? 'Saving...' : 'Save Draft'"></span>
-                {% endcall %}
+                <!-- Fork -->
+                <button @click="forkScript()"
+                    class="flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-white hover:bg-yellow-300 transition-all shadow-hard-sm"
+                    title="Fork this script">
+                    <i class="ph-bold ph-git-fork"></i>
+                    <span class="font-bold text-sm">FORK</span>
+                </button>
+
+                <!-- Save Draft (Only if owner) -->
+                <button x-show="isOwner" @click="saveScript()"
+                    class="flex items-center gap-2 px-3 py-1.5 border-2 border-transparent hover:border-black hover:bg-acid-green transition-all"
+                    :class="{'opacity-50': isSaving}" :disabled="isSaving">
+                    <i class="ph-bold ph-floppy-disk"></i>
+                    <span class="font-bold text-sm" x-text="isSaving ? 'Saving...' : 'SAVE DRAFT'"></span>
+                </button>
+
+                <!-- Save as Fork (If NOT owner) -->
+                <button x-show="!isOwner" @click="forkScript(); saveScript()"
+                    class="flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-acid-green hover:bg-acid-green-dark transition-all shadow-hard-sm">
+                    <i class="ph-bold ph-floppy-disk"></i>
+                    <span class="font-bold text-sm">SAVE TO MY SCRIPTS</span>
+                </button>
+
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
 
                 <!-- Run -->
                 {{ button('Run', variant='primary', class='bg-electric-blue hover:bg-cyan-300 shadow-hard-sm',
@@ -201,162 +247,137 @@
         </div>
     </div>
 
-    <!-- Publish Modal -->
-    <template x-teleport="body">
-        <div x-show="showPublishModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-            style="display: none;">
-
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="showPublishModal = false"
-                x-show="showPublishModal" x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 backdrop-blur-none"
-                x-transition:enter-end="opacity-100 backdrop-blur-sm"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 backdrop-blur-sm"
-                x-transition:leave-end="opacity-0 backdrop-blur-none"></div>
-
-            <!-- Modal Panel -->
-            <div class="relative bg-white border-2 border-black p-6 w-96 shadow-hard-xl" @click.stop
-                x-show="showPublishModal" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4">
-                <h2 class="text-xl font-black uppercase mb-4">Publish to Wall</h2>
-                <div class="space-y-3">
-                    {{ input('publishTitle', attrs='x-model="currentTitle"', placeholder='Title') }}
-                    {{ textarea('publishDesc', attrs='x-model="publishDesc"', class='h-24',
-                    placeholder='Description...') }}
-                    <div class="flex gap-2 pt-2">
-                        {{ button('CANCEL', variant='secondary', class='flex-1 border-black hover:bg-gray-100',
-                        attrs='@click="showPublishModal = false"') }}
-                        {{ button('PUBLISH', variant='primary', class='flex-1 bg-black text-white hover:bg-gray-800',
-                        attrs='@click="publishToWall()"') }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    document.addEventListener('alpine:init', () => {
+    const initCodeground = () => {
         Alpine.data('codeground', () => ({
-            sidebarOpen: true,
-            scripts: [],
-            loadingScripts: false,
-            currentScriptId: null,
-            currentTitle: 'Untitled Script',
-            codeContent: `const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
-camera.position.z = 5;
+            userId: {{ g.user.id if g.user else 'null' }},
+        sidebarOpen: true,
+        scripts: [],
+        loadingScripts: false,
+        currentScriptId: null,
+        currentTitle: 'Untitled Script',
+        codeContent: `const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);\ncamera.position.z = 5;\n\nconst renderer = new THREE.WebGLRenderer({ alpha: true });\nrenderer.setSize(window.innerWidth, window.innerHeight);\ndocument.body.appendChild(renderer.domElement);\n\nconst geometry = new THREE.IcosahedronGeometry(1.5, 0);\nconst material = new THREE.MeshBasicMaterial({ color: 0xa3e635, wireframe: true });\nconst cube = new THREE.Mesh(geometry, material);\nscene.add(cube);\n\nfunction animate() {\n    requestAnimationFrame(animate);\n    cube.rotation.x += 0.01;\n    cube.rotation.y += 0.01;\n    renderer.render(scene, camera);\n}\nanimate();`,
+        docDirty: false,
+        isSaving: false,
+        showPublishModal: false,
+        publishDesc: '',
+        isOwner: true,
+        parentId: null,
 
-const renderer = new THREE.WebGLRenderer({ alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+        init() {
+            this.updateLines();
+            this.fetchScripts();
+            this.runCode();
 
-const geometry = new THREE.IcosahedronGeometry(1.5, 0);
-const material = new THREE.MeshBasicMaterial({ color: 0xa3e635, wireframe: true });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    this.saveScript();
+                }
+            });
 
-function animate() {
-    requestAnimationFrame(animate);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-}
-animate();`,
-            docDirty: false,
-            isSaving: false,
-            showPublishModal: false,
-            publishDesc: '',
+            window.addEventListener('message', (e) => {
+                if (e.data.type === 'log') this.logToConsole(e.data.msg);
+                if (e.data.type === 'error') this.logToConsole(e.data.msg, 'error');
+            });
+        },
 
-            init() {
-                this.updateLines();
-                this.fetchScripts();
-                this.runCode(); // Initial run
-
-                // Add keyboard shortcut for save
-                window.addEventListener('keydown', (e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                        e.preventDefault();
-                        this.saveScript();
-                    }
-                });
-
-                // Listen for iframe logs
-                window.addEventListener('message', (e) => {
-                    if (e.data.type === 'log') this.logToConsole(e.data.msg);
-                    if (e.data.type === 'error') this.logToConsole(e.data.msg, 'error');
-                });
-            },
+            async forkScript() {
+        if (!this.currentScriptId) return;
+        this.parentId = this.currentScriptId;
+        this.currentScriptId = null;
+        this.currentTitle = "Fork of " + this.currentTitle;
+        this.isOwner = true;
+        this.docDirty = true;
+        window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Forked', message: 'Created a local copy. Save to persist.', type: 'info' } }));
+    },
 
             async fetchScripts() {
-                this.loadingScripts = true;
-                const res = await fetch('/scripts/list');
-                const data = await res.json();
-                if (data.ok) this.scripts = data.scripts;
-                this.loadingScripts = false;
-            },
+        this.loadingScripts = true;
+        const res = await fetch('/scripts/list');
+        const data = await res.json();
+        if (data.ok) this.scripts = data.scripts;
+        this.loadingScripts = false;
+    },
 
             async createNewsScript() {
-                this.currentScriptId = null;
-                this.currentTitle = "Untitled Script";
-                this.codeContent = "// New Script\n";
-                this.docDirty = false;
-                this.runCode();
-            },
+        this.currentScriptId = null;
+        this.currentTitle = "Untitled Script";
+        this.codeContent = "// New Script\n";
+        this.docDirty = false;
+        this.runCode();
+    },
 
             async loadScript(id) {
-                if (this.docDirty && !confirm("Unsaved changes! Discard?")) return;
+        if (this.docDirty && !confirm("Unsaved changes! Discard?")) return;
 
-                const res = await fetch('/scripts/get?id=' + id);
-                const data = await res.json();
-                if (data.ok) {
-                    this.currentScriptId = data.script.id;
-                    this.currentTitle = data.script.title;
-                    this.codeContent = data.script.content;
-                    this.docDirty = false;
-                    this.runCode();
-                    this.updateLines();
-                }
-            },
+        const res = await fetch('/scripts/get?id=' + id);
+        const data = await res.json();
+        if (data.ok) {
+            this.currentScriptId = data.script.id;
+            this.currentTitle = data.script.title;
+            this.codeContent = data.script.content;
+            this.isOwner = (data.script.user_id === this.userId);
+            this.parentId = data.script.parent_id;
+            this.docDirty = false;
+            this.runCode();
+            this.updateLines();
+        }
+    },
 
             async saveScript() {
-                this.isSaving = true;
-                const payload = {
-                    id: this.currentScriptId,
-                    title: this.currentTitle,
-                    content: this.codeContent,
-                    script_type: 'p5', // or threejs, auto-detect later
-                    is_public: 1
-                };
+        this.isSaving = true;
+        const payload = {
+            id: this.currentScriptId,
+            title: this.currentTitle,
+            content: this.codeContent,
+            script_type: 'p5',
+            is_public: 1,
+            parent_id: this.parentId
+        };
 
-                const res = await fetch('/scripts/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
+        const res = await fetch('/scripts/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
 
-                if (data.ok) {
-                    this.currentScriptId = data.id;
-                    this.docDirty = false;
-                    this.fetchScripts(); // Refresh list
-                    this.logToConsole("Saved successfully.", 'system');
-                } else {
-                    alert("Error saving: " + data.error);
-                }
-                this.isSaving = false;
-            },
+        if (data.ok) {
+            this.currentScriptId = data.id;
+            this.isOwner = true; // After saving (either new or update), I am the owner
+            this.parentId = null; // Lineage is saved in DB now
+            this.docDirty = false;
+            this.fetchScripts(); // Refresh list
+            this.logToConsole("Saved successfully.", 'system');
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Saved', message: 'Script saved successfully.', type: 'success' } }));
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Error saving: ' + data.error, type: 'error' } }));
+            this.logToConsole("Error saving: " + data.error, 'error');
+        }
+        this.isSaving = false;
+    },
 
-            runCode() {
-                const frame = document.getElementById('preview-frame');
-                const html = `
+            async deleteScript(id) {
+        if (!confirm("Are you sure?")) return;
+        const res = await fetch('/scripts/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({ id })
+        });
+        if ((await res.json()).ok) {
+            this.fetchScripts();
+            if (this.currentScriptId === id) this.createNewsScript();
+        }
+    },
+
+    runCode() {
+        const frame = document.getElementById('preview-frame');
+        const html = `
                     <!DOCTYPE html>
                     <html>
                     <head>
@@ -374,89 +395,95 @@ animate();`,
                     </body>
                     </html>
                 `;
-                const blob = new Blob([html], { type: 'text/html' });
-                frame.src = URL.createObjectURL(blob);
-                this.clearConsole();
-                this.logToConsole("Running...", 'system');
-            },
+        const blob = new Blob([html], { type: 'text/html' });
+        frame.src = URL.createObjectURL(blob);
+        this.clearConsole();
+        this.logToConsole("Running...", 'system');
+    },
 
-            openPublishModal() {
-                if (this.docDirty) {
-                    alert("Please save content first!");
-                    this.saveScript();
-                    return;
-                }
-                this.showPublishModal = true;
-            },
+    openPublishModal() {
+        if (this.docDirty) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Unsaved Changes', message: 'Please save your script before publishing.', type: 'warning' } }));
+            this.saveScript();
+            return;
+        }
+        window.dispatchEvent(new CustomEvent('open-dialog-publish-modal'));
+    },
 
             async publishToWall() {
-                if (!this.currentScriptId) { alert("Save the script first!"); return; }
+        if (!this.currentScriptId) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Save the script first!', type: 'error' } }));
+            return;
+        }
 
-                const payload = {
-                    module_type: 'script',
-                    content: {
-                        script_id: this.currentScriptId, // Link to the real script!
-                        title: this.currentTitle,
-                        description: this.publishDesc,
-                        code: this.codeContent // Snapshot for fallback
-                    },
-                    style: { theme: 'dark' }
-                };
-
-                const res = await fetch('/wall/post/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify(payload)
-                });
-
-                if ((await res.json()).ok) {
-                    alert("Published to Wall!");
-                    this.showPublishModal = false;
-                } else {
-                    alert("Publish failed");
-                }
+        const payload = {
+            module_type: 'script',
+            content: {
+                script_id: this.currentScriptId,
+                title: this.currentTitle,
+                description: this.publishDesc,
+                code: this.codeContent
             },
+            style: { theme: 'dark' }
+        };
 
-            // Editor Utils
-            updateLines() {
-                const lines = this.codeContent.split('\n').length;
-                document.getElementById('line-numbers').innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
-            },
+        const res = await fetch('/wall/post/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify(payload)
+        });
 
-            syncScroll(e) {
-                document.getElementById('line-numbers').scrollTop = e.target.scrollTop;
-            },
+        if ((await res.json()).ok) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Published', message: 'Script published to your Wall!', type: 'success' } }));
+            // Close modal via event if possible, or just rely on the button click closing it (which it does via open=false)
+            // The macro implementation of footer button has @click="... open=false", so it handles closing.
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Failed', message: 'Could not publish script.', type: 'error' } }));
+        }
+    },
 
-            insertTab(e) {
-                const start = e.target.selectionStart;
-                const end = e.target.selectionEnd;
-                this.codeContent = this.codeContent.substring(0, start) + "  " + this.codeContent.substring(end);
-                // Vue/Alpine reactivity might jerk cursor, need nextTick fix usually, but manual set works for basic
-                this.$nextTick(() => {
-                    e.target.selectionStart = e.target.selectionEnd = start + 2;
-                });
-            },
+    // Editor Utils
+    updateLines() {
+        const lines = this.codeContent.split('\n').length;
+        document.getElementById('line-numbers').innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
+    },
 
-            logToConsole(msg, type = 'info') {
-                const div = document.createElement('div');
-                div.textContent = `> ${msg}`;
-                if (type === 'error') div.className = "text-red-500 font-bold";
-                else if (type === 'system') div.className = "text-yellow-400";
+    syncScroll(e) {
+        document.getElementById('line-numbers').scrollTop = e.target.scrollTop;
+    },
 
-                const consoleLogs = document.getElementById('console-logs');
-                consoleLogs.appendChild(div);
-                consoleLogs.scrollTop = consoleLogs.scrollHeight;
-            },
+    insertTab(e) {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        this.codeContent = this.codeContent.substring(0, start) + "  " + this.codeContent.substring(end);
+        this.$nextTick(() => {
+            e.target.selectionStart = e.target.selectionEnd = start + 2;
+        });
+    },
 
-            clearConsole() {
-                document.getElementById('console-logs').innerHTML = '';
-            },
+    logToConsole(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.textContent = `> ${msg}`;
+        if (type === 'error') div.className = "text-red-500 font-bold";
+        else if (type === 'system') div.className = "text-yellow-400";
 
-            formatDate(iso) {
-                if (!iso) return '';
-                return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            }
-        }))
-    });
+        const consoleLogs = document.getElementById('console-logs');
+        consoleLogs.appendChild(div);
+        consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    },
+
+    clearConsole() {
+        document.getElementById('console-logs').innerHTML = '';
+    },
+
+    formatDate(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    }));
+    };
+
+    if (window.Alpine) initCodeground();
+    else document.addEventListener('alpine:init', initCodeground);
 </script>
 {% endblock %}

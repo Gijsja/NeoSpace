@@ -17,6 +17,8 @@
                 extend: {
                     colors: {
                         'acid-green': '#a3e635',
+                        'electric-blue': '#22d3ee',
+                        'hot-pink': '#ff69b4',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -90,50 +92,187 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
 
-        <!-- MEDIA -->
-        <section class="space-y-4 md:col-span-2 lg:col-span-1">
-            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Media</h2>
-            {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Neon City.mp3")
-            }}
-            <div class="h-4"></div>
-            {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Voice Note 001",
-            is_voice=True) }}
-        </section>
+        <!-- MEDIA & STICKERS -->
+        <section class="space-y-8 md:col-span-2 lg:col-span-1">
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Media</h2>
+                {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Neon
+                City.mp3")
+                }}
+                <div class="h-4"></div>
+                {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Voice Note
+                001",
+                is_voice=True) }}
+            </div>
 
-        <!-- BUTTONS -->
-        <section class="space-y-4">
-            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Buttons</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4 flex flex-col items-start"
-                x-data="{ count: 0 }">
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Stickers & Gizmo</h2>
+                <div class="nb-card h-64 relative bg-slate-100 overflow-hidden group">
+                    <div
+                        class="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] bg-[size:16px_16px]">
+                    </div>
 
-                <div class="flex flex-wrap gap-2">
-                    {{ button('Primary', variant='primary') }}
-                    {{ button('Secondary', variant='secondary') }}
-                    {{ button('Ghost', variant='ghost') }}
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    {{ button('Danger', variant='danger') }}
-                </div>
+                    <!-- Sticker Example -->
+                    <div
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 group-hover:scale-105 transition cursor-grab">
+                        <img src="/static/images/cats/beans.png" class="w-full h-full object-contain drop-shadow-md">
 
-                <div class="pt-4 border-t border-gray-100 w-full mt-4">
-                    <p class="font-mono text-xs mb-2">Interactive Counter:</p>
-                    <div class="flex items-center gap-4">
-                        {{ button('-', variant='secondary', attrs='@click="count--"') }}
-                        <span class="font-black text-2xl w-8 text-center" x-text="count"></span>
-                        {{ button('+', variant='primary', attrs='@click="count++"') }}
+                        <!-- Static Gizmo (Visual Only) -->
+                        <div
+                            class="absolute -inset-4 border-2 border-acid-green rounded-lg pointer-events-none opacity-50 group-hover:opacity-100 transition">
+                            <!-- Rotate -->
+                            <div
+                                class="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-acid-green rounded-full flex items-center justify-center shadow-hard-sm">
+                                <i class="ph-bold ph-arrows-clockwise text-xs"></i>
+                            </div>
+                            <!-- Scale -->
+                            <div
+                                class="absolute -bottom-3 -right-3 w-6 h-6 bg-white border-2 border-acid-green rounded-full shadow-sm">
+                            </div>
+                            <!-- Delete -->
+                            <div
+                                class="absolute -top-3 -right-3 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
+                                <i class="ph-bold ph-x text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-2 left-2 flex gap-2">
+                        <img src="/static/images/cats/miso.png" class="w-8 h-8 opacity-50 grayscale">
+                        <img src="/static/images/stickers/melt.png" class="w-8 h-8 opacity-50 grayscale">
+                        <div class="text-xs font-bold opacity-50 pt-1">(=^･ω･^=)</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- INPUTS -->
+        <!-- BUTTONS & INTERACTION -->
+        <section class="space-y-8">
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Buttons</h2>
+                <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-4 flex flex-col items-start"
+                    x-data="{ count: 0 }">
+
+                    <div class="flex flex-wrap gap-2">
+                        {{ button('Primary', variant='primary') }}
+                        {{ button('Secondary', variant='secondary') }}
+                        {{ button('Ghost', variant='ghost') }}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        {{ button('Danger', variant='danger') }}
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 w-full mt-4">
+                        <p class="font-mono text-xs mb-2">Interactive Counter:</p>
+                        <div class="flex items-center gap-4">
+                            {{ button('-', variant='secondary', attrs='@click="count--"') }}
+                            <span class="font-black text-2xl w-8 text-center" x-text="count"></span>
+                            {{ button('+', variant='primary', attrs='@click="count++"') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT BUBBLES -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Messaging</h2>
+                <div class="p-4 bg-slate-900 border-2 border-black space-y-4 rounded-lg">
+                    <!-- Received -->
+                    <div class="flex gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                            ?</div>
+                        <div class="max-w-[80%]">
+                            <div class="px-4 py-2 rounded-2xl rounded-tl-none bg-slate-700/50 text-slate-200 text-sm">
+                                Hey! Check out the new sticker update.
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-1 px-1">10:42 AM</div>
+                        </div>
+                    </div>
+                    <!-- Sent -->
+                    <div class="flex gap-3 flex-row-reverse">
+                        <div class="max-w-[80%]">
+                            <div class="px-4 py-2 rounded-2xl rounded-tr-none bg-blue-500/30 text-white text-sm">
+                                I saw! The giant smileys are insane.
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-1 px-1 text-right">10:43 AM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INPUTS & FORMS -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Inputs</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4">
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-4">
                 {{ input('email', 'Email Address', type='email', placeholder='user@example.com') }}
                 {{ input('password', 'Password', type='password') }}
                 {{ textarea('bio', 'Bio', placeholder='Tell us about yourself...', class='h-24') }}
                 {{ select('role', [('dev', 'Developer'), ('des', 'Designer'), ('mgr', 'Manager')], label='Role') }}
+            </div>
+        </section>
+
+        <!-- WALL POSTS (NEW) -->
+        <section class="space-y-4 md:col-span-2 lg:col-span-3">
+            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Wall Post Types</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Text Module -->
+                <div class="glass-panel-interactive rounded-xl p-5 bg-white border-2 border-black shadow-hard-sm">
+                    <div class="prose prose-sm font-mono leading-relaxed text-black">
+                        <p><strong># Hello World</strong></p>
+                        <p>This is a standard text module. It supports Markdown and feels like a notepad.</p>
+                    </div>
+                </div>
+
+                <!-- Link Module (Simple) -->
+                <a href="#"
+                    class="block p-4 bg-white border-2 border-black hover:bg-gray-50 transition shadow-hard-sm flex items-center gap-3 h-24">
+                    <div class="w-10 h-10 border-2 border-black bg-white flex items-center justify-center shrink-0">
+                        <i class="ph-bold ph-link text-black"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-sm truncate">Awesome Resource</h4>
+                        <p class="text-xs text-gray-500 truncate">example.com</p>
+                    </div>
+                </a>
+
+                <!-- Link Module (Button) -->
+                <a href="#"
+                    class="flex flex-col items-center justify-center py-4 bg-electric-blue border-2 border-black shadow-hard-sm hover:bg-hot-pink hover:text-white transition h-24">
+                    <span class="font-black uppercase flex items-center gap-2">Visit Site <i
+                            class="ph-bold ph-arrow-up-right"></i></span>
+                </a>
+
+                <!-- Link Module (Card) -->
+                <a href="#"
+                    class="block bg-white border-2 border-black shadow-hard-sm hover:shadow-hard transition h-full">
+                    <div
+                        class="h-32 bg-gray-200 border-b-2 border-black flex items-center justify-center bg-pattern-dots">
+                        <i class="ph-duotone ph-image text-4xl text-gray-400"></i>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-bold text-sm uppercase leading-tight mb-1">Feature Preview</h4>
+                        <p class="text-[10px] text-gray-500 font-mono">neospace.dev</p>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- TERMINAL THEME -->
+        <section class="space-y-4 md:col-span-2 lg:col-span-3">
+            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Theme: Hacker Terminal</h2>
+            <div
+                class="p-6 bg-black border-2 border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.2)] font-mono text-green-500 w-full max-w-2xl">
+                <div class="mb-4 text-xs border-b border-green-500/30 pb-2 flex justify-between">
+                    <span>TERMINAL_SESSION_01</span>
+                    <span>ONLINE</span>
+                </div>
+                <p>> initiating handshake...</p>
+                <p>> connected to remote host users@neospace</p>
+                <p class="text-white">> _</p>
             </div>
         </section>
 
@@ -160,7 +299,7 @@
         <!-- DATA DISPLAY (NEW) -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Data Display</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-6">
 
                 <div>
                     <h3 class="font-bold text-sm mb-2">Avatars</h3>
@@ -198,7 +337,7 @@
         <!-- NAVIGATION (NEW) -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Navigation</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-6">
 
                 <div>
                     <h3 class="font-bold text-sm mb-2">Switch</h3>
@@ -232,7 +371,7 @@
         <!-- DIALOGS & OVERLAYS -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Overlays</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-6">
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-6">
 
                 <div>
                     <h3 class="font-bold text-sm mb-2">Modal Dialog</h3>
@@ -260,7 +399,7 @@
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3 flex items-center gap-2">
                 <i class="ph-fill ph-linux-logo"></i> Penguin UI
             </h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-8">
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-8">
 
                 <!-- Tooltips -->
                 <div>
@@ -294,7 +433,7 @@
         <!-- TOASTS -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Feedback</h2>
-            <div class="p-6 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] space-y-4" x-data>
+            <div class="p-6 bg-white border-2 border-black shadow-hard-sm space-y-4" x-data>
 
                 <p class="font-mono text-sm text-gray-500 mb-2">Click to trigger toasts:</p>
 
@@ -318,7 +457,906 @@
             </div>
         </section>
 
-    </div>
+        <!-- PULSE PLAYER (EXPERIMENTAL) -->
+        <section class="space-y-4 md:col-span-2 lg:col-span-1">
+            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Experimental: Pulse Player</h2>
+            <div
+                class="flex items-center justify-center min-h-[400px] bg-slate-900 p-8 font-sans border-2 border-black shadow-hard-sm">
+
+                <div x-data="{ 
+                        isPlaying: false, 
+                        isLiked: false, 
+                        progress: 35, 
+                        volume: 80, 
+                        showVolume: false,
+                        togglePlay() { 
+                            this.isPlaying = !this.isPlaying; 
+                        }
+                    }"
+                    class="relative w-full max-w-sm overflow-hidden rounded-3xl bg-slate-800 shadow-2xl ring-1 ring-white/10">
+
+                    <div class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-indigo-500 blur-3xl opacity-20">
+                    </div>
+                    <div class="absolute top-20 -left-10 h-40 w-40 rounded-full bg-cyan-500 blur-3xl opacity-20"></div>
+
+                    <div class="relative z-10 p-6">
+
+                        <div class="flex items-center justify-between mb-6 text-slate-400">
+                            <button class="hover:text-white transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="text-xs font-bold tracking-widest uppercase text-indigo-400">NeoSpace Audio
+                            </div>
+                            <button @click="isLiked = !isLiked" class="transition-transform active:scale-90"
+                                :class="isLiked ? 'text-pink-500' : 'hover:text-white'">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                                    :fill="isLiked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="group relative mb-6 flex justify-center">
+                            <div
+                                class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 opacity-30 blur-lg transition-opacity group-hover:opacity-50">
+                            </div>
+                            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300&auto=format&fit=crop"
+                                alt="Album Art"
+                                class="relative h-64 w-64 rounded-2xl object-cover shadow-lg transition-transform duration-500 group-hover:scale-105"
+                                :class="isPlaying ? 'scale-105' : 'scale-100 grayscale-[20%]'">
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-white mb-1">Neon City Lights</h3>
+                            <p class="text-sm font-medium text-slate-400">Synthwave Collective</p>
+                        </div>
+
+                        <div class="mb-6 group">
+                            <div class="relative h-1.5 w-full rounded-full bg-slate-700 cursor-pointer">
+                                <div class="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+                                    :style="`width: ${progress}%`"></div>
+                                <div class="absolute top-1/2 -translate-y-1/2 h-3 w-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                                    :style="`left: ${progress}%`"></div>
+                                <input type="range" min="0" max="100" x-model="progress"
+                                    class="absolute inset-0 w-full opacity-0 cursor-pointer">
+                            </div>
+                            <div class="mt-2 flex justify-between text-xs font-medium text-slate-500">
+                                <span x-text="`1:${Math.floor(progress * 0.6).toString().padStart(2, '0')}`"></span>
+                                <span>3:45</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between px-4">
+                            <button class="text-slate-500 hover:text-white transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                            </button>
+
+                            <button class="text-slate-300 hover:text-white transition-colors">
+                                <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 20L9 12l10-8v16zM5 19h2V5H5v14z"></path>
+                                </svg>
+                            </button>
+
+                            <button @click="togglePlay()"
+                                class="flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg shadow-indigo-500/30 transition-all active:scale-95 hover:bg-indigo-50">
+                                <svg x-show="!isPlaying" class="h-8 w-8 translate-x-0.5" fill="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                                <svg x-show="isPlaying" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                </svg>
+                            </button>
+
+                            <button class="text-slate-300 hover:text-white transition-colors">
+                                <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 4l10 8-10 8V4zm14 1v14h-2V5h2z"></path>
+                                </svg>
+                            </button>
+
+                            <div class="relative" x-data="{ hover: false }" @mouseenter="hover = true"
+                                @mouseleave="hover = false">
+                                <button class="text-slate-500 hover:text-white transition-colors">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                    </svg>
+                                </button>
+                                <div x-show="hover" x-transition.opacity
+                                    class="absolute bottom-8 -right-3 h-24 w-8 rounded-full bg-slate-700 p-2 shadow-xl flex flex-col justify-end items-center">
+                                    <div class="relative w-1.5 h-full bg-slate-600 rounded-full">
+                                        <div class="absolute bottom-0 left-0 w-full bg-indigo-400 rounded-full"
+                                            :style="`height: ${volume}%`"></div>
+                                        <input type="range" x-model="volume"
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none z-10"
+                                            style="-webkit-appearance: slider-vertical;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEUBRUTALIST PLAYERS (EXPERIMENTAL) -->
+        <section class="space-y-4 md:col-span-3 lg:col-span-3">
+            <style>
+                /* Custom pattern for Concept 3 */
+                .bg-dots {
+                    background-image: radial-gradient(#000 15%, transparent 16%), radial-gradient(#000 15%, transparent 16%);
+                    background-size: 10px 10px;
+                    background-position: 0 0, 5px 5px;
+                }
+            </style>
+            <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Experimental: Neubrutalist Players</h2>
+            <div class="flex flex-wrap items-center justify-center gap-12 bg-slate-100 p-8 border-2 border-black"
+                style="min-height: 500px">
+
+                <!-- PLAYER 1 -->
+                <div x-data="{ isPlaying: false, isLiked: false, progress: 45 }"
+                    class="relative w-80 bg-white border-4 border-black p-5 shadow-[8px_8px_0_0_#000000] transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0_0_#000000]">
+
+                    <div class="flex justify-between items-center mb-4 border-b-4 border-black pb-2">
+                        <h2 class="font-black text-xl uppercase italic tracking-tighter">PLAYER_01</h2>
+                        <div class="h-4 w-4 bg-red-500 border-2 border-black rounded-full"></div>
+                    </div>
+
+                    <div class="relative mb-5">
+                        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                            class="w-full h-48 object-cover border-4 border-black grayscale transition-all duration-300"
+                            :class="isPlaying ? 'grayscale-0' : 'grayscale'">
+                        <div
+                            class="absolute -bottom-3 -right-3 bg-yellow-400 border-4 border-black px-2 py-1 font-bold text-xs shadow-[4px_4px_0_0_#000]">
+                            HI-FI
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-black text-2xl leading-none mb-1">NEON CITY</h3>
+                        <p class="font-bold text-sm bg-black text-white inline-block px-1">SYNTHWAVE COLL.</p>
+                    </div>
+
+                    <div class="relative h-6 w-full border-4 border-black bg-slate-200 mb-6 cursor-pointer group">
+                        <div class="absolute top-0 left-0 h-full bg-pink-500 border-r-4 border-black"
+                            :style="`width: ${progress}%`"></div>
+                        <div class="absolute top-1/2 -translate-y-1/2 h-8 w-4 bg-black" :style="`left: ${progress}%`">
+                        </div>
+                        <input type="range" x-model="progress" class="absolute inset-0 w-full opacity-0 cursor-pointer">
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <button @click="isLiked = !isLiked"
+                            class="border-4 border-black p-2 shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
+                            :class="isLiked ? 'bg-red-500 text-white' : 'bg-white hover:bg-slate-100'">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </button>
+
+                        <button @click="isPlaying = !isPlaying"
+                            class="w-16 h-16 bg-yellow-400 border-4 border-black flex items-center justify-center shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all hover:bg-yellow-300">
+                            <svg x-show="!isPlaying" class="w-8 h-8" fill="black" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg x-show="isPlaying" class="w-8 h-8" fill="black" viewBox="0 0 24 24">
+                                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                            </svg>
+                        </button>
+
+                        <button
+                            class="border-4 border-black p-2 shadow-[4px_4px_0_0_#000] bg-white hover:bg-slate-100 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                <path d="M5 4l10 8-10 8V4zm14 1v14h-2V5h2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PLAYER 2 (Matrix Style) -->
+                <div x-data="{ isPlaying: false, progress: 62 }"
+                    class="relative w-80 bg-zinc-900 border-2 border-green-500 p-6 font-mono shadow-[6px_6px_0_0_#22c55e]">
+
+                    <div class="absolute top-2 left-2 text-green-700 text-[10px]">+</div>
+                    <div class="absolute top-2 right-2 text-green-700 text-[10px]">+</div>
+                    <div class="absolute bottom-2 left-2 text-green-700 text-[10px]">+</div>
+                    <div class="absolute bottom-2 right-2 text-green-700 text-[10px]">+</div>
+
+                    <div class="flex justify-between text-xs text-green-500/60 mb-4 tracking-widest">
+                        <span>SYS: AUDIO_OUT</span>
+                        <span x-text="isPlaying ? 'STATUS: RUN' : 'STATUS: IDLE'"></span>
+                    </div>
+
+                    <div
+                        class="relative w-full aspect-square bg-zinc-800 border border-green-500 mb-6 p-1 overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_4px,6px_100%]">
+                        </div>
+
+                        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                            class="w-full h-full object-cover sepia hue-rotate-90 contrast-125 brightness-75">
+                    </div>
+
+                    <div class="mb-4 border-l-4 border-green-500 pl-3">
+                        <h3 class="text-green-400 font-bold text-lg uppercase truncate">>> Neon_City.mp3</h3>
+                        <p class="text-green-700 text-xs uppercase">Bitrate: 320kbps</p>
+                    </div>
+
+                    <div class="flex gap-1 mb-6 h-4 w-full cursor-pointer relative"
+                        @click="progress = $event.offsetX / $event.target.closest('div').clientWidth * 100">
+                        <template x-for="i in 20">
+                            <div class="flex-1 border border-green-900"
+                                :class="(i * 5) <= progress ? 'bg-green-500 shadow-[0_0_5px_#22c55e]' : 'bg-zinc-800'">
+                            </div>
+                        </template>
+                        <input type="range" x-model="progress" class="absolute inset-0 w-full opacity-0 cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <button
+                            class="border border-green-500 text-green-500 hover:bg-green-500 hover:text-black py-2 text-xs uppercase transition-colors">
+                            [ Prev ]
+                        </button>
+                        <button @click="isPlaying = !isPlaying"
+                            class="border border-green-500 text-green-500 hover:bg-green-500 hover:text-black py-2 text-xs uppercase font-bold transition-colors">
+                            <span x-text="isPlaying ? '[ STOP ]' : '[ EXEC ]'"></span>
+                        </button>
+                        <button
+                            class="border border-green-500 text-green-500 hover:bg-green-500 hover:text-black py-2 text-xs uppercase transition-colors">
+                            [ Next ]
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PLAYER 3 (Abstract) -->
+                <div x-data="{ isPlaying: false, progress: 25 }" class="relative w-80 mt-10">
+                    <div class="absolute inset-0 bg-indigo-600 border-4 border-black translate-x-2 translate-y-2 z-0">
+                    </div>
+
+                    <div class="relative z-10 bg-white border-4 border-black p-0 overflow-visible">
+
+                        <div
+                            class="h-20 bg-dots border-b-4 border-black flex items-center justify-center overflow-hidden">
+                            <span class="bg-black text-white px-2 py-1 font-black text-2xl -rotate-2">MUSIC!</span>
+                        </div>
+
+                        <div class="p-6 pt-12 text-center relative">
+                            <div
+                                class="absolute -top-16 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full border-4 border-black overflow-hidden bg-yellow-300 z-20 shadow-[4px_4px_0_0_#000]">
+                                <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                                    class="w-full h-full object-cover">
+                            </div>
+
+                            <h3 class="font-black text-2xl mt-2">NEON CITY</h3>
+                            <p class="font-bold text-indigo-600">The Synthwaves</p>
+
+                            <div
+                                class="mt-6 relative h-8 bg-black rounded-full border-4 border-black group cursor-pointer">
+                                <div class="absolute top-0 left-0 h-full bg-yellow-400 rounded-l-full"
+                                    :style="`width: ${progress}%`"></div>
+                                <div class="absolute top-1/2 -translate-y-1/2 h-10 w-10 bg-white border-4 border-black rounded-full shadow-[2px_2px_0_0_#000] hover:scale-110 transition-transform"
+                                    :style="`left: calc(${progress}% - 20px)`"></div>
+                                <input type="range" x-model="progress"
+                                    class="absolute inset-0 w-full opacity-0 cursor-pointer z-30">
+                            </div>
+
+                            <div class="flex justify-center gap-4 mt-8 -mb-10">
+                                <button
+                                    class="w-12 h-12 bg-cyan-400 border-4 border-black rounded-full flex items-center justify-center hover:-translate-y-1 transition-transform shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-y-1">
+                                    <svg class="w-6 h-6" fill="black" viewBox="0 0 24 24">
+                                        <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"></path>
+                                    </svg>
+                                </button>
+
+                                <button @click="isPlaying = !isPlaying"
+                                    class="w-16 h-16 bg-pink-500 border-4 border-black rounded-full flex items-center justify-center -mt-4 hover:-translate-y-1 transition-transform shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-y-1">
+                                    <svg x-show="!isPlaying" class="w-8 h-8 ml-1" fill="white" stroke="black"
+                                        stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    <svg x-show="isPlaying" class="w-8 h-8" fill="white" stroke="black" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    class="w-12 h-12 bg-cyan-400 border-4 border-black rounded-full flex items-center justify-center hover:-translate-y-1 transition-transform shadow-[4px_4px_0_0_#000] active:shadow-none active:translate-y-1">
+                                    <svg class="w-6 h-6" fill="black" viewBox="0 0 24 24">
+                                        <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CYBERPUNK PLAYERS (EXPERIMENTAL - PORTED TO ALPINE) -->
+        <section class="space-y-4 md:col-span-3 lg:col-span-3 bg-black p-8 border-4 border-black">
+            <style>
+                @keyframes scanline {
+                    0% {
+                        transform: translateY(-100%);
+                    }
+
+                    100% {
+                        transform: translateY(100vh);
+                    }
+                }
+
+                @keyframes glitch {
+                    0% {
+                        transform: translate(0);
+                    }
+
+                    20% {
+                        transform: translate(-2px, 2px);
+                    }
+
+                    40% {
+                        transform: translate(-2px, -2px);
+                    }
+
+                    60% {
+                        transform: translate(2px, 2px);
+                    }
+
+                    80% {
+                        transform: translate(2px, -2px);
+                    }
+
+                    100% {
+                        transform: translate(0);
+                    }
+                }
+
+                @keyframes equalizer {
+                    0% {
+                        height: 10%;
+                    }
+
+                    50% {
+                        height: 100%;
+                    }
+
+                    100% {
+                        height: 10%;
+                    }
+                }
+
+                .scanline {
+                    animation: scanline 8s linear infinite;
+                }
+
+                .glitch-active {
+                    animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+                }
+
+                .neon-text {
+                    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+                }
+
+                .brutal-shadow {
+                    box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+                }
+
+                .brutal-shadow-sm {
+                    box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+                }
+            </style>
+
+            <div x-data="{ glitch: false }"
+                x-init="setInterval(() => { glitch = true; setTimeout(() => glitch = false, 100); }, 3000)"
+                class="relative space-y-12 overflow-hidden">
+
+                <!-- Scanline Overlay -->
+                <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-10 z-0">
+                    <div class="scanline w-full h-2 bg-gradient-to-b from-transparent via-cyan-400 to-transparent">
+                    </div>
+                </div>
+
+                <h1 class="text-6xl font-black text-center mb-12 relative z-10" :class="{ 'glitch-active': glitch }">
+                    <span class="text-cyan-400 neon-text">CYBER</span>
+                    <span class="text-pink-500 neon-text">PUNK</span>
+                    <span class="text-yellow-400 neon-text"> BEATS</span>
+                </h1>
+
+                <!-- PLAYER 1 -->
+                <div x-data="{ isPlaying: false, progress: 45 }"
+                    class="bg-purple-600 border-8 border-black brutal-shadow p-8 relative z-10"
+                    :class="{ 'glitch-active': glitch }">
+                    <div class="bg-black border-4 border-cyan-400 p-6">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <div class="text-cyan-400 font-mono text-xs mb-2 neon-text">SYS://AUDIO_CORE_v3.14</div>
+                                <h2 class="text-4xl font-black text-pink-500 neon-text mb-1">NEON NIGHTS</h2>
+                                <p class="text-cyan-400 font-mono">The Synth Collective</p>
+                            </div>
+                            <div class="bg-pink-500 border-4 border-black px-4 py-2 brutal-shadow-sm">
+                                <div class="text-black font-black text-2xl" x-text="isPlaying ? '▶' : '■'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Equalizer -->
+                        <div class="flex items-end justify-between h-16 mb-6 gap-1">
+                            <template x-for="i in 40">
+                                <div class="flex-1 border-2 border-black transition-all duration-100"
+                                    :class="isPlaying ? 'bg-gradient-to-t from-pink-500 to-cyan-400' : 'bg-gray-700 h-[30%]'"
+                                    :style="isPlaying ? `animation: equalizer ${0.2 + Math.random() * 0.5}s infinite ease-in-out` : ''">
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="bg-gray-900 border-4 border-cyan-400 h-4 relative overflow-hidden cursor-pointer"
+                                @click="progress = $event.offsetX / $event.target.clientWidth * 100">
+                                <div class="h-full bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 transition-all duration-100"
+                                    :style="`width: ${progress}%`"></div>
+                            </div>
+                            <div class="flex justify-between mt-2 text-cyan-400 font-mono text-sm">
+                                <span>02:34</span>
+                                <span class="neon-text">BITRATE: 320kbps</span>
+                                <span>05:47</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-4">
+                            <button
+                                class="bg-yellow-400 border-4 border-black brutal-shadow-sm p-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                                <i class="ph-bold ph-shuffle h-6 w-6"></i>
+                            </button>
+                            <button
+                                class="bg-cyan-400 border-4 border-black brutal-shadow-sm p-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                                <i class="ph-bold ph-skip-back h-6 w-6"></i>
+                            </button>
+                            <button @click="isPlaying = !isPlaying"
+                                class="bg-pink-500 border-4 border-black brutal-shadow-sm p-6 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                                <i class="ph-bold h-8 w-8 text-black" :class="isPlaying ? 'ph-pause' : 'ph-play'"></i>
+                            </button>
+                            <button
+                                class="bg-cyan-400 border-4 border-black brutal-shadow-sm p-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                                <i class="ph-bold ph-skip-forward h-6 w-6"></i>
+                            </button>
+                            <button
+                                class="bg-yellow-400 border-4 border-black brutal-shadow-sm p-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                                <i class="ph-bold ph-repeat h-6 w-6"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLAYER 2 -->
+                <div x-data="{ isPlaying: false, progress: 67 }"
+                    class="bg-cyan-400 border-8 border-black brutal-shadow p-8 relative z-10">
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="col-span-2 bg-black border-4 border-pink-500 p-6">
+                            <div class="text-pink-500 font-mono text-xs mb-2 neon-text">TRACK_ID: 0xC0FF33</div>
+                            <h2 class="text-5xl font-black text-yellow-400 neon-text mb-2"
+                                :class="{ 'glitch-active': glitch }">CYBER DREAMS</h2>
+                            <p class="text-cyan-400 font-mono text-lg">Digital Phantoms</p>
+
+                            <div class="mt-6 flex gap-1 h-24 items-end">
+                                <template x-for="i in 20">
+                                    <div class="flex-1 border-2 border-black transition-all duration-100"
+                                        :class="isPlaying ? 'bg-gradient-to-t from-yellow-400 via-pink-500 to-cyan-400' : 'bg-gray-700 h-[40%]'"
+                                        :style="isPlaying ? `animation: equalizer ${0.3 + Math.random() * 0.4}s infinite linear` : ''">
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="bg-pink-500 border-4 border-black p-4 flex flex-col justify-between">
+                            <div class="text-black font-black text-xl">STATUS</div>
+                            <div class="space-y-2">
+                                <div class="bg-black border-2 border-yellow-400 p-2">
+                                    <div class="text-yellow-400 font-mono text-xs neon-text"
+                                        x-text="isPlaying ? '▶ PLAYING' : '■ STOPPED'"></div>
+                                </div>
+                                <div class="bg-black border-2 border-cyan-400 p-2">
+                                    <div class="text-cyan-400 font-mono text-xs neon-text">FORMAT: FLAC</div>
+                                </div>
+                                <div class="bg-black border-2 border-pink-500 p-2">
+                                    <div class="text-pink-500 font-mono text-xs neon-text">44.1kHz/24bit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black border-4 border-black p-4 mb-4">
+                        <div class="relative h-6 bg-gray-900 border-4 border-yellow-400 cursor-pointer"
+                            @click="progress = $event.offsetX / $event.target.clientWidth * 100">
+                            <div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-yellow-400"
+                                :style="`width: ${progress}%`"></div>
+                            <div class="absolute inset-0 flex items-center justify-center text-black font-black font-mono text-xs mix-blend-difference"
+                                x-text="`${Math.floor(progress)}% COMPLETE`">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <button
+                            class="bg-black border-4 border-pink-500 text-pink-500 font-black px-6 py-3 brutal-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all neon-text">PREV</button>
+                        <button @click="isPlaying = !isPlaying"
+                            class="bg-yellow-400 border-4 border-black text-black font-black px-12 py-3 brutal-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all text-2xl"
+                            x-text="isPlaying ? 'PAUSE' : 'PLAY'">
+                        </button>
+                        <button
+                            class="bg-black border-4 border-cyan-400 text-cyan-400 font-black px-6 py-3 brutal-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all neon-text">NEXT</button>
+                    </div>
+                </div>
+
+                <!-- PLAYER 3 -->
+                <div x-data="{ isPlaying: false, progress: 23 }"
+                    class="bg-yellow-400 border-8 border-black brutal-shadow p-1 relative z-10">
+                    <div class="bg-pink-500 border-4 border-black p-1">
+                        <div class="bg-cyan-400 border-4 border-black p-8">
+                            <div class="bg-black border-4 border-yellow-400 p-8">
+                                <div class="text-center mb-8">
+                                    <div class="text-yellow-400 font-mono text-xs mb-3 neon-text">NOW PLAYING</div>
+                                    <h2 class="text-6xl font-black text-pink-500 neon-text mb-3"
+                                        :class="{ 'glitch-active': glitch }">TOKYO RAIN</h2>
+                                    <p class="text-cyan-400 font-mono text-xl neon-text">Neon Samurai</p>
+                                </div>
+
+                                <div class="flex justify-center mb-8">
+                                    <div class="relative w-48 h-48">
+                                        <svg class="transform -rotate-90 w-48 h-48">
+                                            <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="16"
+                                                fill="none" class="text-gray-800"></circle>
+                                            <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="16"
+                                                fill="none" :stroke-dasharray="2 * Math.PI * 88"
+                                                :stroke-dashoffset="2 * Math.PI * 88 * (1 - progress / 100)"
+                                                class="text-yellow-400 transition-all duration-100"
+                                                style="filter: drop-shadow(0 0 5px #facc15);" stroke-linecap="square">
+                                            </circle>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-5xl font-black text-pink-500 neon-text"
+                                                    x-text="`${Math.floor(progress)}%`"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-center">
+                                    <button @click="isPlaying = !isPlaying"
+                                        class="bg-gradient-to-br from-pink-500 to-yellow-400 border-8 border-black px-20 py-8 brutal-shadow hover:translate-x-2 hover:translate-y-2 hover:shadow-none transition-all">
+                                        <div class="text-black font-black text-4xl"
+                                            x-text="isPlaying ? 'PAUSE' : 'PLAY'"></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center relative z-10">
+                    <div class="inline-block bg-black border-4 border-cyan-400 px-8 py-4 brutal-shadow">
+                        <p class="text-cyan-400 font-mono neon-text">CYBERPUNK AUDIO SYSTEM v2.077 // ALL SYSTEMS
+                            NOMINAL</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- GIANT ASCII CAT REACTIONS (EXPERIMENTAL) -->
+        <section class="space-y-4 md:col-span-3 lg:col-span-3 bg-zinc-900 p-8 border-4 border-lime-400">
+            <style>
+                @keyframes shake {
+                    0% {
+                        transform: translate(1px, 1px) rotate(0deg);
+                    }
+
+                    10% {
+                        transform: translate(-1px, -2px) rotate(-1deg);
+                    }
+
+                    20% {
+                        transform: translate(-3px, 0px) rotate(1deg);
+                    }
+
+                    30% {
+                        transform: translate(3px, 2px) rotate(0deg);
+                    }
+
+                    40% {
+                        transform: translate(1px, -1px) rotate(1deg);
+                    }
+
+                    50% {
+                        transform: translate(-1px, 2px) rotate(-1deg);
+                    }
+
+                    60% {
+                        transform: translate(-3px, 1px) rotate(0deg);
+                    }
+
+                    70% {
+                        transform: translate(3px, 1px) rotate(-1deg);
+                    }
+
+                    80% {
+                        transform: translate(-1px, -1px) rotate(1deg);
+                    }
+
+                    90% {
+                        transform: translate(1px, 2px) rotate(0deg);
+                    }
+
+                    100% {
+                        transform: translate(1px, -2px) rotate(-1deg);
+                    }
+                }
+
+                .shake-hover:hover {
+                    animation: shake 0.5s;
+                    animation-iteration-count: infinite;
+                }
+
+                .shake-constant {
+                    animation: shake 0.5s;
+                    animation-iteration-count: infinite;
+                }
+
+                /* --- ASCII CAT ANIMATIONS (NEUBRUTALIST) --- */
+                .ascii-cat {
+                    font-family: monospace;
+                    line-height: 1;
+                    white-space: pre;
+                    display: block;
+                }
+
+                /* PURR: Soft Signal Glow */
+                @keyframes purr-glow {
+                    0% {
+                        color: #00ff66;
+                        text-shadow: none;
+                    }
+
+                    50% {
+                        color: #66ff99;
+                        text-shadow: 0 0 6px #00ff66;
+                    }
+
+                    100% {
+                        color: #00ff66;
+                        text-shadow: none;
+                    }
+                }
+
+                .cat-purr {
+                    animation: purr-glow 1.6s infinite ease-in-out;
+                }
+
+                /* HISS: Fault Flicker */
+                @keyframes hiss-flicker {
+
+                    0%,
+                    100% {
+                        color: #ff3333;
+                        opacity: 1;
+                    }
+
+                    45% {
+                        opacity: 0.4;
+                    }
+
+                    50% {
+                        opacity: 1;
+                    }
+
+                    52% {
+                        opacity: 0.6;
+                    }
+                }
+
+                .cat-hiss {
+                    animation: hiss-flicker 0.9s infinite steps(1);
+                }
+
+                /* CHAOS: Neon Surge */
+                @keyframes chaos-surge {
+                    0% {
+                        color: #ff00ff;
+                        text-shadow: none;
+                    }
+
+                    25% {
+                        color: #00ffff;
+                        text-shadow: 0 0 8px #ff00ff;
+                    }
+
+                    50% {
+                        color: #ffffff;
+                        text-shadow: 0 0 12px #00ffff;
+                    }
+
+                    75% {
+                        color: #ff00ff;
+                    }
+
+                    100% {
+                        color: #ff00ff;
+                        text-shadow: none;
+                    }
+                }
+
+                .cat-chaos {
+                    animation: chaos-surge 0.6s infinite;
+                }
+
+                /* OBSERVE: Passive Dim Pulse */
+                @keyframes observe-dim {
+
+                    0%,
+                    100% {
+                        color: #888;
+                    }
+
+                    50% {
+                        color: #555;
+                    }
+                }
+
+                .cat-observe {
+                    animation: observe-dim 3s infinite;
+                }
+
+                /* Accessibility safeguard */
+                @media (prefers-reduced-motion: reduce) {
+
+                    .cat-purr,
+                    .cat-hiss,
+                    .cat-chaos,
+                    .cat-observe,
+                    .shake-constant,
+                    .shake-hover:hover {
+                        animation: none;
+                    }
+                }
+            </style>
+
+            <h2 class="text-3xl font-mono font-bold text-lime-400 mb-8 border-b-4 border-lime-400 pb-2">
+                >> SYSTEM.REACTIONS.ASCII_CAT
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- 1. CAT_PURR -->
+                <div class="space-y-2">
+                    <p class="font-mono text-lime-400 text-sm opacity-70">// REACTION: CAT_PURR</p>
+                    <div class="border-2 border-lime-400 bg-black p-3 font-mono text-xs">
+                        <div class="opacity-60 mb-1 text-lime-400">REACTION: CAT_PURR</div>
+                        <pre class="ascii-cat cat-purr leading-none">
+ /\_/\ 
+( o.o )  < PURR
+ > ^ <
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- 2. CAT_CHAOS -->
+                <div class="space-y-2">
+                    <p class="font-mono text-fuchsia-500 text-sm opacity-70">// REACTION: CAT_CHAOS (Animated)</p>
+                    <div class="border-2 border-fuchsia-500 bg-black p-3 font-mono text-xs shake-constant">
+                        <div class="opacity-60 mb-1 text-fuchsia-500">REACTION: CAT_CHAOS</div>
+                        <pre class="ascii-cat cat-chaos leading-none">
+ /\_/\  
+( x.x )  !!!!
+ > 💥 <
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- 3. CAT_HISS -->
+                <div class="space-y-2">
+                    <p class="font-mono text-red-500 text-sm opacity-70">// REACTION: CAT_HISS</p>
+                    <div class="border-2 border-red-500 bg-black p-3 font-mono text-xs">
+                        <div class="opacity-60 mb-1 text-red-500">REACTION: CAT_HISS</div>
+                        <pre class="ascii-cat cat-hiss leading-none">
+ /\_/\ 
+( >_< )  HISS
+ > || <
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- 4. CAT_OBSERVE -->
+                <div class="space-y-2">
+                    <p class="font-mono text-gray-500 text-sm opacity-70">// REACTION: CAT_OBSERVE</p>
+                    <div class="border-2 border-gray-500 bg-black p-3 font-mono text-xs">
+                        <div class="opacity-60 mb-1 text-gray-500">REACTION: CAT_OBSERVE</div>
+                        <pre class="ascii-cat cat-observe leading-none">
+ /\_/\ 
+( -.- )  ...
+ > _ <
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- 5. COLLAPSIBLE STACK example -->
+                <div class="space-y-2">
+                    <p class="font-mono text-white text-sm opacity-70">// COLLAPSIBLE STACK (Interactive)</p>
+                    <div x-data="{ open: false }" class="border-2 border-white font-mono text-xs text-white max-w-xs">
+                        <button
+                            class="w-full border-b-2 border-white px-2 py-1 flex justify-between hover:bg-white hover:text-black transition-colors"
+                            @click="open = !open">
+                            <span>REACTIONS [3]</span>
+                            <span x-text="open ? '[-]' : '[+]'"></span>
+                        </button>
+
+                        <div x-show="open" class="p-2 space-y-2 bg-zinc-800" x-transition>
+                            <!-- CAT_PURR Instance -->
+                            <div class="border border-lime-400 bg-black p-2">
+                                <pre class="text-lime-400 leading-none text-[10px]">
+ /\_/\ 
+( o.o ) < PURR
+ > ^ <
+                                </pre>
+                            </div>
+                            <!-- CAT_HISS Instance -->
+                            <div class="border border-red-500 bg-black p-2">
+                                <pre class="text-red-500 leading-none text-[10px]">
+ /\_/\ 
+( >_< ) HISS
+ > || <
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. REACTION PICKER -->
+                <div class="space-y-2">
+                    <p class="font-mono text-white text-sm opacity-70">// PICKER (Anti-Emoji)</p>
+                    <div class="border-2 border-white font-mono text-xs bg-black text-white max-w-xs">
+                        <div class="border-b border-white/20 px-2 py-1 text-white/50 bg-white/10">SELECT REACTION</div>
+                        <button
+                            class="block w-full px-2 py-1 text-left hover:bg-lime-400 hover:text-black hover:font-bold transition-colors">CAT_PURR</button>
+                        <button
+                            class="block w-full px-2 py-1 text-left hover:bg-red-500 hover:text-black hover:font-bold transition-colors">CAT_HISS</button>
+                        <button
+                            class="block w-full px-2 py-1 text-left hover:bg-fuchsia-500 hover:text-black hover:font-bold transition-colors">CAT_CHAOS</button>
+                        <button
+                            class="block w-full px-2 py-1 text-left hover:bg-gray-500 hover:text-black hover:font-bold transition-colors">CAT_OBSERVE</button>
+                    </div>
+                </div>
+
+                <!-- 7. MEGACAT -->
+                <div class="space-y-2 md:col-span-2">
+                    <p class="font-mono text-yellow-400 text-sm opacity-70">// MEGACAT (Escalation Event)</p>
+                    <div class="border-4 border-yellow-400 bg-black p-6 font-mono text-sm flex items-center gap-8">
+                        <pre class="text-yellow-400 leading-none text-2xl font-bold">
+ /\_/\ 
+( O.O ) 
+ > █ <
+                        </pre>
+                        <div>
+                            <div class="text-yellow-400 font-bold text-xl mb-1">MEGA_PURR EVENT</div>
+                            <div class="text-yellow-400/70 text-xs">12 USERS reacted with CAT_PURR</div>
+                            <div class="text-yellow-400/50 text-xs mt-2">> SYSTEM: COMMUNITY_APPROVAL_THRESHOLD_MET
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
 
 </body>
 

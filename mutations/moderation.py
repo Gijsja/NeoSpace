@@ -81,27 +81,30 @@ def resolve_report():
                     pass
                     
         elif data.action == 'ban_user':
-            # Identify user to ban. 
-            # If report is about 'user', content_id is user_id.
-            # If report is about 'post', we need to look up author.
             target_user_id = None
             if report['content_type'] == 'user':
                 target_user_id = int(report['content_id'])
             elif report['content_type'] == 'post':
-                post = db.execute("SELECT p.user_id FROM profile_posts pp JOIN profiles p ON pp.profile_id = p.id WHERE pp.id = ?", (report['content_id'],)).fetchone()
+                # content_id for post is profile_post.id
+                # Post doesn't store author directly if it's a profile post!
+                # Wait, profile_posts are on a profile. 
+                # If it's a "wall post", who is the author? 
+                # Currently profile_posts doesn't track "author" distinct from "profile owner" usually?
+                # Actually, `mutations/wall.py` uses `g.user['id']` to verify, but `profile_posts` table ONLY has `profile_id`.
+                # Limitation: We assume the profile owner wrote the post unless it's a sticker (which has `placed_by`).
+                # Wall posts (modules) are content of the *profile*.
+                # So we ban the profile owner.
+                post = db.execute("SELECT user_id FROM profiles WHERE id = (SELECT profile_id FROM profile_posts WHERE id = ?)", (report['content_id'],)).fetchone()
                 if post:
                     target_user_id = post['user_id']
+            elif report['content_type'] == 'script':
+                script = db.execute("SELECT user_id FROM scripts WHERE id = ?", (report['content_id'],)).fetchone()
+                if script:
+                    target_user_id = script['user_id']
             
             if target_user_id:
-                # Ban logic: simplified, maybe just scramble password or add is_banned flag?
-                # We don't have is_banned column yet. Maybe just delete session?
-                # For MVP, let's just delete the user? No that's destructive.
-                # Let's add 'BANNED' to their bio for now or something simple.
-                # Actually, blocking login is best.
-                # But we didn't add is_banned column.
-                # Let's just note it in resolution for now.
-                data.note += " [Action: User Ban Requested (Not Implemented)]"
-                pass
+                db.execute("UPDATE users SET is_banned = 1 WHERE id = ?", (target_user_id,))
+                data.note += f" [Action: User {target_user_id} Banned]"
     
     else:
         return jsonify({"error": "Invalid action"}), 400

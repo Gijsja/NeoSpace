@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Song // Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-black': '#050505',
+                        'cyber-grid': '#1a1a1a',
+                        'cyber-neon': '#ccff00',
+                        'cyber-hot': '#ff0055',
+                        'cyber-blue': '#00ccff',
+                        'cyber-purp': '#9d00ff',
+                    },
+                    fontFamily: { mono: ['JetBrains Mono', 'monospace'] },
+                    boxShadow: {
+                        'neon': '0 0 10px currentColor',
+                        'neon-lg': '0 0 20px currentColor',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* scanline overlay */
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.99;
+            }
+
+            50% {
+                opacity: 0.95;
+            }
+
+            100% {
+                opacity: 0.99;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ccff00;
+        }
+
+        .knob-range {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        .knob-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            background: #ccff00;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px #ccff00;
+        }
+
+        .knob-range::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+        }
+    </style>
+</head>
+
+<body class="bg-cyber-black text-white font-mono h-screen flex flex-col overflow-hidden relative">
+
+    <div class="absolute inset-0 scanlines z-50"></div>
+    <div class="absolute inset-0 crt-flicker bg-white/1 z-40"></div>
+
+    <!-- Header -->
+    <header
+        class="h-14 border-b border-cyber-grid flex items-center justify-between px-6 bg-cyber-black shrink-0 relative z-50">
+        <div class="flex items-center gap-6">
+            <a href="/"
+                class="text-cyber-grid hover:text-white transition uppercase font-bold text-xs tracking-widest flex items-center gap-2">
+                <span>◄</span> EXIT
+            </a>
+            <div class="h-6 w-px bg-cyber-grid"></div>
+            <div class="flex flex-col">
+                <h1 class="text-lg font-black italic tracking-tighter uppercase leading-none">
+                    THE<span class="text-cyber-hot">SONG</span>
+                </h1>
+                <span class="text-[10px] text-cyber-blue tracking-[0.2em] opacity-80">STUDIO.SYS</span>
+            </div>
+        </div>
+
+        <!-- Transport Center -->
+        <div
+            class="absolute left-1/2 -translate-x-1/2 flex items-center gap-6 bg-cyber-grid/20 px-6 py-2 rounded-full border border-white/5">
+            <div class="flex flex-col items-center">
+                <span class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">BPM</span>
+                <input type="number" id="bpm-input" value="120"
+                    class="bg-transparent text-center font-bold text-cyber-neon w-12 border-none focus:outline-none focus:ring-0 appearance-none">
+            </div>
+
+            <button id="btn-play"
+                class="bg-cyber-neon text-cyber-black px-8 py-2 font-black uppercase tracking-widest hover:bg-white hover:scale-105 transition-all shadow-neon flex items-center gap-2 rounded-sm clip-path-斜め">
+                <span>► PLAY</span>
+            </button>
+
+            <div class="flex flex-col items-center w-16">
+                <span class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">TIME</span>
+                <span id="transport-time" class="font-bold font-mono">0:0</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-4">
+            <button id="btn-save"
+                class="text-xs font-bold text-cyber-blue hover:text-white uppercase tracking-widest border border-cyber-blue/30 px-3 py-1 hover:bg-cyber-blue/10 transition">
+                Save
+            </button>
+            <button id="btn-clear" class="text-xs font-bold text-gray-600 hover:text-red-500 uppercase tracking-widest">
+                Clear
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden relative z-10">
+
+        <!-- Left: Instrument Rack -->
+        <aside class="w-48 border-r border-cyber-grid bg-[#0a0a0a] flex flex-col overflow-y-auto">
+            <div class="p-3 border-b border-cyber-grid text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                TRACKS [8]
+            </div>
+
+            <!-- Track Headers (Static labels for now, but aligned with grid) -->
+            <div id="track-headers" class="flex-1 flex flex-col gap-1 p-2 pt-14">
+                <!-- Matches grid spacing -->
+                <!-- We will generate these dynamically in JS or keep static if simpler -->
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-hot bg-white/5">
+                    <span class="font-bold text-xs">KICK</span>
+                    <div class="w-2 h-2 rounded-full bg-cyber-hot shadow-neon"></div>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-blue bg-white/5">
+                    <span class="font-bold text-xs">SNARE</span>
+                    <div class="w-2 h-2 rounded-full bg-cyber-blue"></div>
+                </div>
+                <!-- ... Repeat for others or let JS handle mapping -->
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-neon bg-white/5">
+                    <span class="font-bold text-xs">HAT.C</span>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-neon bg-white/5">
+                    <span class="font-bold text-xs">HAT.O</span>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-[#9d00ff] bg-white/5">
+                    <span class="font-bold text-xs">BASS</span>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-orange-500 bg-white/5">
+                    <span class="font-bold text-xs">LEAD</span>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-pink-500 bg-white/5">
+                    <span class="font-bold text-xs">PAD</span>
+                </div>
+                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-white bg-white/5">
+                    <span class="font-bold text-xs">FX</span>
+                </div>
+            </div>
+
+            <!-- Bottom FX Knobs -->
+            <div class="p-4 border-t border-cyber-grid space-y-4">
+                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">MASTER FX</div>
+
+                <div class="space-y-1">
+                    <label class="text-[xs] font-bold text-gray-400 flex justify-between">Reverb <span
+                            class="text-cyber-blue">20%</span></label>
+                    <input type="range"
+                        class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyber-blue range-sm">
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Center: Grid -->
+        <div class="flex-1 bg-[#080808] relative overflow-hidden flex flex-col">
+            <!-- Timeline Ruler -->
+            <div
+                class="h-8 border-b border-cyber-grid flex items-end pb-1 px-4 text-[10px] text-gray-600 font-mono tracking-widest gap-1">
+                <div class="flex-1 flex justify-between">
+                    <span>1.1</span><span>1.2</span><span>1.3</span><span>1.4</span>
+                </div>
+            </div>
+
+            <!-- Grid Container -->
+            <div class="flex-1 p-4 overflow-auto">
+                <div class="grid grid-cols-16 gap-1 w-full max-w-5xl" id="sequencer-grid">
+                    <!-- JS populates this -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { SongStudio } from '/ui/js/song/SongStudio.js';
+
+        window.studio = new SongStudio();
+    </script>
+</body>
+
+</html>

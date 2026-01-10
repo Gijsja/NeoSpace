@@ -20,49 +20,58 @@ def add_sticker():
         profile_id: int
         x_pos: float
         y_pos: float
-        image: file
+        sticker_type: 'image' | 'text'
+        image: file (if type='image')
+        text_content: str (if type='text')
     """
-    if 'image' not in request.files:
-        return jsonify({"error": "No image file provided"}), 400
-        
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-        
-    if not allowed_file(file.filename):
-        return jsonify({"error": "Invalid file type"}), 400
-
     profile_id = request.form.get('profile_id')
     x_pos = request.form.get('x_pos', 0)
     y_pos = request.form.get('y_pos', 0)
+    sticker_type = request.form.get('sticker_type', 'image')
     
     if not profile_id:
         return jsonify({"error": "Profile ID required"}), 400
 
-    # Save file
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    filename = f"sticker_{uuid.uuid4().hex}.{ext}"
-    
-    # Ensure upload directory exists
-    upload_folder = os.path.join("static", "uploads", "stickers")
-    os.makedirs(upload_folder, exist_ok=True)
-    
-    file_path = os.path.join(upload_folder, filename)
-    file.save(file_path)
-    
-    web_path = f"/static/uploads/stickers/{filename}"
     sticker_id = str(uuid.uuid4())
+    image_path = None
+    text_content = None
+
+    if sticker_type == 'text':
+        text_content = request.form.get('text_content')
+        if not text_content:
+             return jsonify({"error": "Text content required"}), 400
+    else:
+        # Image handling
+        if 'image' not in request.files:
+            return jsonify({"error": "No image file provided"}), 400
+            
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+            
+        if not allowed_file(file.filename):
+            return jsonify({"error": "Invalid file type"}), 400
+
+        # Save file
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"sticker_{uuid.uuid4().hex}.{ext}"
+        
+        # Ensure upload directory exists
+        upload_folder = os.path.join("static", "uploads", "stickers")
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
+        
+        image_path = f"/static/uploads/stickers/{filename}"
     
     db = get_db()
     
-    # Check permissions (Guestbook mode: anyone can add? For now let's say yes, logged in users)
-    # Ideally should check profile's privacy settings, but for MVP we assume open guestbook if public.
-    
     db.execute(
         """INSERT INTO profile_stickers 
-           (id, profile_id, sticker_type, image_path, x_pos, y_pos, rotation, scale, z_index, placed_by)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (sticker_id, profile_id, 'image', web_path, x_pos, y_pos, 0, 1, 10, g.user['id'])
+           (id, profile_id, sticker_type, image_path, text_content, x_pos, y_pos, rotation, scale, z_index, placed_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (sticker_id, profile_id, sticker_type, image_path, text_content, x_pos, y_pos, 0, 1, 10, g.user['id'])
     )
     db.commit()
     
@@ -70,7 +79,9 @@ def add_sticker():
         "success": True, 
         "sticker": {
             "id": sticker_id,
-            "image_path": web_path,
+            "sticker_type": sticker_type,
+            "image_path": image_path,
+            "text_content": text_content,
             "x_pos": float(x_pos),
             "y_pos": float(y_pos),
             "rotation": 0,

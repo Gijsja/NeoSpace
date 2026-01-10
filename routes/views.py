@@ -20,7 +20,7 @@ def dashboard():
          return redirect(url_for("auth.login"))
     return render_template("dashboard.html")
 
-@bp.route("/directory")
+@bp.route("/directory", strict_slashes=False)
 def directory():
     if g.user is None:
          return redirect(url_for("auth.login"))
@@ -110,8 +110,15 @@ def lobby_users():
     
     return {"users": list(unique_users.values())}
 
-@bp.route("/song")
-def song():
+
+@bp.route("/internals")
+def internals():
     if g.user is None:
          return redirect(url_for("auth.login"))
-    return send_from_directory("ui/views", "song.html")
+    return send_from_directory("ui/views", "internals.html")
+
+@bp.route("/catsound_player")
+def catsound_player_underscore():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("catsound_player.html")

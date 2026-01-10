@@ -248,6 +248,7 @@ def add_sticker():
         target_user_id = request.form.get("target_user_id")
         x = request.form.get("x", 0)
         y = request.form.get("y", 0)
+        rotation = float(request.form.get("rotation", random.uniform(-10, 10)))
         
         file = request.files.get('image')
         if not file:
@@ -281,8 +282,11 @@ def add_sticker():
         target_user_id = req.target_user_id
         x = req.x
         y = req.y
-        image_path = None
-
+        if req.rotation is not None:
+            rotation = req.rotation
+        else:
+            rotation = random.uniform(-10, 10) # Default random for emojis if not specified
+        
     # Basic position validation
     try:
         x = float(x)
@@ -305,9 +309,6 @@ def add_sticker():
     # Create Sticker
     # Generate UUID for ID
     sid = str(uuid.uuid4())
-    
-    # Random default rotation
-    rotation = float(data.get("rotation", 0)) if request.is_json else random.uniform(-10, 10)
     
     db.execute(
         """INSERT INTO profile_stickers (

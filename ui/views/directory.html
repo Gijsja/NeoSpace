@@ -1,76 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>User Directory - NeoSpace</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <link rel="stylesheet" href="/ui/css/styles.css">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'bbs-bg': '#0a0f1a',
-              'bbs-surface': 'rgba(30, 41, 59, 0.8)',
-              'bbs-border': 'rgba(71, 85, 105, 0.5)',
-              'bbs-accent': '#60a5fa',
-              'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
-            },
-            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Directory - NeoSpace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <link rel="stylesheet" href="/ui/css/styles.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bbs-bg': '#0a0f1a',
+            'bbs-surface': 'rgba(30, 41, 59, 0.8)',
+            'bbs-border': 'rgba(71, 85, 105, 0.5)',
+            'bbs-accent': '#60a5fa',
+            'bbs-accent-glow': 'rgba(96, 165, 250, 0.4)',
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
         }
       }
-    </script>
-    <style>
-        .htmx-request { opacity: 0.5; transition: opacity 200ms; }
-        .htmx-request .htmx-indicator { display: inline-block; }
-    </style>
+    }
+  </script>
+  <style>
+    .htmx-request {
+      opacity: 0.5;
+      transition: opacity 200ms;
+    }
+
+    .htmx-request .htmx-indicator {
+      display: inline-block;
+    }
+  </style>
 </head>
+
 <body class="bg-bbs-bg text-slate-200 min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="/ui/views/app.html" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-                <i class="ph-bold ph-arrow-left"></i> Back
-            </a>
-            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
-                <i class="ph-bold ph-users-three text-bbs-accent"></i> User Directory
-            </h1>
-        </div>
-        <div class="relative group">
-            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
-            <input type="search" 
-                   name="search"
-                   placeholder="Search profiles..." 
-                   class="w-64 pl-9 pr-4 py-2 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow transition-all duration-200"
-                   hx-get="/users/cards"
-                   hx-trigger="input changed delay:300ms, search"
-                   hx-target="#user-grid"
-                   hx-swap="innerHTML" />
-        </div>
-    </nav>
+  <!-- Navigation -->
+  <nav
+    class="fixed top-0 left-0 right-0 z-50 bg-bbs-surface backdrop-blur-xl border-b border-bbs-border px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+        <i class="ph-bold ph-arrow-left"></i> Back
+      </a>
+      <h1
+        class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
+        <i class="ph-bold ph-users-three text-bbs-accent"></i> User Directory
+      </h1>
+    </div>
+    <div class="relative group">
+      <i
+        class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-bbs-accent transition-colors"></i>
+      <input type="search" name="search" placeholder="Search profiles..."
+        class="w-64 pl-9 pr-4 py-2 bg-slate-800/50 border border-bbs-border rounded-lg focus:outline-none focus:border-bbs-accent focus:ring-2 focus:ring-bbs-accent-glow transition-all duration-200"
+        hx-get="/users/cards" hx-trigger="input changed delay:300ms, search" hx-target="#user-grid"
+        hx-swap="innerHTML" />
+    </div>
+  </nav>
 
-    <!-- Main Content -->
-    <div class="pt-24 px-6 pb-12 max-w-7xl mx-auto">
-        
-        <!-- Grid - Loads via HTMX on page load -->
-        <div id="user-grid" 
-             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-             hx-get="/users/cards"
-             hx-trigger="load"
-             hx-swap="innerHTML">
-            <!-- Loading State -->
-            <div class="col-span-full text-center py-12 text-slate-500 animate-pulse">
-                Loading directory...
-            </div>
-        </div>
+  <!-- Main Content -->
+  <div class="pt-24 px-6 pb-12 max-w-7xl mx-auto">
 
+    <!-- Grid - Loads via HTMX on page load -->
+    <div id="user-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" hx-get="/users/cards"
+      hx-trigger="load" hx-swap="innerHTML">
+      <!-- Loading State -->
+      <div class="col-span-full text-center py-12 text-slate-500 animate-pulse">
+        Loading directory...
+      </div>
     </div>
 
+  </div>
+
 </body>
+
 </html>

@@ -333,15 +333,21 @@
                 {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}
                 {{ nav_link('/lobby', 'ph-bold ph-users-three', 'Visual Lobby', class='sidebar-link') }}
                 {{ nav_link('/messages', 'ph-bold ph-chat-centered-text', 'Communications', class='sidebar-link') }}
-                {{ nav_link('/song', 'ph-bold ph-music-notes-simple', 'The Song', class='sidebar-link') }}
                 {{ nav_link('/notifications/center', 'ph-bold ph-bell-ringing', 'Live Wire', class='sidebar-link') }}
-                {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice', class='sidebar-link opacity-50
+
+                <!-- Studio Category -->
+                <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Studio</span>
+                </div>
+                {{ nav_link('/song', 'ph-bold ph-music-notes-simple', 'The Song', class='sidebar-link') }}
+                {{ nav_link('/catsound_player', 'ph-bold ph-cat', 'Cat Orchestra', class='sidebar-link') }}
+                {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice Notes', class='sidebar-link opacity-50
                 cursor-not-allowed', badge=False) }}
 
                 <div class="h-0.5 bg-black my-4 opacity-10 mx-4"></div>
 
                 <!-- System / Admin -->
-                {{ nav_link('/ui/views/internals.html', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link') }}
+                {{ nav_link('/internals', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link') }}
                 {{ nav_link('/dashboard', 'ph-bold ph-shield', 'Admin', class='sidebar-link') }}
             </nav>
 

@@ -1,9 +1,6 @@
-"""
-Cat Service Facade - services/cats/__init__.py
-
-The public API for the CatSystem.
-Combines Brain (Logic), Store (DB), and Audio (Assets).
-"""
+# Cat Service Facade - services/cats/__init__.py
+# The public API for the CatSystem.
+# Combines Brain (Logic), Store (DB), and Audio (Assets).
 
 from typing import Dict, Any, Optional
 import os
@@ -14,7 +11,7 @@ from .dialogue import CatDialogue
 from .semantics import get_faction_label, get_detailed_status, get_idle_vocalization
 
 def get_all_cats():
-    """Get all cats with their current emotional state."""
+    # Get all cats with their current emotional state.
     cats = CatStore.get_all_cats()
     for cat in cats:
         # Calculate Named State from PAD
@@ -30,10 +27,8 @@ def get_cat_by_name(name: str):
     return CatStore.get_cat_by_name(name)
 
 def trigger_event(cat_name: str, event: str, user_id: Optional[int] = None) -> Dict[str, Any]:
-    """
-    Trigger an event for a specific cat (or all watching cats).
-    Returns the reaction (lines, sound, mechanics).
-    """
+    # Trigger an event for a specific cat (or all watching cats).
+    # Returns the reaction (lines, sound, mechanics).
     cat = CatStore.get_cat_by_name(cat_name)
     if not cat:
         return {"error": "Cat not found"}
@@ -118,7 +113,7 @@ def trigger_event(cat_name: str, event: str, user_id: Optional[int] = None) -> D
     }
 
 def seed_db():
-    """Utility to seed the new tables."""
+    # Utility to seed the new tables.
     # Define Base Cats (Legacy/Core definitions)
     BASE_CATS = [
         {"name": "beans", "priority": 10, "triggers": ["login_attempt", "login_success"], "silence_bias": 0.1, "global_observer": False},

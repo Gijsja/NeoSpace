@@ -92,6 +92,9 @@ def create_app(test_config=None):
     from routes.cats import cats_bp
     app.register_blueprint(cats_bp)
 
+    from routes.song import bp as song_bp
+    app.register_blueprint(song_bp)
+
     # =============================================
     # ERROR HANDLERS (Cat Error Pages)
     # =============================================
@@ -124,8 +127,8 @@ def create_app(test_config=None):
     return app
 
 
-# Reload trigger 2026-01-08
+# Reload trigger 2026-01-10
 
 if __name__ == "__main__":
     app = create_app()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, use_reloader=False)

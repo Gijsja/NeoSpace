@@ -18,6 +18,7 @@
 ## ⚡️ Performance & Clean Code
 
 - [ ] **Database Archival**: Move old messages to `messages_archive` table to keep queries fast.
+- [ ] **Bun Integration**: Evaluate replacing `npm` with `bun` for 25x faster installs and zero-config testing.
 
 ## ❤️ Emotional Intelligence Upgrade (Completed)
 

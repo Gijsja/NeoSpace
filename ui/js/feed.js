@@ -27,6 +27,7 @@ if (!window.FeedManager) {
             this.container.innerHTML = ''; // Start fresh
 
             // Initial Load
+            this.renderSkeletons();
             this.loadPosts();
 
             // Infinite Scroll
@@ -279,6 +280,26 @@ if (!window.FeedManager) {
                 container.innerHTML = '<div class="flex items-center justify-center h-full text-white font-mono uppercase">Terminated</div>';
             };
             container.appendChild(resetBtn);
+        },
+
+        renderSkeletons() {
+            // Render 3 skeleton posts
+            this.container.innerHTML = Array(3).fill(0).map(() => `
+                <div class="nb-card p-0 mb-6 animate-pulse bg-white">
+                    <div class="flex items-center gap-3 p-4 border-b border-black/10">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 border border-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                            <div class="h-3 w-20 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="h-4 w-3/4 bg-gray-200 rounded"></div>
+                        <div class="h-4 w-1/2 bg-gray-200 rounded"></div>
+                        <div class="h-32 w-full bg-gray-100 rounded border border-gray-200"></div>
+                    </div>
+                </div>
+            `).join('');
         }
     };
 }

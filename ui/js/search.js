@@ -58,12 +58,15 @@ const SearchUI = {
         const container = document.getElementById('search-results');
 
         // Loading State
-        container.innerHTML = `
-            <div class="col-span-full text-center p-8">
-                <i class="ph-bold ph-spinner animate-spin text-4xl mb-2"></i>
-                <p>LOADING NETWORK...</p>
-            </div>
-        `;
+        // Skeleton Loading State
+        container.innerHTML = Array(8).fill(0).map(() => `
+                <div class="nb-card p-4 flex flex-col items-center gap-3 animate-pulse">
+                    <div class="w-20 h-20 rounded-full bg-gray-200 border-2 border-gray-300"></div>
+                    <div class="h-4 w-32 bg-gray-200 rounded"></div>
+                    <div class="h-3 w-20 bg-gray-200 rounded"></div>
+                    <div class="h-8 w-full bg-gray-200 rounded mt-2"></div>
+                </div>
+            `).join('');
 
         try {
             // Hit the Directory API instead of Search API
@@ -133,24 +136,24 @@ const SearchUI = {
 
         if (this.state.type === 'users') {
             container.innerHTML = results.map(user => `
-                <div class="user-card p-4 flex flex-col items-center text-center gap-3">
-                    <a href="/wall?user_id=${user.id}" class="block group">
+                <div class="nb-card p-4 flex flex-col items-center text-center gap-3 group relative overflow-hidden">
+                    <a href="/wall?user_id=${user.id}" class="block relative">
                         <img src="${user.avatar_path || '/static/img/default_avatar.png'}" 
-                             class="w-20 h-20 rounded-full border-2 border-black object-cover group-hover:scale-105 transition-transform">
+                             class="w-20 h-20 rounded-full border-2 border-black object-cover group-hover:scale-105 transition-transform bg-gray-100">
                     </a>
-                    <div>
-                        <a href="/wall?user_id=${user.id}" class="font-bold text-lg hover:underline">
+                    <div class="min-w-0 w-full px-2">
+                        <a href="/wall?user_id=${user.id}" class="font-bold text-lg hover:underline truncate block">
                             ${user.display_name || user.username}
                         </a>
-                        <p class="text-sm text-gray-500">@${user.username}</p>
+                        <p class="text-sm text-gray-500 font-mono truncate">@${user.username}</p>
                     </div>
                     
-                    <!-- Follow Button (Sprint 20) -->
-                    <button class="nb-button w-full text-sm ${user.is_following ? 'bg-white text-black border border-black' : 'bg-black text-white'}" 
+                    <!-- Follow Button -->
+                    <button class="w-full h-8 border-2 border-black font-bold text-sm uppercase transition-all active:translate-y-1 active:shadow-none shadow-hard-sm flex items-center justify-center gap-2 ${user.is_following ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-800'}" 
                             data-user-id="${user.id}"
                             data-status="${user.is_following ? 'following' : 'not_following'}"
                             onclick="FriendManager.toggleFollow(this)">
-                        ${user.is_following ? 'UNFOLLOW' : 'FOLLOW'}
+                        ${user.is_following ? '<i class="ph-bold ph-check"></i> FOLLOWING' : '<i class="ph-bold ph-plus"></i> FOLLOW'}
                     </button>
                 </div>
             `).join('');

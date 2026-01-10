@@ -34,15 +34,27 @@ def save_script():
         return jsonify(ok=True, id=req.id, message="Updated")
     else:
         # Create new
+        parent_id = req.parent_id
+        root_id = None
+        
+        if parent_id:
+            parent = db.execute("SELECT id, root_id FROM scripts WHERE id=?", (parent_id,)).fetchone()
+            if parent:
+                # If parent has a root, that's our root. Else parent is root.
+                root_id = parent['root_id'] if parent['root_id'] else parent['id']
+            else:
+                # Invalid parent, ignore
+                parent_id = None
+
         try:
             row = db.execute(
-                """INSERT INTO scripts (user_id, title, content, script_type, is_public) 
-                   VALUES (?, ?, ?, ?, ?) 
+                """INSERT INTO scripts (user_id, title, content, script_type, is_public, parent_id, root_id) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?) 
                    RETURNING id""",
-                (user_id, req.title, req.content, req.script_type, req.is_public)
+                (user_id, req.title, req.content, req.script_type, req.is_public, parent_id, root_id)
             ).fetchone()
             db.commit()
-            return jsonify(ok=True, id=row['id'], message="Created")
+            return jsonify(ok=True, id=row['id'], message="Created", parent_id=parent_id, root_id=root_id)
         except Exception as e:
             return jsonify(ok=False, error=str(e)), 500
 
@@ -52,7 +64,7 @@ def list_scripts():
     user_id = g.user['id']
     
     rows = db.execute(
-        "SELECT id, title, script_type, updated_at, created_at FROM scripts WHERE user_id=? ORDER BY updated_at DESC, created_at DESC",
+        "SELECT id, title, script_type, updated_at, created_at, parent_id, root_id FROM scripts WHERE user_id=? ORDER BY updated_at DESC, created_at DESC",
         (user_id,)
     ).fetchall()
     
@@ -60,7 +72,9 @@ def list_scripts():
         id=r['id'], 
         title=r['title'], 
         script_type=r['script_type'],
-        last_modified=r['updated_at'] or r['created_at']
+        last_modified=r['updated_at'] or r['created_at'],
+        parent_id=r['parent_id'],
+        root_id=r['root_id']
     ) for r in rows]
     
     return jsonify(ok=True, scripts=scripts)

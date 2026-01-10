@@ -196,8 +196,23 @@ class SaveScriptRequest(msgspec.Struct):
     content: str = ""
     script_type: str = "p5"
     is_public: int = 1
+    parent_id: Optional[int] = None
 
 
 class DeleteScriptRequest(msgspec.Struct):
     """Request to delete a script."""
+    id: int
+
+
+# Song Studio Mutations
+class SaveSongRequest(msgspec.Struct):
+    """Request to save a song project."""
+    data: dict
+    title: str = "Untitled Track"
+    is_public: int = 0
+    id: Optional[int] = None
+
+
+class DeleteSongRequest(msgspec.Struct):
+    """Request to delete a song."""
     id: int

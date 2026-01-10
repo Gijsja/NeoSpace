@@ -106,6 +106,7 @@ profile_stickers = Table(
     Column("profile_id", Integer, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False),
     Column("sticker_type", Text),
     Column("image_path", Text),
+    Column("text_content", Text),
     Column("x_pos", Float, nullable=False),
     Column("y_pos", Float, nullable=False),
     Column("rotation", Float, server_default="0"),
@@ -126,10 +127,14 @@ scripts = Table(
     Column("content", Text, nullable=False),
     Column("script_type", Text, server_default="p5"),
     Column("is_public", Integer, server_default="1"),
+    Column("parent_id", Integer, ForeignKey("scripts.id"), nullable=True),
+    Column("root_id", Integer, ForeignKey("scripts.id"), nullable=True),
     Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
     Column("updated_at", Text),
 )
 Index("idx_scripts_user", scripts.c.user_id)
+Index("idx_scripts_parent", scripts.c.parent_id)
+Index("idx_scripts_root", scripts.c.root_id)
 
 # Profile Scripts Table
 profile_scripts = Table(
@@ -202,3 +207,18 @@ rooms = Table(
     Column("created_by", Integer, ForeignKey("users.id")),
     Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
 )
+
+# Songs Table (The Studio)
+songs = Table(
+    "songs",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("title", Text, nullable=False, server_default="Untitled Track"),
+    Column("data_json", Text, nullable=False),  # Full sequencer state (patterns, songs, effects)
+    Column("version", Integer, server_default="1"),
+    Column("is_public", Integer, server_default="0"),
+    Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
+    Column("updated_at", Text),
+)
+Index("idx_songs_user", songs.c.user_id)
