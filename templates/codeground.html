@@ -253,249 +253,251 @@
 
 {% block scripts %}
 <script>
-    (function () {
-        const initCodeground = () => {
-            Alpine.data('codeground', () => ({
-                userId: {{ g.user.id if g.user else 'null' }},
-            sidebarOpen: true,
+    window.initCodeground = window.initCodeground || (() => {
+        Alpine.data('codeground', () => ({
+            userId: {{ g.user.id if g.user else 'null' }},
+        sidebarOpen: true,
             scripts: [],
-            loadingScripts: false,
-            currentScriptId: null,
-            currentTitle: 'Untitled Script',
-            codeContent: `const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);\ncamera.position.z = 5;\n\nconst renderer = new THREE.WebGLRenderer({ alpha: true });\nrenderer.setSize(window.innerWidth, window.innerHeight);\ndocument.body.appendChild(renderer.domElement);\n\nconst geometry = new THREE.IcosahedronGeometry(1.5, 0);\nconst material = new THREE.MeshBasicMaterial({ color: 0xa3e635, wireframe: true });\nconst cube = new THREE.Mesh(geometry, material);\nscene.add(cube);\n\nfunction animate() {\n    requestAnimationFrame(animate);\n    cube.rotation.x += 0.01;\n    cube.rotation.y += 0.01;\n    renderer.render(scene, camera);\n}\nanimate();`,
-            docDirty: false,
-            isSaving: false,
-            showPublishModal: false,
-            publishDesc: '',
-            isOwner: true,
-            parentId: null,
+                loadingScripts: false,
+                    currentScriptId: null,
+                        currentTitle: 'Untitled Script',
+                            codeContent: `const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);\ncamera.position.z = 5;\n\nconst renderer = new THREE.WebGLRenderer({ alpha: true });\nrenderer.setSize(window.innerWidth, window.innerHeight);\ndocument.body.appendChild(renderer.domElement);\n\nconst geometry = new THREE.IcosahedronGeometry(1.5, 0);\nconst material = new THREE.MeshBasicMaterial({ color: 0xa3e635, wireframe: true });\nconst cube = new THREE.Mesh(geometry, material);\nscene.add(cube);\n\nfunction animate() {\n    requestAnimationFrame(animate);\n    cube.rotation.x += 0.01;\n    cube.rotation.y += 0.01;\n    renderer.render(scene, camera);\n}\nanimate();`,
+                                docDirty: false,
+                                    isSaving: false,
+                                        showPublishModal: false,
+                                            publishDesc: '',
+                                                isOwner: true,
+                                                    parentId: null,
 
-            init() {
-                this.updateLines();
-                this.fetchScripts();
-                this.runCode();
+                                                        init() {
+        this.updateLines();
+        this.fetchScripts();
+        this.runCode();
 
-                window.addEventListener('keydown', (e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                        e.preventDefault();
-                        this.saveScript();
-                    }
-                });
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                this.saveScript();
+            }
+        });
 
-                window.addEventListener('message', (e) => {
-                    if (e.data.type === 'log') this.logToConsole(e.data.msg);
-                    if (e.data.type === 'error') this.logToConsole(e.data.msg, 'error');
-                });
-            },
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'log') this.logToConsole(e.data.msg);
+            if (e.data.type === 'error') this.logToConsole(e.data.msg, 'error');
+        });
+    },
 
-                async forkScript() {
-            if (!this.currentScriptId) return;
-            this.parentId = this.currentScriptId;
-            this.currentScriptId = null;
-            this.currentTitle = "Fork of " + this.currentTitle;
-            this.isOwner = true;
-            this.docDirty = true;
-            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Forked', message: 'Created a local copy. Save to persist.', type: 'info' } }));
-        },
+            async forkScript() {
+        if (!this.currentScriptId) return;
+        this.parentId = this.currentScriptId;
+        this.currentScriptId = null;
+        this.currentTitle = "Fork of " + this.currentTitle;
+        this.isOwner = true;
+        this.docDirty = true;
+        window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Forked', message: 'Created a local copy. Save to persist.', type: 'info' } }));
+    },
 
-                async fetchScripts() {
-            this.loadingScripts = true;
-            const res = await fetch('/scripts/list');
-            const data = await res.json();
-            if (data.ok) this.scripts = data.scripts;
-            this.loadingScripts = false;
-        },
+            async fetchScripts() {
+        this.loadingScripts = true;
+        const res = await fetch('/scripts/list');
+        const data = await res.json();
+        if (data.ok) this.scripts = data.scripts;
+        this.loadingScripts = false;
+    },
 
-                async createNewsScript() {
-            this.currentScriptId = null;
-            this.currentTitle = "Untitled Script";
-            this.codeContent = "// New Script\n";
+            async createNewsScript() {
+        this.currentScriptId = null;
+        this.currentTitle = "Untitled Script";
+        this.codeContent = "// New Script\n";
+        this.docDirty = false;
+        this.runCode();
+    },
+
+            async loadScript(id) {
+        if (this.docDirty && !confirm("Unsaved changes! Discard?")) return;
+
+        const res = await fetch('/scripts/get?id=' + id);
+        const data = await res.json();
+        if (data.ok) {
+            this.currentScriptId = data.script.id;
+            this.currentTitle = data.script.title;
+            this.codeContent = data.script.content;
+            this.isOwner = (data.script.user_id === this.userId);
+            this.parentId = data.script.parent_id;
             this.docDirty = false;
             this.runCode();
-        },
-
-                async loadScript(id) {
-            if (this.docDirty && !confirm("Unsaved changes! Discard?")) return;
-
-            const res = await fetch('/scripts/get?id=' + id);
-            const data = await res.json();
-            if (data.ok) {
-                this.currentScriptId = data.script.id;
-                this.currentTitle = data.script.title;
-                this.codeContent = data.script.content;
-                this.isOwner = (data.script.user_id === this.userId);
-                this.parentId = data.script.parent_id;
-                this.docDirty = false;
-                this.runCode();
-                this.updateLines();
-            }
-        },
-
-                async saveScript() {
-            this.isSaving = true;
-            const payload = {
-                id: this.currentScriptId,
-                title: this.currentTitle,
-                content: this.codeContent,
-                script_type: 'p5',
-                is_public: 1,
-                parent_id: this.parentId
-            };
-
-            const res = await fetch('/scripts/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-
-            if (data.ok) {
-                this.currentScriptId = data.id;
-                this.isOwner = true; // After saving (either new or update), I am the owner
-                this.parentId = null; // Lineage is saved in DB now
-                this.docDirty = false;
-                this.fetchScripts(); // Refresh list
-                this.logToConsole("Saved successfully.", 'system');
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Saved', message: 'Script saved successfully.', type: 'success' } }));
-            } else {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Error saving: ' + data.error, type: 'error' } }));
-                this.logToConsole("Error saving: " + data.error, 'error');
-            }
-            this.isSaving = false;
-        },
-
-                async deleteScript(id) {
-            if (!confirm("Are you sure?")) return;
-            const res = await fetch('/scripts/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify({ id })
-            });
-            if ((await res.json()).ok) {
-                this.fetchScripts();
-                if (this.currentScriptId === id) this.createNewsScript();
-            }
-        },
-
-        runCode() {
-            const frame = document.getElementById('preview-frame');
-            const html = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <style>body { margin: 0; overflow: hidden; background: white; }</style>
-                            <script src="/static/vendor/three.min.js"><\/script>
-                            <script src="/static/vendor/p5.min.js"><\/script>
-                        </head>
-                        <body>
-                            <script>
-                                window.console.log = (...args) => window.parent.postMessage({type: 'log', msg: args.join(' ')}, '*');
-                                window.console.error = (...args) => window.parent.postMessage({type: 'error', msg: args.join(' ')}, '*');
-                                window.onerror = (msg) => window.parent.postMessage({type: 'error', msg}, '*');
-                                try { ${this.codeContent} } catch(e) { console.error(e); }
-                            <\/script>
-                        </body>
-                        </html>
-                    `;
-            const blob = new Blob([html], { type: 'text/html' });
-            frame.src = URL.createObjectURL(blob);
-            this.clearConsole();
-            this.logToConsole("Running...", 'system');
-        },
-
-        openPublishModal() {
-            if (this.docDirty) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Unsaved Changes', message: 'Please save your script before publishing.', type: 'warning' } }));
-                this.saveScript();
-                return;
-            }
-            window.dispatchEvent(new CustomEvent('open-dialog-publish-modal'));
-        },
-
-                async publishToWall() {
-            if (!this.currentScriptId) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Save the script first!', type: 'error' } }));
-                return;
-            }
-
-            const payload = {
-                module_type: 'script',
-                content: {
-                    script_id: this.currentScriptId,
-                    title: this.currentTitle,
-                    description: this.publishDesc,
-                    code: this.codeContent
-                },
-                style: { theme: 'dark' }
-            };
-
-            const res = await fetch('/wall/post/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify(payload)
-            });
-
-            if ((await res.json()).ok) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Published', message: 'Script published to your Wall!', type: 'success' } }));
-            } else {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Failed', message: 'Could not publish script.', type: 'error' } }));
-            }
-        },
-
-        // Editor Utils
-        updateLines() {
-            const lines = this.codeContent.split('\n').length;
-            const lineNumbers = document.getElementById('line-numbers');
-            if (lineNumbers) {
-                lineNumbers.innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
-            }
-        },
-
-        syncScroll(e) {
-            const lineNumbers = document.getElementById('line-numbers');
-            if (lineNumbers) {
-                lineNumbers.scrollTop = e.target.scrollTop;
-            }
-        },
-
-        insertTab(e) {
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            this.codeContent = this.codeContent.substring(0, start) + "  " + this.codeContent.substring(end);
-            this.$nextTick(() => {
-                e.target.selectionStart = e.target.selectionEnd = start + 2;
-            });
-        },
-
-        logToConsole(msg, type = 'info') {
-            const div = document.createElement('div');
-            div.textContent = `> ${msg}`;
-            if (type === 'error') div.className = "text-red-500 font-bold";
-            else if (type === 'system') div.className = "text-yellow-400";
-
-            const consoleLogs = document.getElementById('console-logs');
-            if (consoleLogs) {
-                consoleLogs.appendChild(div);
-                consoleLogs.scrollTop = consoleLogs.scrollHeight;
-            }
-        },
-
-        clearConsole() {
-            const consoleLogs = document.getElementById('console-logs');
-            if (consoleLogs) {
-                consoleLogs.innerHTML = '';
-            }
-        },
-
-        formatDate(iso) {
-            if (!iso) return '';
-            return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            this.updateLines();
         }
-    }));
+    },
+
+            async saveScript() {
+        this.isSaving = true;
+        const payload = {
+            id: this.currentScriptId,
+            title: this.currentTitle,
+            content: this.codeContent,
+            script_type: 'p5',
+            is_public: 1,
+            parent_id: this.parentId
         };
 
-    if (window.Alpine) initCodeground();
-    else document.addEventListener('alpine:init', initCodeground);
-    }) ();
+        const res = await fetch('/scripts/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            this.currentScriptId = data.id;
+            this.isOwner = true; // After saving (either new or update), I am the owner
+            this.parentId = null; // Lineage is saved in DB now
+            this.docDirty = false;
+            this.fetchScripts(); // Refresh list
+            this.logToConsole("Saved successfully.", 'system');
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Saved', message: 'Script saved successfully.', type: 'success' } }));
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Error saving: ' + data.error, type: 'error' } }));
+            this.logToConsole("Error saving: " + data.error, 'error');
+        }
+        this.isSaving = false;
+    },
+
+            async deleteScript(id) {
+        if (!confirm("Are you sure?")) return;
+        const res = await fetch('/scripts/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({ id })
+        });
+        if ((await res.json()).ok) {
+            this.fetchScripts();
+            if (this.currentScriptId === id) this.createNewsScript();
+        }
+    },
+
+    runCode() {
+        const frame = document.getElementById('preview-frame');
+        const html = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>body { margin: 0; overflow: hidden; background: white; }</style>
+                        <script src="/static/vendor/three.min.js"><\/script>
+                        <script src="/static/vendor/p5.min.js"><\/script>
+                    </head>
+                    <body>
+                        <script>
+                            window.console.log = (...args) => window.parent.postMessage({type: 'log', msg: args.join(' ')}, '*');
+                            window.console.error = (...args) => window.parent.postMessage({type: 'error', msg: args.join(' ')}, '*');
+                            window.onerror = (msg) => window.parent.postMessage({type: 'error', msg}, '*');
+                            try { ${this.codeContent} } catch(e) { console.error(e); }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+        const blob = new Blob([html], { type: 'text/html' });
+        frame.src = URL.createObjectURL(blob);
+        this.clearConsole();
+        this.logToConsole("Running...", 'system');
+    },
+
+    openPublishModal() {
+        if (this.docDirty) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Unsaved Changes', message: 'Please save your script before publishing.', type: 'warning' } }));
+            this.saveScript();
+            return;
+        }
+        window.dispatchEvent(new CustomEvent('open-dialog-publish-modal'));
+    },
+
+            async publishToWall() {
+        if (!this.currentScriptId) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Error', message: 'Save the script first!', type: 'error' } }));
+            return;
+        }
+
+        const payload = {
+            module_type: 'script',
+            content: {
+                script_id: this.currentScriptId,
+                title: this.currentTitle,
+                description: this.publishDesc,
+                code: this.codeContent
+            },
+            style: { theme: 'dark' }
+        };
+
+        const res = await fetch('/wall/post/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify(payload)
+        });
+
+        if ((await res.json()).ok) {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Published', message: 'Script published to your Wall!', type: 'success' } }));
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { title: 'Failed', message: 'Could not publish script.', type: 'error' } }));
+        }
+    },
+
+    // Editor Utils
+    updateLines() {
+        const lines = this.codeContent.split('\n').length;
+        const lineNumbers = document.getElementById('line-numbers');
+        if (lineNumbers) {
+            lineNumbers.innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
+        }
+    },
+
+    syncScroll(e) {
+        const lineNumbers = document.getElementById('line-numbers');
+        if (lineNumbers) {
+            lineNumbers.scrollTop = e.target.scrollTop;
+        }
+    },
+
+    insertTab(e) {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        this.codeContent = this.codeContent.substring(0, start) + "  " + this.codeContent.substring(end);
+        this.$nextTick(() => {
+            e.target.selectionStart = e.target.selectionEnd = start + 2;
+        });
+    },
+
+    logToConsole(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.textContent = `> ${msg}`;
+        if (type === 'error') div.className = "text-red-500 font-bold";
+        else if (type === 'system') div.className = "text-yellow-400";
+
+        const consoleLogs = document.getElementById('console-logs');
+        if (consoleLogs) {
+            consoleLogs.appendChild(div);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+    },
+
+    clearConsole() {
+        const consoleLogs = document.getElementById('console-logs');
+        if (consoleLogs) {
+            consoleLogs.innerHTML = '';
+        }
+    },
+
+    formatDate(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+}));
+    });
+
+    if (window.Alpine) {
+        window.initCodeground();
+    } else {
+        document.addEventListener('alpine:init', window.initCodeground);
+    }
+
 </script>
 {% endblock %}

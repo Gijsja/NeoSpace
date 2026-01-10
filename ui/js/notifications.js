@@ -3,11 +3,15 @@
  * Handles notification polling, badge updates, and toast alerts.
  */
 
-const NotificationManager = {
+window.NotificationManager = window.NotificationManager || {
     state: {
         unreadCount: 0,
         pollingInterval: 15000, // 15 seconds
         timer: null
+    },
+
+    getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content;
     },
 
     init() {
@@ -81,8 +85,12 @@ const NotificationManager = {
 
     async markAllRead() {
         try {
+            const csrfToken = this.getCsrfToken();
             const res = await fetch('/notifications/mark-all-read', {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
             });
             const data = await res.json();
             if (data.ok) {

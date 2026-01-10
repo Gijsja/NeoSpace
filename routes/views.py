@@ -122,3 +122,9 @@ def catsound_player_underscore():
     if g.user is None:
          return redirect(url_for("auth.login"))
     return render_template("catsound_player.html")
+
+@bp.route("/catpool")
+def catpool():
+    if g.user is None:
+         return redirect(url_for("auth.login"))
+    return render_template("catpool.html")
