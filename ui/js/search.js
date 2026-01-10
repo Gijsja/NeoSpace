@@ -3,7 +3,7 @@
  * Handles client-side search against /search API
  */
 
-const SearchUI = {
+window.SearchUI = window.SearchUI || {
     state: {
         query: '',
         type: 'users', // 'users' or 'posts'
@@ -138,7 +138,7 @@ const SearchUI = {
             container.innerHTML = results.map(user => `
                 <div class="nb-card p-4 flex flex-col items-center text-center gap-3 group relative overflow-hidden">
                     <a href="/wall?user_id=${user.id}" class="block relative">
-                        <img src="${user.avatar_path || '/static/img/default_avatar.png'}" 
+                        <img src="${user.avatar_path || '/static/images/cats/null.png'}" 
                              class="w-20 h-20 rounded-full border-2 border-black object-cover group-hover:scale-105 transition-transform bg-gray-100">
                     </a>
                     <div class="min-w-0 w-full px-2">

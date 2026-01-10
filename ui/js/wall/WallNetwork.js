@@ -59,7 +59,10 @@ export async function deleteModule(moduleId) {
     try {
         const res = await fetch('/wall/post/delete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            },
             body: JSON.stringify({ id: moduleId })
         });
         const data = await res.json();

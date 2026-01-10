@@ -86,7 +86,7 @@ if (!window.FeedManager) {
             // Safe defaults
             const author = post.author_name || "Unknown";
             const username = post.author_username || "anon";
-            const avatar = post.author_avatar || "/static/img/default_avatar.png";
+            const avatar = post.author_avatar || "/static/images/cats/null.png";
             const time = new Date(post.created_at).toLocaleDateString();
 
             let contentHTML = "";

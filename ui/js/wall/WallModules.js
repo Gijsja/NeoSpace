@@ -256,7 +256,10 @@ export function showModuleMenu(mod, anchorBtn) {
             try {
                 const res = await fetch('/admin/report', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    },
                     body: JSON.stringify({
                         content_type: 'post',
                         content_id: String(mod.id),
@@ -421,8 +424,10 @@ export function setupModuleForm(callbacks) {
             // Show/Hide Fields
             ['text', 'image', 'link', 'audio', 'voice'].forEach(t => {
                 const el = document.getElementById(`fields-${t}`);
-                if (t === type) el.classList.remove('hidden');
-                else el.classList.add('hidden');
+                if (el) {
+                    if (t === type) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
             });
         };
     });
@@ -472,7 +477,10 @@ export function setupModuleForm(callbacks) {
 
                 const res = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
@@ -529,7 +537,13 @@ function setupVoiceRecorder() {
                 formData.append('file', blob, 'voicenote.webm');
 
                 try {
-                    const res = await fetch('/wall/post/upload', { method: 'POST', body: formData });
+                    const res = await fetch('/wall/post/upload', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                        },
+                        body: formData
+                    });
                     const data = await res.json();
                     if (data.ok) {
                         urlInput.value = data.url;

@@ -15,12 +15,21 @@ export default class WallStickers {
         this.scale = 1; // Canvas zoom if any
 
         // Audio
-        this.sounds = {
-            pop: new Tone.Player("https://tonejs.github.io/audio/berklee/hit_1.mp3").toDestination(), // Placeholder URL or synthetic
-            click: new Tone.MembraneSynth().toDestination()
-        };
-        // Simple synth fallback for clicks
-        this.synth = new Tone.MembraneSynth().toDestination();
+        // Audio - Lazy load or safe check
+        this.sounds = {};
+        this.synth = null;
+
+        if (window.Tone) {
+            try {
+                this.sounds = {
+                    pop: new Tone.Player("https://tonejs.github.io/audio/berklee/hit_1.mp3").toDestination(),
+                    click: new Tone.MembraneSynth().toDestination()
+                };
+                this.synth = new Tone.MembraneSynth().toDestination();
+            } catch (e) {
+                console.warn("Tone.js failed to init in constructor", e);
+            }
+        }
 
         this.init();
     }
@@ -45,7 +54,9 @@ export default class WallStickers {
 
         // Init Audio Context on first click
         window.addEventListener('click', async () => {
-            await Tone.start();
+            if (window.Tone) {
+                try { await Tone.start(); } catch (e) { }
+            }
         }, { once: true });
     }
 
@@ -64,20 +75,26 @@ export default class WallStickers {
     }
 
     playPop() {
-        // Quick synthetic pop
-        const synth = new Tone.Synth({
-            oscillator: { type: "triangle" },
-            envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
-        }).toDestination();
-        synth.triggerAttackRelease("C5", "32n");
-        synth.triggerAttackRelease("E5", "32n", "+0.05");
+        if (!window.Tone) return;
+        try {
+            // Quick synthetic pop
+            const synth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+            synth.triggerAttackRelease("C5", "32n");
+            synth.triggerAttackRelease("E5", "32n", "+0.05");
+        } catch (e) { }
     }
 
     playClick() {
-        const synth = new Tone.MembraneSynth({
-            envelope: { attack: 0.001, decay: 0.05, sustain: 0 }
-        }).toDestination();
-        synth.triggerAttackRelease("A2", "32n");
+        if (!window.Tone) return;
+        try {
+            const synth = new Tone.MembraneSynth({
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0 }
+            }).toDestination();
+            synth.triggerAttackRelease("A2", "32n");
+        } catch (e) { }
     }
 
     renderSticker(data) {
@@ -305,11 +322,18 @@ export default class WallStickers {
         window.addEventListener('mouseup', onUp);
     }
 
+    getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    }
+
     async saveStickerState(el) {
         try {
             await fetch('/wall/sticker/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
                 body: JSON.stringify({
                     id: el.dataset.id,
                     x: parseFloat(el.dataset.x),
@@ -383,7 +407,13 @@ export default class WallStickers {
         }
 
         try {
-            const res = await fetch('/wall/sticker/add', { method: 'POST', body: formData });
+            const res = await fetch('/wall/sticker/add', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: formData
+            });
             const data = await res.json();
             if (data.success) {
                 this.renderSticker(data.sticker);
@@ -405,7 +435,14 @@ export default class WallStickers {
         }, 100);
 
         setTimeout(async () => {
-            await fetch('/wall/sticker/delete', { method: 'POST', body: JSON.stringify({ id }) });
+            await fetch('/wall/sticker/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ id })
+            });
             el.remove();
             this.deselectAll();
         }, 300);

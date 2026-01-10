@@ -123,12 +123,12 @@ def create_app(test_config=None):
                 
         return response
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
     init_sockets(app)
     return app
 
-
 # Reload trigger 2026-01-10
-
-if __name__ == "__main__":
-    app = create_app()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, use_reloader=False)

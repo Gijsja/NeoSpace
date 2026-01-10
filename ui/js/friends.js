@@ -3,7 +3,7 @@
  * Client-side logic for Friend interactions (Follow/Unfollow)
  */
 
-const FriendManager = {
+window.FriendManager = window.FriendManager || {
     async toggleFollow(btn) {
         // Prevent double clicks
         if (btn.classList.contains('processing')) return;

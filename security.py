@@ -27,6 +27,7 @@ def init_security(app):
             "'self'",
             "'unsafe-inline'",  # Needed for Alpine/Tailwind config in HTML
             "'unsafe-eval'",    # Needed for standard Alpine.js
+            "blob:",            # Needed for Tone.js workers
             "https://cdn.jsdelivr.net",  # Fallback for emoji-picker only
             "https://cdnjs.cloudflare.com",
             "https://cdn.tailwindcss.com"
@@ -43,9 +44,10 @@ def init_security(app):
             "https://fonts.gstatic.com",
             "https://cdnjs.cloudflare.com"
         ],
-        'connect-src': ["'self'", "wss:", "ws:", "https://*"],  # Allow outgoing API/Websocket
+        'connect-src': ["'self'", "blob:", "wss:", "ws:", "https://*"],  # Allow outgoing API/Websocket and blob: for Tone.js
         'media-src': ["'self'", "blob:", "data:", "https://*", "http://*"],  # Allow external audio streams
-        'frame-src': ["'self'", "blob:"]  # For script sandboxes
+        'frame-src': ["'self'", "blob:"],  # For script sandboxes
+        'worker-src': ["'self'", "blob:"]   # For Tone.js audio worklets
     }
     
     talisman.init_app(app, 
