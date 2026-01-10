@@ -15,7 +15,7 @@ description: Sprint-based development workflow for NeoSpace
 
    // turbo
 
-2. Identify sprint goals (max 3-5 items per sprint)
+2. Identify sprint goals (max 3-5 items per sprint). Make them part of phases of development. A loop of Frontend and Backend checks and balances. One feature at a time.
 
 3. Create sprint backlog in `docs/SPRINT.md` with:
    - Sprint number and date range

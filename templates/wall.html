@@ -31,14 +31,31 @@
 
 {% block content %}
 {% from "components/ui_macros.html" import button, input, card, badge, textarea, select %}
+{% from "components/skeleton.html" import skeleton %}
 <!-- Loading State -->
-<div id="loading" class="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-    <div class="animate-spin text-4xl mb-4">
-        <i class="ph-bold ph-spinner"></i>
+<!-- Loading State (Skeleton) -->
+<div id="loading" class="animate-pulse space-y-8 pb-20 pt-4">
+    <!-- Header Skeleton -->
+    <div class="nb-card p-0 h-64 relative bg-gray-100 border-2 border-transparent">
+        <div class="absolute bottom-6 left-8 md:left-48 space-y-2">
+            {{ skeleton('h-10 w-64 bg-gray-300') }}
+            {{ skeleton('h-6 w-32 bg-gray-300') }}
+        </div>
+        <div class="absolute -top-12 left-8 w-32 h-32 bg-gray-200 border-2 border-white"></div>
     </div>
-    <span
-        class="font-mono text-xl font-bold uppercase tracking-widest border-2 border-black p-2 bg-white shadow-hard">Loading
-        Identity Matrix...</span>
+
+    <!-- Grid Skeleton -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div class="col-span-1 md:col-span-3 space-y-6">
+            {{ skeleton('h-48 w-full') }}
+            {{ skeleton('h-32 w-full') }}
+        </div>
+        <div class="col-span-1 md:col-span-9 space-y-6">
+            {{ skeleton('h-32 w-full') }}
+            {{ skeleton('h-64 w-full') }}
+            {{ skeleton('h-64 w-full') }}
+        </div>
+    </div>
 </div>
 
 <!-- Main Wall Container -->

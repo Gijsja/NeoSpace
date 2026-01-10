@@ -125,3 +125,7 @@ def create_app(test_config=None):
 
 
 # Reload trigger 2026-01-08
+
+if __name__ == "__main__":
+    app = create_app()
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)

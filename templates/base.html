@@ -269,7 +269,7 @@
                 <!-- Helper Macro -->
                 {% macro nav_link(href, icon, label, badge=None, class='') %}
                 <a href="{{ href }}"
-                    class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 transition-all duration-100 text-black font-bold text-sm uppercase">
+                    class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all duration-100 text-black font-bold text-sm uppercase">
                     <i class="{{ icon }} text-lg"></i>
                     <span>{{ label }}</span>
                     {% if badge %}
@@ -306,7 +306,7 @@
                 }" class="mb-2">
                     <template x-for="room in rooms" :key="room.id">
                         <a :href="'/app?room=' + room.name"
-                            class="sidebar-link group flex items-center gap-2 px-4 py-1.5 border-l-4 transition-all font-mono font-bold text-sm"
+                            class="sidebar-link group flex items-center gap-2 px-4 py-1.5 border-l-4 transition-all font-mono font-bold text-sm active:bg-black/10"
                             :class="currentRoom === room.name 
                                ? 'border-black bg-black text-white' 
                                : 'border-transparent hover:border-black hover:bg-black/5 text-black'">
@@ -347,7 +347,7 @@
                     toggle() { this.playing = !this.playing; this.playing ? this.audio.play() : this.audio.pause(); }
                 }">
                     <button @click="toggle()"
-                        class="w-8 h-8 border-2 border-black flex items-center justify-center transition-colors"
+                        class="w-8 h-8 border-2 border-black flex items-center justify-center transition-colors active:scale-95 transform"
                         :class="playing ? 'bg-acid-green' : 'bg-white hover:bg-gray-100'">
                         <i class="ph-bold text-lg" :class="playing ? 'ph-pause' : 'ph-play'"></i>
                     </button>
@@ -371,7 +371,7 @@
                 </div>
 
                 <!-- Profile -->
-                <div class="flex items-center gap-3 p-2 border-2 border-transparent hover:border-black transition-colors cursor-pointer"
+                <div class="flex items-center gap-3 p-2 border-2 border-transparent hover:border-black transition-colors cursor-pointer active:bg-gray-100"
                     x-data="{ 
                          user: { username: 'Loading...', id: '---' }, 
                          avatar: null,
@@ -447,8 +447,8 @@
 
     <script src="/ui/js/notifications.js"></script>
 
-    <!-- Init Toast Container -->
-    <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Penguin UI Toaster -->
+    {% include "components/toast.html" %}
 
     <!-- Cat Companion Widget -->
     {% from "components/cat_widget.html" import cat_widget %}

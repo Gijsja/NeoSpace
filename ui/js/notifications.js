@@ -20,7 +20,7 @@ const NotificationManager = {
 
         // Start polling
         this.startPolling();
-        
+
         // Bell Click
         if (this.bellBtn) {
             this.bellBtn.onclick = () => {
@@ -37,13 +37,13 @@ const NotificationManager = {
         try {
             const res = await fetch('/notifications/unread-count');
             const data = await res.json();
-            
+
             if (data.ok) {
                 this.updateBadge(data.count);
-                
+
                 // If count increased significantly, maybe show toast?
                 // For now, just badge.
-                 if (data.count > this.state.unreadCount && data.count > 0) {
+                if (data.count > this.state.unreadCount && data.count > 0) {
                     // Start animation on bell
                     if (this.bellBtn) {
                         this.bellBtn.classList.add('animate-bounce');
@@ -59,7 +59,7 @@ const NotificationManager = {
 
     updateBadge(count) {
         if (!this.bellBadge) return;
-        
+
         if (count > 0) {
             this.bellBadge.classList.remove('hidden');
             this.bellBadge.innerText = count > 99 ? '99+' : count;
@@ -70,33 +70,15 @@ const NotificationManager = {
 
     // To be called by other components (e.g. WebSocket or AJAX actions)
     showToast(message, type = 'info') {
-        if (!this.toastContainer) return;
-
-        const toast = document.createElement('div');
-        const bgClass = type === 'error' ? 'bg-red-500 text-white' : 
-                        type === 'success' ? 'bg-acid-green text-black' : 
-                        'bg-black text-white';
-                        
-        toast.className = `${bgClass} p-4 border-2 border-transparent shadow-hard-xl pointer-events-auto transform transition-all duration-300 translate-x-32 opacity-0 flex items-center gap-3 min-w-[200px]`;
-        toast.innerHTML = `
-            <i class="ph-bold ${type === 'error' ? 'ph-warning' : type === 'success' ? 'ph-check' : 'ph-info'}"></i>
-            <span class="font-bold text-sm font-mono uppercase">${message}</span>
-        `;
-        
-        this.toastContainer.appendChild(toast);
-        
-        // Animate In
-        requestAnimationFrame(() => {
-            toast.classList.remove('translate-x-32', 'opacity-0');
-        });
-        
-        // Remove after 3s
-        setTimeout(() => {
-            toast.classList.add('translate-x-32', 'opacity-0');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        window.dispatchEvent(new CustomEvent('toast', {
+            detail: {
+                title: 'Notification',
+                message: message,
+                type: type
+            }
+        }));
     },
-    
+
     async markAllRead() {
         try {
             const res = await fetch('/notifications/mark-all-read', {
@@ -111,7 +93,7 @@ const NotificationManager = {
                     window.location.reload();
                 }
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e);
         }
     }

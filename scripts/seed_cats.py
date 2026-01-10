@@ -9,13 +9,10 @@ from app import create_app
 app = create_app()
 
 with app.app_context():
-    from services.cat_service import seed_cat_personalities, seed_cat_bot_users
+    from services.cats import seed_db
     
-    print("Seeding cat personalities...")
-    seed_cat_personalities()
-    
-    print("Creating cat bot users...")
-    seed_cat_bot_users()
+    print("Seeding cat personalities and bots...")
+    seed_db()
     
     print("✅ 10 cats seeded successfully!")
     

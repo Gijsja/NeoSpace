@@ -78,6 +78,7 @@
 
 {% block main_container %}
 {% from "components/ui_macros.html" import button, input, textarea %}
+{% from "components/skeleton.html" import skeleton %}
 <div class="flex h-full overflow-hidden bg-bbs-bg" x-data="codeground()">
 
     <!-- LEFT: Script Manager Sidebar -->
@@ -93,12 +94,31 @@
         <!-- Script List -->
         <div class="flex-1 overflow-y-auto p-2 space-y-2">
             <template x-if="loadingScripts">
-                <div class="text-center py-4 text-xs text-gray-500 font-mono animate-pulse">Loading...</div>
+                <div class="space-y-3 mt-2">
+                    <div class="p-2 border-2 border-transparent">
+                        <div class="flex justify-between items-start mb-1">
+                            {{ skeleton('h-4 w-24') }}
+                            {{ skeleton('h-3 w-12') }}
+                        </div>
+                    </div>
+                    <div class="p-2 border-2 border-transparent">
+                        <div class="flex justify-between items-start mb-1">
+                            {{ skeleton('h-4 w-20') }}
+                            {{ skeleton('h-3 w-12') }}
+                        </div>
+                    </div>
+                    <div class="p-2 border-2 border-transparent">
+                        <div class="flex justify-between items-start mb-1">
+                            {{ skeleton('h-4 w-28') }}
+                            {{ skeleton('h-3 w-12') }}
+                        </div>
+                    </div>
+                </div>
             </template>
 
             <template x-for="script in scripts" :key="script.id">
                 <div @click="loadScript(script.id)"
-                    class="p-2 border-2 border-transparent hover:border-black hover:bg-gray-50 cursor-pointer group transition-all"
+                    class="p-2 border-2 border-transparent hover:border-black hover:bg-gray-50 cursor-pointer group transition-all active:bg-acid-green/20"
                     :class="currentScriptId === script.id ? 'bg-acid-green border-black shadow-hard-sm' : ''">
                     <div class="flex justify-between items-start mb-1">
                         <span class="font-bold text-sm truncate w-32" x-text="script.title || 'Untitled'"></span>
@@ -110,8 +130,8 @@
         </div>
 
         <!-- Toggle Handle (When closed) -->
-        <button x-show="!sidebarOpen" @click="sidebarOpen = true"
-            class="absolute -right-8 top-10 w-8 h-10 bg-black text-white flex items-center justify-center border-y-2 border-r-2 border-white cursor-pointer hover:bg-acid-green hover:text-black">
+        <button x-show="!sidebarOpen" @click="sidebarOpen = true" x-transition.opacity
+            class="absolute -right-8 top-10 w-8 h-10 bg-black text-white flex items-center justify-center border-y-2 border-r-2 border-white cursor-pointer hover:bg-acid-green hover:text-black active:scale-95 origin-left transition-transform">
             <i class="ph-bold ph-caret-right"></i>
         </button>
     </div>
@@ -182,22 +202,41 @@
     </div>
 
     <!-- Publish Modal -->
-    <div x-show="showPublishModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
-        style="display: none;">
-        <div class="bg-white border-2 border-black p-6 w-96 shadow-hard-xl" @click.away="showPublishModal = false">
-            <h2 class="text-xl font-black uppercase mb-4">Publish to Wall</h2>
-            <div class="space-y-3">
-                {{ input('publishTitle', attrs='x-model="currentTitle"', placeholder='Title') }}
-                {{ textarea('publishDesc', attrs='x-model="publishDesc"', class='h-24', placeholder='Description...') }}
-                <div class="flex gap-2 pt-2">
-                    {{ button('CANCEL', variant='secondary', class='flex-1 border-black hover:bg-gray-100',
-                    attrs='@click="showPublishModal = false"') }}
-                    {{ button('PUBLISH', variant='primary', class='flex-1 bg-black text-white hover:bg-gray-800',
-                    attrs='@click="publishToWall()"') }}
+    <template x-teleport="body">
+        <div x-show="showPublishModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style="display: none;">
+
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="showPublishModal = false"
+                x-show="showPublishModal" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 backdrop-blur-none"
+                x-transition:enter-end="opacity-100 backdrop-blur-sm"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 backdrop-blur-sm"
+                x-transition:leave-end="opacity-0 backdrop-blur-none"></div>
+
+            <!-- Modal Panel -->
+            <div class="relative bg-white border-2 border-black p-6 w-96 shadow-hard-xl" @click.stop
+                x-show="showPublishModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+                <h2 class="text-xl font-black uppercase mb-4">Publish to Wall</h2>
+                <div class="space-y-3">
+                    {{ input('publishTitle', attrs='x-model="currentTitle"', placeholder='Title') }}
+                    {{ textarea('publishDesc', attrs='x-model="publishDesc"', class='h-24',
+                    placeholder='Description...') }}
+                    <div class="flex gap-2 pt-2">
+                        {{ button('CANCEL', variant='secondary', class='flex-1 border-black hover:bg-gray-100',
+                        attrs='@click="showPublishModal = false"') }}
+                        {{ button('PUBLISH', variant='primary', class='flex-1 bg-black text-white hover:bg-gray-800',
+                        attrs='@click="publishToWall()"') }}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 </div>
 {% endblock %}

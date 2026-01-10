@@ -2,7 +2,7 @@
   Toast Component (Notification System)
   Style: Neubrutalist
   Usage: Include this once in your base layout. 
-         Dispatch event 'toast' with { title, message, type }.
+         Dispatch event 'toast' with { title, message, type, avatar? }.
 -->
 <div x-data="{ 
     toasts: [],
@@ -12,42 +12,48 @@
             id, 
             title: e.detail.title || 'Notification', 
             message: e.detail.message, 
-            type: e.detail.type || 'info' 
+            type: e.detail.type || 'info',
+            avatar: e.detail.avatar
         });
         setTimeout(() => this.remove(id), 5000);
     },
     remove(id) {
         this.toasts = this.toasts.filter(t => t.id !== id);
     }
-}" 
-@toast.window="add($event)"
-class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+}" @toast.window="add($event)" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
 
     <template x-for="toast in toasts" :key="toast.id">
         <div class="pointer-events-auto min-w-[300px] max-w-sm bg-white border-2 border-black shadow-[4px_4px_0_0_#000] p-4 flex gap-3 transition-all"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="translate-y-full opacity-0 scale-95"
-             x-transition:enter-end="translate-y-0 opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="translate-x-0 opacity-100"
-             x-transition:leave-end="translate-x-full opacity-0">
-            
-            <!-- Icon based on type -->
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="translate-y-full opacity-0 scale-95"
+            x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0 opacity-100"
+            x-transition:leave-end="translate-x-full opacity-0">
+
+            <!-- Icon or Avatar -->
             <div class="shrink-0 pt-0.5">
-                <template x-if="toast.type === 'success'">
-                     <div class="w-6 h-6 bg-acid-green border-2 border-black flex items-center justify-center rounded-full">
+                <template x-if="toast.avatar">
+                    <div class="w-10 h-10 border-2 border-black rounded-full overflow-hidden bg-white">
+                        <img :src="toast.avatar" class="w-full h-full object-cover">
+                    </div>
+                </template>
+                <template x-if="!toast.avatar && toast.type === 'success'">
+                    <div
+                        class="w-6 h-6 bg-acid-green border-2 border-black flex items-center justify-center rounded-full">
                         <i class="ph-bold ph-check text-xs"></i>
-                     </div>
+                    </div>
                 </template>
-                <template x-if="toast.type === 'error'">
-                     <div class="w-6 h-6 bg-red-500 text-white border-2 border-black flex items-center justify-center rounded-full">
+                <template x-if="!toast.avatar && toast.type === 'error'">
+                    <div
+                        class="w-6 h-6 bg-red-500 text-white border-2 border-black flex items-center justify-center rounded-full">
                         <i class="ph-bold ph-warning text-xs"></i>
-                     </div>
+                    </div>
                 </template>
-                <template x-if="toast.type === 'info'">
-                     <div class="w-6 h-6 bg-black text-white border-2 border-transparent flex items-center justify-center rounded-full">
+                <template x-if="!toast.avatar && toast.type === 'info'">
+                    <div
+                        class="w-6 h-6 bg-black text-white border-2 border-transparent flex items-center justify-center rounded-full">
                         <i class="ph-bold ph-info text-xs"></i>
-                     </div>
+                    </div>
                 </template>
             </div>
 
@@ -56,7 +62,8 @@ class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
                 <p class="text-xs text-gray-500 font-mono mt-1" x-text="toast.message"></p>
             </div>
 
-            <button @click="remove(toast.id)" class="shrink-0 h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors">
+            <button @click="remove(toast.id)"
+                class="shrink-0 h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors">
                 <i class="ph-bold ph-x"></i>
             </button>
         </div>

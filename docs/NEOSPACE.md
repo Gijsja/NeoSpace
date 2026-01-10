@@ -299,6 +299,8 @@ SBBS/
 
 | Sprint | Theme                      | Features                                              |
 | ------ | -------------------------- | ----------------------------------------------------- |
+| #26    | Emotional Intelligence     | PAD Model, Cat Factions, Dialogue Engine, Audio       |
+| #25    | The Facelift (UI/UX)       | Visual Consistency, Micro-interactions, Mobile Polish |
 | #24    | v0.4 Release               | Version Bump, Docs, Tagging                           |
 | #23    | Feature Expansion          | Service tests, Alembic, Cat errors, Script publishing |
 | #22    | Live Wire UI               | Notification Center, Badges, Toasts                   |

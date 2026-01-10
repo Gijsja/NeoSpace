@@ -72,45 +72,5 @@ Usage:
     }
 </style>
 
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('catCompanion', (defaultMode = 'cute') => ({
-            visible: false,
-            cat: null,
-            avatar: null,
-            line: null,
-            mode: defaultMode,
-            timeout: null,
-
-            async speak(event) {
-                try {
-                    const res = await fetch('/cats/speak', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ event, mode: this.mode })
-                    });
-                    const data = await res.json();
-
-                    if (data.cat && data.line) {
-                        this.cat = data.cat;
-                        this.avatar = data.avatar;
-                        this.line = data.line;
-                        this.visible = true;
-
-                        // Auto-dismiss after 6 seconds
-                        clearTimeout(this.timeout);
-                        this.timeout = setTimeout(() => this.dismiss(), 6000);
-                    }
-                } catch (err) {
-                    console.warn('[CatCompanion] Error:', err);
-                }
-            },
-
-            dismiss() {
-                this.visible = false;
-                clearTimeout(this.timeout);
-            }
-        }));
-    });
-</script>
+<script src="/ui/js/components/CatCompanion.js"></script>
 {% endmacro %}

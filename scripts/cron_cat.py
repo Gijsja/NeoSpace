@@ -27,8 +27,8 @@ sys.path.append(parent_dir)
 
 from app import create_app
 from db import get_db
-# Import BASE_CATS to get traits
-from services.cat_service import BASE_CATS
+# Import new service
+from services.cats import get_all_cats
 
 # Try to import an AI library if available (example structure)
 # import openai 
@@ -141,9 +141,17 @@ def main():
         username = bot["username"]
         user_id = bot["id"]
         
-        # Lookup traits from global config (services/cat_service.py)
-        cat_config = next((c for c in BASE_CATS if c["name"] == bot["personality_name"]), {})
-        traits = cat_config.get("traits", {})
+        # Lookup traits via service (DB)
+        all_cats = get_all_cats()
+        cat_config = next((c for c in all_cats if c["name"] == bot["personality_name"]), {})
+        # JSON parsing might be needed if traits are stored as string in DB
+        traits = cat_config.get("traits")
+        if isinstance(traits, str):
+            try:
+                traits = json.loads(traits)
+            except:
+                traits = {}
+        traits = traits or {}
         
         print(f"🐱 Selected Cat: {username}")
 
