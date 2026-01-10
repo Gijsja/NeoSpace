@@ -79,19 +79,19 @@ class CatStore:
             ).fetchone()
             
             if existing:
-                db.execute("UPDATE users SET is_bot = 1 WHERE username = ?", (cat["name"],))
-                continue
+                # Update existing bot status and personality link
+                user_id = existing["id"]
+                db.execute("UPDATE users SET is_bot = 1 WHERE id = ?", (user_id,))
+            else:
+                # Create new bot user
+                password_hash = generate_password_hash(secrets.token_hex(32))
+                cursor = db.execute('''
+                    INSERT INTO users (username, password_hash, is_bot, avatar_color, created_at)
+                    VALUES (?, ?, 1, ?, CURRENT_TIMESTAMP)
+                ''', (cat["name"], password_hash, "#" + secrets.token_hex(3)[:6]))
+                user_id = cursor.lastrowid
             
-            # Create new bot user
-            password_hash = generate_password_hash(secrets.token_hex(32))
-            cursor = db.execute('''
-                INSERT INTO users (username, password_hash, is_bot, avatar_color, created_at)
-                VALUES (?, ?, 1, ?, CURRENT_TIMESTAMP)
-            ''', (cat["name"], password_hash, "#" + secrets.token_hex(3)[:6]))
-            
-            user_id = cursor.lastrowid
-            
-            # Link Personality
+            # Link Personality (Always update)
             personality = db.execute(
                 "SELECT id FROM cat_personalities WHERE name = ?",
                 (cat["name"],)
@@ -103,10 +103,14 @@ class CatStore:
                     (personality["id"], user_id)
                 )
             
-            # Create profile
+            # Update/Create profile (Sync display name & bio)
+            # We use INSERT OR REPLACE logic or explicit UPDATE
             db.execute('''
-                INSERT OR IGNORE INTO profiles (user_id, display_name, bio, theme_preset)
+                INSERT INTO profiles (user_id, display_name, bio, theme_preset)
                 VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    display_name = excluded.display_name,
+                    bio = excluded.bio
             ''', (
                 user_id,
                 cat["name"].upper(),
@@ -210,3 +214,11 @@ class CatStore:
         query = "SELECT affinity FROM cat_relationships WHERE source_cat_id = ? AND target_user_id = ?"
         row = execute_with_retry(query, (cat_id, user_id), fetchone=True)
         return row[0] if row else 0.0 
+    @staticmethod
+    def get_interaction_count(cat_id: int, user_id: int) -> int:
+        """
+        Count total memories between cat and user.
+        """
+        query = "SELECT COUNT(*) FROM cat_memories WHERE source_cat_id = ? AND target_user_id = ?"
+        row = execute_with_retry(query, (cat_id, user_id), fetchone=True)
+        return row[0] if row else 0

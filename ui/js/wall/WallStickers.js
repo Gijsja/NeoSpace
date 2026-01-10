@@ -23,6 +23,9 @@ export default class WallStickers {
         this.canvas.addEventListener('dragleave', (e) => this.handleDragLeave(e));
         this.canvas.addEventListener('drop', (e) => this.handleDrop(e));
 
+        // Initialize Palette
+        this.loadPalette();
+
         // Global click to deselect
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.sticker-item')) {
@@ -165,6 +168,31 @@ export default class WallStickers {
             return;
         }
 
+        // Check for Preset Drag
+        const presetData = e.dataTransfer.getData('text/plain');
+        if (presetData) {
+            try {
+                const data = JSON.parse(presetData);
+                if (data.type === 'sticker_preset') {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                    // Convert URL to File? Or upload by URL?
+                    // For now, let's fetch the blob and upload to standardize.
+                    fetch(data.src)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], "sticker_preset.png", { type: "image/png" });
+                            this.uploadSticker(file, x, y);
+                        });
+                    return;
+                }
+            } catch (err) {
+                // Ignore json parse error, might be file drop
+            }
+        }
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             const file = files[0];
@@ -241,5 +269,55 @@ export default class WallStickers {
 
     deselectAll() {
         // remove active states if any
+        if (this.activeSticker) {
+            this.activeSticker.style.zIndex = this.activeSticker.dataset.z_index || 10;
+            this.activeSticker = null;
+        }
+    }
+
+    loadPalette() {
+        const palette = document.getElementById('sticker-palette');
+        if (!palette) return;
+
+        // Show palette
+        palette.classList.remove('hidden');
+
+        // Static Cat Assets (Quick Win)
+        // In a real app, fetch from /api/stickers/cats
+        const CAT_STICKERS = [
+            'beans', 'miso', 'tofu', 'ash', 'delta',
+            'patch', 'static', 'hex', 'null', 'root',
+            'glitch', 'neon'
+        ];
+
+        // Clear
+        palette.innerHTML = '<div class="text-[10px] font-bold uppercase shrink-0 flex items-center">Cats:</div>';
+
+        CAT_STICKERS.forEach(cat => {
+            const img = document.createElement('img');
+            img.src = `/static/images/cats/${cat}.png`;
+            img.className = 'w-10 h-10 object-contain cursor-grab hover:scale-110 transition active:cursor-grabbing';
+            img.title = cat.toUpperCase();
+
+            // Allow dragging from palette
+            img.draggable = true;
+            img.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: 'sticker_preset',
+                    src: img.src,
+                    id: 'temp_' + Date.now()
+                }));
+                // Set drag image?
+            });
+
+            palette.appendChild(img);
+        });
+
+        // Add "Upload" button placeholder
+        const upBtn = document.createElement('button');
+        upBtn.className = 'w-10 h-10 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-black hover:text-black transition shrink-0';
+        upBtn.innerHTML = '<i class="ph-bold ph-upload-simple"></i>';
+        upBtn.onclick = () => document.getElementById('sticker-upload-input')?.click();
+        palette.appendChild(upBtn);
     }
 }

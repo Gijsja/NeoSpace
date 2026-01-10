@@ -8,7 +8,10 @@ from flask_limiter.util import get_remote_address
 
 csrf = CSRFProtect()
 talisman = Talisman()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri="memory://"
+)
 
 def init_security(app):
     """Initialize security extensions."""

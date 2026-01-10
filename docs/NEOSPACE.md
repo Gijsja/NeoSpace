@@ -172,7 +172,25 @@ db.execute('PRAGMA temp_store = MEMORY;')          # Sorts in RAM
 | ------------------ | ------------------------------------------------ |
 | `profile_stickers` | Draggable wall stickers (emoji, images)          |
 | `profile_scripts`  | Pinned scripts on profile walls (max 3)          |
+| `profile_stickers` | Draggable wall stickers (emoji, images)          |
+| `profile_scripts`  | Pinned scripts on profile walls (max 3)          |
 | `profile_posts`    | Modular canvas posts (text, image, link, script) |
+
+### Cat System Engine
+
+<!-- Refactored from: SPRINT.md "Sprint 26: Emotional Intelligence" -->
+
+The Cat System is a deterministic emotional simulation engine driven by the **PAD Model** (Pleasure, Arousal, Dominance).
+
+**Core Components:**
+
+1.  **PAD State**: A 3-dimensional float vector `[P, A, D]` representing the cat's current emotion.
+    *   **Pleasure**: Valence (Happy vs. Unhappy).
+    *   **Arousal**: Energy (Excited vs. Bored).
+    *   **Dominance**: Confidence (Dominant vs. Submissive).
+2.  **Affinity Integration**: Relationships are calculated dynamically based on Faction compatibility (e.g., "Anarchs" love errors, "Sentinels" hate them).
+3.  **Deed System**: Events are not just logs; they are "Deeds" with emotional impact (e.g., `login_success` = +Pleasure, `system_crash` = -Dominance).
+4.  **Dynamic Assets**: Avatars switch states (Zen, Playful, Grumpy) based on real-time PAD values.
 
 ## Server Configuration
 
@@ -291,9 +309,9 @@ SBBS/
 
 <!-- Refactored from: BLUEPRINT.md "Roadmap" -->
 
-**Sprint #25**: _The Facelift (UI/UX)_
+**Sprint #27**: _The Creator Economy_ (Proposed)
 
-**Goals**: Visual Consistency, Micro-interactions, Mobile Polish.
+**Goals**: Script sharing ecosystem, branching narratives ("The Song"), and deeper collaborative tools.
 
 ## Recently Shipped
 

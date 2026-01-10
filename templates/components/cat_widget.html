@@ -27,7 +27,9 @@ Usage:
             </div>
             <div class="flex-1">
                 <span class="font-bold text-sm uppercase tracking-tight" x-text="cat || 'cat'"></span>
-                <span class="text-xs opacity-60 block">cat companion</span>
+                <!-- Relationship Label (e.g., 'RIVAL') -->
+                <span class="text-xs font-bold opacity-80 block text-purple-600"
+                    x-text="relationship_label || 'cat companion'" :title="status_tag"></span>
             </div>
             <button @click="dismiss()" class="p-1 hover:bg-black hover:text-acid-green transition-colors">
                 <i class="ph-bold ph-x"></i>

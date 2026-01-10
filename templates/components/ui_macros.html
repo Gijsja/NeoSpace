@@ -8,7 +8,8 @@ Standardized Neobrutalist Macros for Sprint 25
 {#Types: primary (acid-green), secondary (white), danger (hot-pink), ghost (transparent), outline #}
 {% macro button(text, variant='primary', size='md', icon=None, href=None, class='', attrs='', id=None) -%}
 {% set base_classes = "inline-flex items-center justify-center gap-2 border-2 border-black font-bold uppercase
-shadow-hard transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" %}
+shadow-hard transition-all hover:-translate-y-0.5 hover:shadow-hard-md active:translate-x-[2px] active:translate-y-[2px]
+active:shadow-none" %}
 
 {# Size Classes #}
 {% if size == 'sm' %}

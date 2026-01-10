@@ -225,21 +225,20 @@ def get_detailed_status(affinity: float, interactions: int) -> str:
     # Special Case: No interactions
     if interactions == 0:
         return DETAILED_RELATIONSHIPS[0] # Unknown
+        
+    # Early Game: Low interactions overrides pure affinity (unless hostile)
+    # If purely neutral/positive but barely met:
+    if interactions <= 2 and -10 <= affinity <= 10:
+        return DETAILED_RELATIONSHIPS[1] # "Just Met"
+        
+    if interactions <= 5 and -10 <= affinity <= 20:
+        return DETAILED_RELATIONSHIPS[2] # "Seen You Around"
 
     # Map Affinity to Index (Basic approach)
     # Range is -100 to 100.
-    # Positive (0 to 100) -> Indices 3 to 15
-    # Negative (-1 to -100) -> Indices 18 to 29
-    # Indices 16, 17 are transitional? "Competing", "Opps".
     
     if affinity >= 0:
         # 0 to 100. 
-        # 0-10: Neutral(3) -> Cool With(4)
-        # 10-30: Low-Key Cool(5) -> Polite(6) -> Solid(7)
-        # 30-60: Trusted(8) -> Tight(9) -> Inner Paw(10)
-        # 60-80: OG(11) -> Learned From(12)
-        # 80-100: Respected(13) -> Working Together(14) ...
-        # Use a simplified bucket
         score = affinity
         if score < 10: return "Neutral"
         if score < 20: return "Cool With"

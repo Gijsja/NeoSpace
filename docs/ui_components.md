@@ -129,9 +129,27 @@ Ensure your base template includes Alpine.js and Tailwind CSS (or the output CSS
 {{ audio_player() }}
 ```
 
+
+### 5. Feedback
+
+**Toast (Notification):**
+
+The Toast component is global. Dispatch a window event to trigger it.
+
+```javascript
+window.dispatchEvent(new CustomEvent('toast', {
+    detail: {
+        title: 'Success',
+        message: 'Action completed successfully.',
+        type: 'success' // or 'error', 'info'
+    }
+}));
+```
+
 ## Creating New Components
 
 1. Create a new file in `templates/components/` (e.g., `rating.html`).
 2. Define a macro: `{% macro rating(score) %} ... {% endmacro %}`.
 3. Use Alpine `x-data` for any internal state.
 4. Use Tailwind for all styling.
+5. **Standard**: Ensure all interactive elements have `:active` states (e.g., `active:scale-95`).

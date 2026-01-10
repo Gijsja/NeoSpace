@@ -7,6 +7,10 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('catCompanion', (defaultMode = 'cute') => ({
         visible: false,
         cat: 'Loading...',
+        // Relationship Data
+        relationship_label: '',
+        status_tag: '',
+
         state: 'Idle',
         line: '...',
         avatar: null,
@@ -66,13 +70,22 @@ document.addEventListener('alpine:init', () => {
             this.avatar = data.avatar;
             this.sound = data.sound;
 
+            // New Relationship Data
+            this.relationship_label = data.relationship_label || '';
+            this.status_tag = data.status_tag || '';
+
             // Play Audio
             this.playAudio();
 
             // Dispatch Toast (Penguin UI)
+            // Format Title: "Miso [Rival]" or just "Miso" if no label
+            const toastTitle = this.relationship_label
+                ? `${this.cat} [${this.relationship_label}]`
+                : this.cat;
+
             window.dispatchEvent(new CustomEvent('toast', {
                 detail: {
-                    title: this.cat, // Cat Name as Title
+                    title: toastTitle,
                     message: this.line,
                     type: 'info',
                     avatar: this.avatar

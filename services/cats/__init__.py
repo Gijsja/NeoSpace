@@ -4,7 +4,9 @@ Cat Service Facade - services/cats/__init__.py
 The public API for the CatSystem.
 Combines Brain (Logic), Store (DB), and Audio (Assets).
 """
+
 from typing import Dict, Any, Optional
+import os
 from .brain import CatBrain
 from .store import CatStore
 from .audio import CatAudio
@@ -73,7 +75,14 @@ def trigger_event(cat_name: str, event: str, user_id: Optional[int] = None) -> D
     # 6. Dialogue Override based on Affinity/Love/Hate
     # Special Case: Idle calls use the Vocal Map
     if event == "idle":
-        line = get_idle_vocalization(faction_name, affinity, interactions=1)
+        # Calculate interactions for idle too (if possible, though idle is usually broadcast)
+        # If user_id is provided (e.g. user clicked idle?), use it. 
+        # But 'idle' is often global. If global, interaction_count might be 0 relative to "everyone".
+        # For now, if we have a user_id context, use it.
+        i_count = 0
+        if user_id:
+            i_count = CatStore.get_interaction_count(cat["id"], user_id)
+        line = get_idle_vocalization(faction_name, affinity, interactions=i_count)
     else:
         line = CatDialogue.get_line(event, mode)
         
@@ -84,15 +93,24 @@ def trigger_event(cat_name: str, event: str, user_id: Optional[int] = None) -> D
         
     # 7. Get Faction Status Label & Detailed Tag
     # faction_name is already retrieved above
-    rel_label = get_faction_label(faction_name, affinity, interaction_count=1) 
-    rel_tag = get_detailed_status(affinity, interactions=1)
+    interaction_count = 0
+    if user_id:
+        interaction_count = CatStore.get_interaction_count(cat["id"], user_id)
+        
+    rel_label = get_faction_label(faction_name, affinity, interaction_count=interaction_count) 
+    rel_tag = get_detailed_status(affinity, interactions=interaction_count)
     
     return {
         "cat": cat_name,
         "state": state_name,
         "pad": new_pad,
         "sound": sound,
-        "avatar": cat.get("avatar_url") or f"/static/images/cats/{cat_name}.png",
+        # Default Avatar Logic with Dynamic State Fallback
+        "avatar": (lambda: 
+            f"/static/images/cats/{cat_name}_{state_name.lower()}.png" 
+            if os.path.exists(os.path.join(os.getcwd(), f"static/images/cats/{cat_name}_{state_name.lower()}.png")) 
+            else (cat.get("avatar_url") or f"/static/images/cats/{cat_name}.png")
+        )(),
         "line": line,
         "affinity": affinity,
         "relationship_label": rel_label,
