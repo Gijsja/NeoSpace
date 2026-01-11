@@ -8,7 +8,7 @@
     <div class="h-16 flex items-center justify-center shrink-0 border-b-2 border-black bg-white">
         <div class="flex items-center gap-3">
             <div
-                class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold border-2 border-transparent">
+                class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold border-4 border-transparent">
                 N
             </div>
             <span class="text-xl font-black tracking-tighter uppercase italic transform -skew-x-6">NeoSpace</span>
@@ -20,7 +20,7 @@
         <!-- Helper Macro -->
         {% macro nav_link(href, icon, label, badge=None, class='', boost=True) %}
         <a href="{{ href }}" {% if not boost %}hx-boost="false" {% endif %}
-            class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all duration-100 text-black font-bold text-sm uppercase">
+            class="{{ class }} group flex items-center gap-3 px-3 py-2 border-4 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all duration-100 text-black font-bold text-sm uppercase">
             <i class="{{ icon }} text-lg"></i>
             <span>{{ label }}</span>
             {% if badge %}
@@ -104,7 +104,7 @@
             toggle() { this.playing = !this.playing; this.playing ? this.audio.play() : this.audio.pause(); }
         }">
             <button @click="toggle()"
-                class="w-8 h-8 border-2 border-black flex items-center justify-center transition-colors active:scale-95 transform"
+                class="w-8 h-8 border-4 border-black flex items-center justify-center transition-colors active:scale-95 transform"
                 :class="playing ? 'bg-acid-green' : 'bg-white hover:bg-gray-100'">
                 <i class="ph-bold text-lg" :class="playing ? 'ph-pause' : 'ph-play'"></i>
             </button>
@@ -128,7 +128,7 @@
         </div>
 
         <!-- Profile -->
-        <div class="flex items-center gap-3 p-2 border-2 border-transparent hover:border-black transition-colors cursor-pointer active:bg-gray-100"
+        <div class="flex items-center gap-3 p-2 border-4 border-transparent hover:border-black transition-colors cursor-pointer active:bg-gray-100"
             x-data="{ 
                  user: { username: 'Loading...', id: '---' }, 
                  avatar: null,
@@ -144,7 +144,7 @@
                      });
                  }
              }">
-            <div class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold text-xs border-2 border-black shadow-hard-sm bg-cover bg-center"
+            <div class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold text-xs border-4 border-black shadow-hard-sm bg-cover bg-center"
                 :style="avatar ? 'background-image: url(' + avatar + '); color: transparent;' : ''">
                 <span x-text="user.username ? user.username.charAt(0).toUpperCase() : 'U'"></span>
             </div>

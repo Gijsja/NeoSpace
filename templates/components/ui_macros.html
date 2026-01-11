@@ -7,8 +7,8 @@ Standardized Neobrutalist Macros for Sprint 25
 {# Types: primary (acid-green), secondary (white), danger (hot-pink), ghost (transparent) #}
 {#Types: primary (acid-green), secondary (white), danger (hot-pink), ghost (transparent), outline #}
 {% macro button(text, variant='primary', size='md', icon=None, href=None, class='', attrs='', id=None) -%}
-{% set base_classes = "inline-flex items-center justify-center gap-2 border-2 border-black font-bold uppercase
-shadow-hard transition-all hover:-translate-y-0.5 hover:shadow-hard-md active:translate-x-[2px] active:translate-y-[2px]
+{% set base_classes = "inline-flex items-center justify-center gap-2 border-[4px] border-black font-bold uppercase
+shadow-hard transition-all hover:-translate-y-0.5 hover:shadow-hard-md active:translate-x-[4px] active:translate-y-[4px]
 active:shadow-none" %}
 
 {# Size Classes #}
@@ -28,7 +28,7 @@ active:shadow-none" %}
 
 {# Variant Classes #}
 {% if variant == 'primary' %}
-{% set color_classes = "bg-acid-green text-black hover:bg-green-400" %}
+{% set color_classes = "bg-neon-green text-black hover:bg-white" %}
 {% elif variant == 'secondary' %}
 {% set color_classes = "bg-white text-black hover:bg-gray-100" %}
 {% elif variant == 'destructive' or variant == 'danger' %}
@@ -38,10 +38,10 @@ active:shadow-none" %}
 {% set color_classes = "text-black bg-transparent border-none shadow-none text-sm" %}
 {% set size_classes = "" %}
 {% elif variant == 'outline' %}
-{% set color_classes = "bg-transparent text-black hover:bg-black hover:text-white" %}
+{% set color_classes = "bg-transparent text-black hover:bg-black hover:text-white border-[4px]" %}
 {% else %}
 {# Default to primary if unknown #}
-{% set color_classes = "bg-acid-green text-black hover:bg-green-400" %}
+{% set color_classes = "bg-neon-green text-black hover:bg-white" %}
 {% endif %}
 
 {% if href %}
@@ -73,7 +73,7 @@ wrapper_class='w-full') -%}
     <div class="relative">
         <input {% if type=='password' %}:type="show ? 'text' : 'password'" type="password" {% else %}type="{{ type }}"
             {% endif %} name="{{ name }}" id="{{ id or name }}" placeholder="{{ placeholder }}" value="{{ value }}"
-            class="nb-input h-10 {{ class }} {% if type == 'password' %}pr-10{% endif %}" {{ attrs|safe }}>
+            class="nb-input h-10 border-[4px] {{ class }} {% if type == 'password' %}pr-10{% endif %}" {{ attrs|safe }}>
 
         {% if type == 'password' %}
         <button type="button" @click="show = !show"
@@ -116,11 +116,11 @@ wrapper_class='w-full') -%}
 {% macro card(class='', title=None) -%}
 <div class="nb-card p-4 {{ class }}">
     {% if title %}
-    <div class="border-b-2 border-black pb-2 mb-4 flex justify-between items-center">
+    <div class="border-b-[4px] border-black pb-2 mb-4 flex justify-between items-center">
         <h3 class="font-black text-lg uppercase">{{ title }}</h3>
-        <div class="flex gap-1">
-            <div class="w-3 h-3 bg-black rounded-full"></div>
-            <div class="w-3 h-3 border-2 border-black rounded-full"></div>
+        <div class="flex gap-2">
+            <div class="w-4 h-4 bg-black"></div>
+            <div class="w-4 h-4 border-[4px] border-black"></div>
         </div>
     </div>
     {% endif %}
@@ -133,7 +133,7 @@ wrapper_class='w-full') -%}
 {# --- BADGES --- #}
 {% macro badge(text, variant='primary') -%}
 {% if variant == 'primary' or variant == 'acid' %}
-{% set classes = "bg-acid-green text-black" %}
+{% set classes = "bg-neon-green text-black" %}
 {% elif variant == 'secondary' %}
 {% set classes = "bg-white text-black" %}
 {% elif variant == 'destructive' %}
@@ -141,9 +141,10 @@ wrapper_class='w-full') -%}
 {% elif variant == 'outline' %}
 {% set classes = "bg-transparent text-black border border-black" %}
 {% else %}
-{% set classes = "bg-electric-blue text-black" %}
+{% set classes = "bg-cyber-blue text-black" %}
 {% endif %}
-<span class="inline-block px-2 py-0.5 border border-black text-[10px] font-bold uppercase shadow-hard-sm {{ classes }}">
+<span
+    class="inline-block px-2 py-0.5 border-[2px] border-black text-[10px] font-bold uppercase shadow-hard-sm {{ classes }}">
     {{ text }}
 </span>
 {%- endmacro %}
