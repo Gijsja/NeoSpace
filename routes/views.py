@@ -6,7 +6,7 @@ bp = Blueprint('views', __name__)
 def index():
     if g.user is None:
          return redirect(url_for("auth.login"))
-    return render_template("app.html")
+    return redirect(url_for("wall.index"))
 
 @bp.route("/app")
 def app_view():

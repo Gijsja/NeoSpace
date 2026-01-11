@@ -40,7 +40,7 @@ echo " Gunicorn: 4 workers × 16 threads"
 echo "========================================"
 
 # Start Gunicorn in background
-gunicorn \
+./.venv/bin/python3 -m gunicorn \
     --workers 4 \
     --threads 16 \
     --worker-class gthread \

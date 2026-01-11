@@ -1,6 +1,6 @@
 {
   "name": "neospace",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "NeoSpace - Creative Communication Platform",
   "scripts": {
     "dev": "tailwindcss -i ./ui/css/input.css -o ./ui/css/styles.css --watch",

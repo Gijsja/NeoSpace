@@ -22,6 +22,17 @@ class Config:
     # SocketIO
     SOCKETIO_ASYNC_MODE = os.environ.get("SOCKETIO_ASYNC_MODE", None)
 
+    # Storage
+    STORAGE_BACKEND = os.environ.get("STORAGE_BACKEND", "local")
+    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "uploads")
+    STORAGE_SHARDING = True
+    
+    # S3 (Future Expansion)
+    S3_BUCKET = os.environ.get("S3_BUCKET", None)
+    S3_REGION = os.environ.get("S3_REGION", None)
+    S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", None)
+    S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", None)
+
     @property
     def SESSION_COOKIE_SECURE(self):
         """Secure cookies only in production (HTTPS)."""

@@ -128,6 +128,9 @@ def create_app(test_config=None):
     from routes.song import bp as song_bp
     app.register_blueprint(song_bp)
 
+    from routes.files import bp as files_bp
+    app.register_blueprint(files_bp)
+
     # =============================================
     # ERROR HANDLERS (Cat Error Pages)
     # =============================================

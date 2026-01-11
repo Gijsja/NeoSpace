@@ -14,10 +14,16 @@
         file_server
     }
     
-    # Uploaded files (avatars, voice intros, etc.)
+    # Direct Linking / Hotlink Protection
+    @hotlinking {
+        header Referer !*{host}*
+        path /files/*/avatars/*
+    }
+    respond @hotlinking "Hotlinking is not allowed." 403
+
+    # Uploaded files (Internal only, served via Flask)
     handle /uploads/* {
-        root * .
-        file_server
+        error 403
     }
 
     # Micro-Cache: Cache public reads for 1 second

@@ -13,10 +13,7 @@
 
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <!-- Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/fonts.css" />
 
     <!-- Tailwind CSS (Vendored) -->
     <script src="/static/vendor/tailwindcss.js"></script>
@@ -279,8 +276,8 @@
             <!-- Navigation -->
             <nav class="flex-1 overflow-y-auto py-4 px-4 space-y-2 font-mono">
                 <!-- Helper Macro -->
-                {% macro nav_link(href, icon, label, badge=None, class='') %}
-                <a href="{{ href }}"
+                {% macro nav_link(href, icon, label, badge=None, class='', boost=True) %}
+                <a href="{{ href }}" {% if not boost %}hx-boost="false" {% endif %}
                     class="{{ class }} group flex items-center gap-3 px-3 py-2 border-2 border-transparent hover:border-black hover:bg-acid-green hover:shadow-hard-sm hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all duration-100 text-black font-bold text-sm uppercase">
                     <i class="{{ icon }} text-lg"></i>
                     <span>{{ label }}</span>
@@ -342,7 +339,7 @@
                 <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Studio</span>
                 </div>
-                {{ nav_link('/song', 'ph-bold ph-music-notes-simple', 'The Song', class='sidebar-link') }}
+                {{ nav_link('/song', 'ph-bold ph-music-notes-simple', 'The Song', class='sidebar-link', boost=False) }}
                 {{ nav_link('/catsound_player', 'ph-bold ph-cat', 'Cat Orchestra', class='sidebar-link') }}
                 {{ nav_link('#', 'ph-bold ph-microphone-stage', 'Voice Notes', class='sidebar-link opacity-50
                 cursor-not-allowed', badge=False) }}
@@ -350,7 +347,7 @@
                 <div class="h-0.5 bg-black my-4 opacity-10 mx-4"></div>
 
                 <!-- System / Admin -->
-                {{ nav_link('/internals', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link') }}
+                {{ nav_link('/internals', 'ph-bold ph-cpu', 'System', badge=True, class='sidebar-link', boost=False) }}
                 {{ nav_link('/dashboard', 'ph-bold ph-shield', 'Admin', class='sidebar-link') }}
             </nav>
 
