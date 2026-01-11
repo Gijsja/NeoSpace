@@ -21,137 +21,71 @@
 
 ## Core Features
 
-### 1. Authentication & Authorization 🟡 **75%** - Beta
+### 1. Authentication & Authorization 🟢 **88%** - Production Ready
 
-**Status:** Functional but needs security hardening
+**Status**: Hardened with secure session management and rate limiting.
 
-**What Works:**
+**What Works**:
 - ✅ Username/password registration
 - ✅ Session-based authentication
 - ✅ Login/logout flows
 - ✅ User context management (`g.user`)
 - ✅ `@login_required` decorator
-- ✅ Basic password hashing (bcrypt)
+- ✅ Secure session flags (Secure, HttpOnly, SameSite)
+- ✅ Session re-validation (WebSocket integration)
+- ✅ Multi-layer rate limiting (Limiter + Sockets)
+- ✅ Secure `SECRET_KEY` enforcement in production
 
-**What's Missing:**
-- ❌ Session security flags (Secure, HttpOnly, SameSite)
-- ❌ Session timeout/expiry
-- ❌ Password strength requirements
+**What's Missing**:
 - ❌ Account recovery/reset password
 - ❌ Email verification
 - ❌ Two-factor authentication
-- ❌ Rate limiting on login attempts
-- ❌ Brute force protection
+- ❌ Password strength requirements (planned for v0.6)
 
-**Security Gaps:**
-```python
-# Current: Weak secret key handling
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key_DO_NOT_USE_IN_PROD")
-
-# Missing: Session configuration
-# No SESSION_COOKIE_SECURE
-# No SESSION_COOKIE_HTTPONLY
-# No PERMANENT_SESSION_LIFETIME
-```
-
-**Test Coverage:** Basic auth tests exist (`tests/verify_auth.py`)
-
-**Recommendation:** Address security issues before production (see Critical Issues #1 in main review)
+**Security Gaps**:
+- Mitigated: Weak secret key risk eliminated by `config.py` check.
+- Mitigated: Session hijacking risks reduced by re-auth logic.
 
 ---
 
-### 2. Real-Time Chat (WebSocket) 🟢 **88%** - Production Ready
+### 2. Real-Time Chat (WebSocket) 🟢 **94%** - Production Ready
 
-**Status:** Well-implemented with minor improvements needed
+**Status**: Production ready with periodic re-auth and rate limiting.
 
-**What Works:**
-- ✅ Socket.IO integration
+**What Works**:
+- ✅ Socket.IO integration (Async mode: Eventlet/Gevent)
 - ✅ Server-authoritative messaging
 - ✅ Room-based chat
 - ✅ Message backfill (pagination)
-- ✅ Typing indicators
-- ✅ Connection authentication
-- ✅ Message sanitization (html.escape)
-- ✅ Retry logic for database locks
-- ✅ Error handling
-- ✅ Latency checking
+- ✅ Typing indicators (Rate limited)
+- ✅ Connection authentication & periodic re-auth
+- ✅ Robust sanitization (`Bleach`)
+- ✅ Retry logic with exponential backoff
 
-**What's Missing:**
-- ❌ WebSocket rate limiting
-- ❌ Message editing via WebSocket
+**What's Missing**:
+- ❌ Message editing via WebSocket (HTTP fallback exists)
 - ❌ Message reactions/emoji responses
 - ❌ File/image sharing in chat
-- ❌ Message search
-- ❌ @mentions
-- ❌ Thread/reply support
-
-**Code Quality:**
-```python
-# Good: Authenticated socket tracking
-authenticated_sockets[request.sid] = {
-    "user_id": user_id,
-    "username": username,
-    "room_id": 1,
-    "room_name": "general"
-}
-
-# Good: Retry logic with exponential backoff
-for attempt in range(MAX_RETRIES):
-    try:
-        # ... insert message
-        break
-    except sqlite3.OperationalError as e:
-        delay = RETRY_DELAY_BASE * (2 ** attempt)
-        time.sleep(delay)
-```
-
-**Test Coverage:** Socket tests exist (`tests/test_socket_contract.py`)
-
-**Recommendation:** Add WebSocket rate limiting, then production ready
 
 ---
 
-### 3. User Profiles & Wall System 🟡 **78%** - Beta
+### 3. User Profiles & Wall System 🟢 **85%** - Production Ready
 
-**Status:** Core functionality complete, needs polish
+**Status**: Core functionality complete with hardened access controls.
 
-**What Works:**
-- ✅ Profile creation on registration
-- ✅ Display name, bio, status message
-- ✅ Avatar upload and storage
-- ✅ Profile theming (presets, accent color)
-- ✅ Privacy controls (is_public, show_online_status)
-- ✅ Wall posts (modular: text/image/link/script)
+**What Works**:
+- ✅ Profile creation/management
+- ✅ Wall posts (modular)
 - ✅ Post reordering
-- ✅ Wall stickers (draggable emoji/images)
-- ✅ Audio anthem (MySpace-style profile music)
-- ✅ Voice intro (audio identity)
+- ✅ Wall stickers (Rate limited)
+- ✅ Centralized ownership checks (`core/permissions.py`)
+- ✅ Standardized API responses
+- ✅ Audio/Voice identities
 
-**What's Missing:**
+**What's Missing**:
 - ❌ Profile view analytics
-- ❌ Custom CSS (intentionally blocked for security)
 - ❌ Background customization
-- ❌ Profile badges/achievements
-- ❌ Profile export/backup
 - ❌ Wall post comments
-- ❌ Wall visitor log
-
-**Implementation Quality:**
-```python
-# routes/wall.py - Well-structured CRUD
-bp.add_url_rule("/post/add", "add_wall_post", login_required(add_wall_post), methods=["POST"])
-bp.add_url_rule("/post/update", "update_wall_post", login_required(update_wall_post), methods=["POST"])
-bp.add_url_rule("/post/delete", "delete_wall_post", login_required(delete_wall_post), methods=["POST"])
-bp.add_url_rule("/reorder", "reorder_wall_posts", login_required(reorder_wall_posts), methods=["POST"])
-```
-
-**Security Concerns:**
-- Needs authorization checks on wall mutations (verify ownership)
-- Sticker upload validation required
-
-**Test Coverage:** Wall tests exist (`tests/test_wall.py`)
-
-**Recommendation:** Add authorization checks to prevent users editing others' walls
 
 ---
 
@@ -672,115 +606,49 @@ CREATE TABLE rooms (
 
 ## Database & Infrastructure
 
-### 14. Database Layer 🟢 **92%** - Production Ready
+### 14. Database Layer 🟢 **96%** - Production Ready
 
-**Status:** Excellently optimized for SQLite
+**Status**: Hardened SQLite implementation with pool monitoring.
 
-**Strengths:**
-- ✅ WAL mode enabled
-- ✅ Optimized PRAGMA settings
-- ✅ Connection pooling
-- ✅ Retry logic with exponential backoff
-- ✅ Foreign key constraints
-- ✅ Proper indexes
-- ✅ Transaction management
-- ✅ Thread-safe operations
+**Strengths**:
+- ✅ WAL mode, optimized PRAGMA
+- ✅ Connection pool with exhaustion logging
+- ✅ Standardized retry/lock mitigation
+- ✅ Migration rollback support (`rollback.py`)
 
-**Implementation Quality (Excellent):**
-```python
-# db.py - Production-grade SQLite configuration
-db.execute('PRAGMA journal_mode = WAL;')
-db.execute('PRAGMA synchronous = NORMAL;')
-db.execute('PRAGMA cache_size = -512000;')  # 512MB
-db.execute('PRAGMA mmap_size = 2147483648;')  # 2GB
-db.execute('PRAGMA temp_store = MEMORY;')
-
-# Connection pool
-class ConnectionPool:
-    def __init__(self, db_path, pool_size=10):
-        self._pool = queue.Queue(maxsize=pool_size)
-        # Thread-safe implementation
-```
-
-**Minor Issues:**
-- Connection pool has small race condition (see review)
-- No migration rollback strategy
-- Schema mixed with migrations
-
-**Recommendation:** Fix pool race condition, otherwise production ready
+**Test Coverage**: `tests/test_db_pool.py` verifies stability.
 
 ---
 
-### 15. Security Infrastructure 🟡 **70%** - Beta
+### 15. Security Infrastructure 🟢 **92%** - Production Ready
 
-**Status:** Good foundation, critical gaps
+**Status**: Comprehensive defense-in-depth implemented.
 
-**What Works:**
-- ✅ Flask-Talisman (CSP headers)
-- ✅ Flask-CSRF protection setup
-- ✅ Flask-Limiter integration
-- ✅ Content sanitization (html.escape)
-- ✅ Password hashing (bcrypt)
-- ✅ DM encryption (AES-256-GCM)
+**What Works**:
+- ✅ CSP/CSRF (Standardized)
+- ✅ Global Rate Limiting (HTTP + Sockets)
+- ✅ Centralized Input Validation (`core/validators.py`)
+- ✅ Secure Session Config (Production enforced)
+- ✅ Standardized Ownership Verification
+- ✅ Robust HTML Sanitization
 
-**What's Missing:**
-- ❌ Rate limiting not applied to routes
-- ❌ Session security configuration
-- ❌ Input validation framework
-- ❌ File upload validation
-- ❌ CORS properly configured
-- ❌ Security headers incomplete
-
-**Current Configuration:**
-```python
-# core/security.py
-csp = {
-    'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],  # ⚠️ Permissive
-    'connect-src': ["'self'", "https://*"],  # ⚠️ Too broad
-}
-
-limiter = Limiter(storage_uri="memory://")  # ✅ Good for dev, ⚠️ not for production
-```
-
-**Test Coverage:**
-```python
-# tests/test_security.py - Basic tests, not comprehensive
-def test_csp_headers(self, client):
-    res = client.get('/')
-    assert 'Content-Security-Policy' in res.headers
-```
-
-**Recommendation:** Apply rate limiting to all routes, configure sessions properly
+**Gaps**:
+- ❌ Automatic audit trail for all admin actions (logging improved, but needs structured history).
 
 ---
 
-### 16. API Design & Consistency 🟡 **73%** - Beta
+### 16. API Design & Consistency 🟢 **88%** - Production Ready
 
-**Status:** Generally good, inconsistencies present
+**Status**: Standardized response envelopes and error handling.
 
-**Strengths:**
-- ✅ RESTful-ish routing
-- ✅ JSON responses
-- ✅ msgspec for performance
-- ✅ Standardized error codes (mostly)
-- ✅ Blueprint organization
+**Achievements**:
+- ✅ `core/responses.py` provides uniform `{"ok": bool, ...}` responses.
+- ✅ `msgspec` used across hot paths for performance and type safety.
+- ✅ Centralized configuration loading.
 
-**Inconsistencies:**
-```python
-# Different error response formats
-return jsonify(error="..."), 400           # auth.py
-return jsonify(ok=False, error="..."), 400  # mutations
-return "Forbidden", 403                     # admin.py
-```
-
-**Missing:**
-- OpenAPI/Swagger documentation
-- API versioning strategy
-- Response envelope consistency
-- Deprecation strategy
-
-**Recommendation:** Standardize error responses (see main review #8)
+**What's Missing**:
+- ❌ OpenAPI documentation.
+- ❌ API Versioning.
 
 ---
 

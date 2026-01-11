@@ -1,54 +1,32 @@
 # Sprint Status
 
-## Current Sprint: #27 (Active)
+## Current Sprint: #28 (Active)
 
-**Theme**: The Hardening (Security & Reliability)
-**Focus**: Security Consolidation, Observability, Technical Debt Paydown
+**Theme**: The Creator Economy
+**Focus**: Script Sharing, Collaborative Coding, Branching Narratives
 
-> **Objective**: Before expanding features, we must solidify the foundation. This sprint addresses critical findings from the Jan 2026 Code Review, ensuring NeoSpace is secure, stable, and ready for scale.
+> **Objective**: Building on our hardened foundation, we now focus on the social and creative features that drive long-term engagement.
 
 ### Phases
 
-#### Phase 1: Security Consolidation (Critical)
-- [ ] **WebSocket Session Longevity**: Implement `validate_auth` with periodic re-checks to prevent stale/banned sessions from persisting.
-- [ ] **Global Rate Limiting**: Expand `Flask-Limiter` coverage to all mutations and critical WebSocket events.
-- [ ] **Access Control Hardening**: Centralize ownership checks (`check_ownership` helper) to prevent IDOR in Profile/Wall mutations.
+#### Phase 1: Script Ecosystem
+- [ ] **Script Publishing Flow**: Allow publishing scripts from Codeground to public feed.
+- [ ] **Forking & Attribution**: Detailed tracking and UI for script forks.
+- [ ] **Discovery**: Browse/Search scripts by tag or popularity.
 
-#### Phase 2: Reliability & Observability (High)
-- [ ] **DB Connection Safety**: Add logging/monitoring to `ConnectionPool` to track exhaustion.
-- [ ] **Standardized Errors**: Implement `core/responses.py` for consistent JSON error formats.
-- [ ] **Structured Logging**: Replace `print()` with `structlog` for production-grade visibility.
-
-#### Phase 3: Integrity & DevOps (Medium)
-- [ ] **Migration Rollbacks**: Create `rollback.py` and test infrastructure for Alembic.
-- [ ] **Input Validation**: Centralize validation logic (username rules, etc.) in `core/validators.py`.
-
----
-
-## Interactive Checklist (Sprint #27)
-
-- [ ] **Planning**: Review detailed implementation plan in `neospace_review.md`.
-- [ ] **Backend**: Implement `sockets.py` re-auth logic.
-- [ ] **Backend**: Decorate all mutations with rate limits.
-- [ ] **Ops**: Configure structured logging.
-
----
-
-## Future Sprint: #28 (The Creator Economy)
-*Deferred from #27 to prioritize hardening*
-
-**Theme**: Script Sharing, Collaborative Coding, Branching Narratives
-
-- [ ] **Script Publishing Flow**:
-  - [ ] Allow publishing scripts from Codeground to Feed.
-  - [ ] Implement "Fork" button on scripts.
-- [ ] **The Song**:
-  - [ ] Implement the branching narrative engine.
-  - [ ] Allow collaborative editing of "Verse" nodes.
+#### Phase 2: The Song (Interactive Narrative)
+- [ ] **Narrative Engine**: Branching choice system for collaborative story nodes.
+- [ ] **Voice & Verse**: Integrating audio intros into the story flow.
 
 ---
 
 ## Recently Completed
+
+### Sprint #27: The Hardening
+- **Security**: WebSocket Session Re-Auth, Global Rate Limiting, Access Control Hardening.
+- **Reliability**: Connection Pool Monitoring, Standardized Error Envelopes (`core/responses.py`).
+- **Observability**: Structured Logging (`structlog`), Config Centralization (`config.py`).
+- **DevOps**: Migration Rollback Script (`rollback.py`), Centralized Validators.
 
 ### Sprint #26: Emotional Intelligence
 - **PAD Model**: Implemented Pleasure-Arousal-Dominance engine.

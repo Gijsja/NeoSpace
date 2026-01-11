@@ -264,10 +264,10 @@ Only if needed; keep lightweight.
 - [x] SECRET_KEY from env  
 - [x] CSP/CSRF/rate limiting (core/security.py)  
 - [x] Parameterized queries  
-- [ ] Full re-auth on sockets  
+- [x] Full re-auth on sockets  
 - [x] Sanitization (utils/sanitize.py)  
 - [x] Ownership checks  
-- [ ] Audit logging  
+- [x] Audit logging (Standardized via structlog)  
 
 ## Bonus: Dependency Direction Map
 

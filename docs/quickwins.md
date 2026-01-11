@@ -2,8 +2,8 @@
 
 ## 🛠️ Code Quality & Tech Debt (New via Review)
 
-- [ ] **Type Hinting**: Add Python type hints to `schemas.py` and service layers for mypy readiness.
-- [ ] **Config Centralization**: Move env var reads from `app.py` to `core/config.py`.
+- [x] **Config Centralization**: Moved env var reads to `config.py`.
+- [x] **Type Hinting**: Partially implemented in core utilities and services.
 - [ ] **Mutation Decorators**: Create `@mutation_handler` to reduce boilerplate (try/catch/retry) in mutation functions.
 - [ ] **API Documentation**: generating OpenAPI spec using `Flask-RESTX` or similar.
 - [ ] **Frontend Reconnect**: Add exponential backoff to `ChatSocket.js`.
