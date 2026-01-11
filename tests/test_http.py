@@ -7,10 +7,10 @@ def test_root_redirects_when_unauthenticated(client):
 
 
 def test_root_serves_ui_when_authenticated(auth_client):
-    """Root endpoint serves the HTML UI when authenticated."""
+    """Root endpoint redirects to wall/home when authenticated."""
     res = auth_client.get("/")
-    assert res.status_code == 200
-    assert b"<!DOCTYPE html>" in res.data or b"<html" in res.data
+    assert res.status_code == 302
+    assert "/home" in res.location or "/wall" in res.location
 
 
 def test_unread_endpoint(client):
