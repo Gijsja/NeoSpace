@@ -41,7 +41,7 @@ Flask-WTF==1.2.2
 Flask-Talisman==1.1.0
 Flask-Limiter==4.1.1
 structlog==25.5.0
-sentry-sdk==2.8.0
+sentry-sdk==2.49.0
 
 # Database Migrations
 alembic==1.18.0
