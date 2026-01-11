@@ -57,6 +57,7 @@ yarn-error.log
 
 # --- Temporary Files ---
 COMMIT_MSG.txt
+bandit_report*.json
 
 # --- Database ---
 *.db
