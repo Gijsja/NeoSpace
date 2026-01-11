@@ -12,6 +12,7 @@ import hashlib
 import html
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
+from utils.sanitize import clean_html
 
 from db import get_db
 
@@ -61,11 +62,11 @@ def sanitize_display_name(name: str) -> str:
     return cleaned.strip()[:MAX_DISPLAY_NAME_LENGTH]
 
 
+
 def sanitize_bio(bio: str) -> str:
     """Sanitize bio content using bleach."""
     if not bio:
         return ""
-    from utils.sanitize import clean_html
     return clean_html(bio.strip()[:MAX_BIO_LENGTH])
 
 
