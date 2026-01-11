@@ -1,10 +1,10 @@
-function assertNonEmptyString (str) {
+function assertNonEmptyString(str) {
   if (typeof str !== 'string' || !str) {
     throw new Error('expected a non-empty string, got: ' + str)
   }
 }
 
-function assertNumber (number) {
+function assertNumber(number) {
   if (typeof number !== 'number') {
     throw new Error('expected a number, got: ' + number)
   }
@@ -30,11 +30,11 @@ const MODE_READWRITE = 'readwrite';
 const INDEX_SKIN_UNICODE = 'skinUnicodes';
 const FIELD_SKIN_UNICODE = 'skinUnicodes';
 
-const DEFAULT_DATA_SOURCE = 'https://cdn.jsdelivr.net/npm/emoji-picker-element-data@^1/en/emojibase/data.json';
+const DEFAULT_DATA_SOURCE = '/static/vendor/emoji-data.json';
 const DEFAULT_LOCALE = 'en';
 
 // like lodash's uniqBy but much smaller
-function uniqBy (arr, func) {
+function uniqBy(arr, func) {
   const set = new Set();
   const res = [];
   for (const item of arr) {
@@ -47,12 +47,12 @@ function uniqBy (arr, func) {
   return res
 }
 
-function uniqEmoji (emojis) {
+function uniqEmoji(emojis) {
   return uniqBy(emojis, _ => _.unicode)
 }
 
-function initialMigration (db) {
-  function createObjectStore (name, keyPath, indexes) {
+function initialMigration(db) {
+  function createObjectStore(name, keyPath, indexes) {
     const store = keyPath
       ? db.createObjectStore(name, { keyPath })
       : db.createObjectStore(name);
@@ -79,7 +79,7 @@ const openIndexedDBRequests = {};
 const databaseCache = {};
 const onCloseListeners = {};
 
-function handleOpenOrDeleteReq (resolve, reject, req) {
+function handleOpenOrDeleteReq(resolve, reject, req) {
   // These things are almost impossible to test with fakeIndexedDB sadly
   /* istanbul ignore next */
   req.onerror = () => reject(req.error);
@@ -88,7 +88,7 @@ function handleOpenOrDeleteReq (resolve, reject, req) {
   req.onsuccess = () => resolve(req.result);
 }
 
-async function createDatabase (dbName) {
+async function createDatabase(dbName) {
   const db = await new Promise((resolve, reject) => {
     const req = indexedDB.open(dbName, DB_VERSION_CURRENT);
     openIndexedDBRequests[dbName] = req;
@@ -113,14 +113,14 @@ async function createDatabase (dbName) {
   return db
 }
 
-function openDatabase (dbName) {
+function openDatabase(dbName) {
   if (!databaseCache[dbName]) {
     databaseCache[dbName] = createDatabase(dbName);
   }
   return databaseCache[dbName]
 }
 
-function dbPromise (db, storeName, readOnlyOrReadWrite, cb) {
+function dbPromise(db, storeName, readOnlyOrReadWrite, cb) {
   return new Promise((resolve, reject) => {
     // Use relaxed durability because neither the emoji data nor the favorites/preferred skin tone
     // are really irreplaceable data. IndexedDB is just a cache in this case.
@@ -139,7 +139,7 @@ function dbPromise (db, storeName, readOnlyOrReadWrite, cb) {
   })
 }
 
-function closeDatabase (dbName) {
+function closeDatabase(dbName) {
   // close any open requests
   const req = openIndexedDBRequests[dbName];
   const db = req && req.result;
@@ -158,7 +158,7 @@ function closeDatabase (dbName) {
   delete onCloseListeners[dbName];
 }
 
-function deleteDatabase (dbName) {
+function deleteDatabase(dbName) {
   return new Promise((resolve, reject) => {
     // close any open requests
     closeDatabase(dbName);
@@ -170,7 +170,7 @@ function deleteDatabase (dbName) {
 // The "close" event occurs during an abnormal shutdown, e.g. a user clearing their browser data.
 // However, it doesn't occur with the normal "close" event, so we handle that separately.
 // https://www.w3.org/TR/IndexedDB/#close-a-database-connection
-function addOnCloseListener (dbName, listener) {
+function addOnCloseListener(dbName, listener) {
   let listeners = onCloseListeners[dbName];
   if (!listeners) {
     listeners = onCloseListeners[dbName] = [];
@@ -192,7 +192,7 @@ const irregularEmoticons = new Set([
   '8#'
 ]);
 
-function extractTokens (str) {
+function extractTokens(str) {
   return str
     .split(/[\s_]+/)
     .map(word => {
@@ -215,7 +215,7 @@ const MIN_SEARCH_TEXT_LENGTH = 2;
 // emoticons, where we don't want to do any tokenization (because it makes no sense to split up
 // ">:)" by the colon) but we do want to lowercase it to have consistent search results, so that
 // the user can type ':P' or ':p' and still get the same result.
-function normalizeTokens (str) {
+function normalizeTokens(str) {
   return str
     .filter(Boolean)
     .map(_ => _.toLowerCase())
@@ -223,7 +223,7 @@ function normalizeTokens (str) {
 }
 
 // Transform emoji data for storage in IDB
-function transformEmojiData (emojiData) {
+function transformEmojiData(emojiData) {
   const res = emojiData.map(({ annotation, emoticon, group, order, shortcodes, skins, tags, emoji, version }) => {
     const tokens = [...new Set(
       normalizeTokens([
@@ -265,19 +265,19 @@ function transformEmojiData (emojiData) {
 
 // helper functions that help compress the code better
 
-function callStore (store, method, key, cb) {
+function callStore(store, method, key, cb) {
   store[method](key).onsuccess = e => (cb && cb(e.target.result));
 }
 
-function getIDB (store, key, cb) {
+function getIDB(store, key, cb) {
   callStore(store, 'get', key, cb);
 }
 
-function getAllIDB (store, key, cb) {
+function getAllIDB(store, key, cb) {
   callStore(store, 'getAll', key, cb);
 }
 
-function commit (txn) {
+function commit(txn) {
   /* istanbul ignore else */
   if (txn.commit) {
     txn.commit();
@@ -285,7 +285,7 @@ function commit (txn) {
 }
 
 // like lodash's minBy
-function minBy (array, func) {
+function minBy(array, func) {
   let minItem = array[0];
   for (let i = 1; i < array.length; i++) {
     const item = array[i];
@@ -299,7 +299,7 @@ function minBy (array, func) {
 // return an array of results representing all items that are found in each one of the arrays
 //
 
-function findCommonMembers (arrays, uniqByFunc) {
+function findCommonMembers(arrays, uniqByFunc) {
   const shortestArray = minBy(arrays, _ => _.length);
   const results = [];
   for (const item of shortestArray) {
@@ -311,17 +311,17 @@ function findCommonMembers (arrays, uniqByFunc) {
   return results
 }
 
-async function isEmpty (db) {
+async function isEmpty(db) {
   return !(await get(db, STORE_KEYVALUE, KEY_URL))
 }
 
-async function hasData (db, url, eTag) {
+async function hasData(db, url, eTag) {
   const [oldETag, oldUrl] = await Promise.all([KEY_ETAG, KEY_URL]
     .map(key => get(db, STORE_KEYVALUE, key)));
   return (oldETag === eTag && oldUrl === url)
 }
 
-async function doFullDatabaseScanForSingleResult (db, predicate) {
+async function doFullDatabaseScanForSingleResult(db, predicate) {
   // This batching algorithm is just a perf improvement over a basic
   // cursor. The BATCH_SIZE is an estimate of what would give the best
   // perf for doing a full DB scan (worst case).
@@ -359,7 +359,7 @@ async function doFullDatabaseScanForSingleResult (db, predicate) {
   })
 }
 
-async function loadData (db, emojiData, url, eTag) {
+async function loadData(db, emojiData, url, eTag) {
   try {
     const transformedData = transformEmojiData(emojiData);
     await dbPromise(db, [STORE_EMOJI, STORE_KEYVALUE], MODE_READWRITE, ([emojiStore, metaStore], txn) => {
@@ -367,13 +367,13 @@ async function loadData (db, emojiData, url, eTag) {
       let oldUrl;
       let todo = 0;
 
-      function checkFetched () {
+      function checkFetched() {
         if (++todo === 2) { // 2 requests made
           onFetched();
         }
       }
 
-      function onFetched () {
+      function onFetched() {
         if (oldETag === eTag && oldUrl === url) {
           // check again within the transaction to guard against concurrency, e.g. multiple browser tabs
           return
@@ -403,14 +403,14 @@ async function loadData (db, emojiData, url, eTag) {
   }
 }
 
-async function getEmojiByGroup (db, group) {
+async function getEmojiByGroup(db, group) {
   return dbPromise(db, STORE_EMOJI, MODE_READONLY, (emojiStore, txn, cb) => {
     const range = IDBKeyRange.bound([group, 0], [group + 1, 0], false, true);
     getAllIDB(emojiStore.index(INDEX_GROUP_AND_ORDER), range, cb);
   })
 }
 
-async function getEmojiBySearchQuery (db, query) {
+async function getEmojiBySearchQuery(db, query) {
   const tokens = normalizeTokens(extractTokens(query));
 
   if (!tokens.length) {
@@ -447,7 +447,7 @@ async function getEmojiBySearchQuery (db, query) {
 
 // This could have been implemented as an IDB index on shortcodes, but it seemed wasteful to do that
 // when we can already query by tokens and this will give us what we're looking for 99.9% of the time
-async function getEmojiByShortcode (db, shortcode) {
+async function getEmojiByShortcode(db, shortcode) {
   const emojis = await getEmojiBySearchQuery(db, shortcode);
 
   // In very rare cases (e.g. the shortcode "v" as in "v for victory"), we cannot search because
@@ -466,7 +466,7 @@ async function getEmojiByShortcode (db, shortcode) {
   })[0] || null
 }
 
-async function getEmojiByUnicode (db, unicode) {
+async function getEmojiByUnicode(db, unicode) {
   return dbPromise(db, STORE_EMOJI, MODE_READONLY, (emojiStore, txn, cb) => (
     getIDB(emojiStore, unicode, result => {
       if (result) {
@@ -477,20 +477,20 @@ async function getEmojiByUnicode (db, unicode) {
   ))
 }
 
-function get (db, storeName, key) {
+function get(db, storeName, key) {
   return dbPromise(db, storeName, MODE_READONLY, (store, txn, cb) => (
     getIDB(store, key, cb)
   ))
 }
 
-function set (db, storeName, key, value) {
+function set(db, storeName, key, value) {
   return dbPromise(db, storeName, MODE_READWRITE, (store, txn) => {
     store.put(value, key);
     commit(txn);
   })
 }
 
-function incrementFavoriteEmojiCount (db, unicode) {
+function incrementFavoriteEmojiCount(db, unicode) {
   return dbPromise(db, STORE_FAVORITES, MODE_READWRITE, (store, txn) => (
     getIDB(store, unicode, result => {
       store.put((result || 0) + 1, unicode);
@@ -499,7 +499,7 @@ function incrementFavoriteEmojiCount (db, unicode) {
   ))
 }
 
-function getTopFavoriteEmoji (db, customEmojiIndex, limit) {
+function getTopFavoriteEmoji(db, customEmojiIndex, limit) {
   if (limit === 0) {
     return []
   }
@@ -511,7 +511,7 @@ function getTopFavoriteEmoji (db, customEmojiIndex, limit) {
         return cb(results)
       }
 
-      function addResult (result) {
+      function addResult(result) {
         results.push(result);
         if (results.length === limit) {
           return cb(results) // done, reached the limit
@@ -542,7 +542,7 @@ function getTopFavoriteEmoji (db, customEmojiIndex, limit) {
 
 const CODA_MARKER = ''; // marks the end of the string
 
-function trie (arr, itemToTokens) {
+function trie(arr, itemToTokens) {
   const map = new Map();
   for (const item of arr) {
     const tokens = itemToTokens(item);
@@ -608,7 +608,7 @@ const requiredKeys$1 = [
   'url'
 ];
 
-function assertCustomEmojis (customEmojis) {
+function assertCustomEmojis(customEmojis) {
   const isArray = customEmojis && Array.isArray(customEmojis);
   const firstItemIsFaulty = isArray &&
     customEmojis.length &&
@@ -618,7 +618,7 @@ function assertCustomEmojis (customEmojis) {
   }
 }
 
-function customEmojiIndex (customEmojis) {
+function customEmojiIndex(customEmojis) {
   assertCustomEmojis(customEmojis);
 
   const sortByName = (a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
@@ -676,7 +676,7 @@ const isFirefoxContentScript = typeof wrappedJSObject !== 'undefined';
 
 // remove some internal implementation details, i.e. the "tokens" array on the emoji object
 // essentially, convert the emoji from the version stored in IDB to the version used in-memory
-function cleanEmoji (emoji) {
+function cleanEmoji(emoji) {
   if (!emoji) {
     return emoji
   }
@@ -704,7 +704,7 @@ function cleanEmoji (emoji) {
   return emoji
 }
 
-function warnETag (eTag) {
+function warnETag(eTag) {
   if (!eTag) {
     console.warn('emoji-picker-element is more efficient if the dataSource server exposes an ETag header.');
   }
@@ -719,7 +719,7 @@ const requiredKeys = [
   'version'
 ];
 
-function assertEmojiData (emojiData) {
+function assertEmojiData(emojiData) {
   if (!emojiData ||
     !Array.isArray(emojiData) ||
     !emojiData[0] ||
@@ -729,13 +729,13 @@ function assertEmojiData (emojiData) {
   }
 }
 
-function assertStatus (response, dataSource) {
+function assertStatus(response, dataSource) {
   if (Math.floor(response.status / 100) !== 2) {
     throw new Error('Failed to fetch: ' + dataSource + ':  ' + response.status)
   }
 }
 
-async function getETag (dataSource) {
+async function getETag(dataSource) {
   const response = await fetch(dataSource, { method: 'HEAD' });
   assertStatus(response, dataSource);
   const eTag = response.headers.get('etag');
@@ -743,7 +743,7 @@ async function getETag (dataSource) {
   return eTag
 }
 
-async function getETagAndData (dataSource) {
+async function getETagAndData(dataSource) {
   const response = await fetch(dataSource);
   assertStatus(response, dataSource);
   const eTag = response.headers.get('etag');
@@ -769,14 +769,14 @@ async function getETagAndData (dataSource) {
  * @returns binary string
  */
 function arrayBufferToBinaryString(buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    var length = bytes.byteLength;
-    var i = -1;
-    while (++i < length) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return binary;
+  var binary = '';
+  var bytes = new Uint8Array(buffer);
+  var length = bytes.byteLength;
+  var i = -1;
+  while (++i < length) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return binary;
 }
 /**
  * Convert a binary string to an `ArrayBuffer`.
@@ -789,18 +789,18 @@ function arrayBufferToBinaryString(buffer) {
  * @returns array buffer
  */
 function binaryStringToArrayBuffer(binary) {
-    var length = binary.length;
-    var buf = new ArrayBuffer(length);
-    var arr = new Uint8Array(buf);
-    var i = -1;
-    while (++i < length) {
-        arr[i] = binary.charCodeAt(i);
-    }
-    return buf;
+  var length = binary.length;
+  var buf = new ArrayBuffer(length);
+  var arr = new Uint8Array(buf);
+  var i = -1;
+  while (++i < length) {
+    arr[i] = binary.charCodeAt(i);
+  }
+  return buf;
 }
 
 // generate a checksum based on the stringified JSON
-async function jsonChecksum (object) {
+async function jsonChecksum(object) {
   const inString = JSON.stringify(object);
   let inBuffer = binaryStringToArrayBuffer(inString);
 
@@ -811,7 +811,7 @@ async function jsonChecksum (object) {
   return res
 }
 
-async function checkForUpdates (db, dataSource) {
+async function checkForUpdates(db, dataSource) {
   // just do a simple HEAD request first to see if the eTags match
   let emojiData;
   let eTag = await getETag(dataSource);
@@ -823,7 +823,7 @@ async function checkForUpdates (db, dataSource) {
       eTag = await jsonChecksum(emojiData);
     }
   }
-  if (await hasData(db, dataSource, eTag)) ; else {
+  if (await hasData(db, dataSource, eTag)); else {
     if (!emojiData) {
       const eTagAndData = await getETagAndData(dataSource);
       emojiData = eTagAndData[1];
@@ -832,7 +832,7 @@ async function checkForUpdates (db, dataSource) {
   }
 }
 
-async function loadDataForFirstTime (db, dataSource) {
+async function loadDataForFirstTime(db, dataSource) {
   let [eTag, emojiData] = await getETagAndData(dataSource);
   if (!eTag) {
     // Handle lack of support for ETag or Access-Control-Expose-Headers
@@ -844,7 +844,7 @@ async function loadDataForFirstTime (db, dataSource) {
 }
 
 class Database {
-  constructor ({ dataSource = DEFAULT_DATA_SOURCE, locale = DEFAULT_LOCALE, customEmoji = [] } = {}) {
+  constructor({ dataSource = DEFAULT_DATA_SOURCE, locale = DEFAULT_LOCALE, customEmoji = [] } = {}) {
     this.dataSource = dataSource;
     this.locale = locale;
     this._dbName = `emoji-picker-element-${this.locale}`;
@@ -856,7 +856,7 @@ class Database {
     this._ready = this._init();
   }
 
-  async _init () {
+  async _init() {
     const db = this._db = await openDatabase(this._dbName);
 
     addOnCloseListener(this._dbName, this._clear);
@@ -870,7 +870,7 @@ class Database {
     }
   }
 
-  async ready () {
+  async ready() {
     const checkReady = async () => {
       if (!this._ready) {
         this._ready = this._init();
@@ -886,13 +886,13 @@ class Database {
     }
   }
 
-  async getEmojiByGroup (group) {
+  async getEmojiByGroup(group) {
     assertNumber(group);
     await this.ready();
     return uniqEmoji(await getEmojiByGroup(this._db, group)).map(cleanEmoji)
   }
 
-  async getEmojiBySearchQuery (query) {
+  async getEmojiBySearchQuery(query) {
     assertNonEmptyString(query);
     await this.ready();
     const customs = this._custom.search(query);
@@ -903,7 +903,7 @@ class Database {
     ]
   }
 
-  async getEmojiByShortcode (shortcode) {
+  async getEmojiByShortcode(shortcode) {
     assertNonEmptyString(shortcode);
     await this.ready();
     const custom = this._custom.byShortcode(shortcode);
@@ -913,7 +913,7 @@ class Database {
     return cleanEmoji(await getEmojiByShortcode(this._db, shortcode))
   }
 
-  async getEmojiByUnicodeOrName (unicodeOrName) {
+  async getEmojiByUnicodeOrName(unicodeOrName) {
     assertNonEmptyString(unicodeOrName);
     await this.ready();
     const custom = this._custom.byName(unicodeOrName);
@@ -923,38 +923,38 @@ class Database {
     return cleanEmoji(await getEmojiByUnicode(this._db, unicodeOrName))
   }
 
-  async getPreferredSkinTone () {
+  async getPreferredSkinTone() {
     await this.ready();
     return (await get(this._db, STORE_KEYVALUE, KEY_PREFERRED_SKINTONE)) || 0
   }
 
-  async setPreferredSkinTone (skinTone) {
+  async setPreferredSkinTone(skinTone) {
     assertNumber(skinTone);
     await this.ready();
     return set(this._db, STORE_KEYVALUE, KEY_PREFERRED_SKINTONE, skinTone)
   }
 
-  async incrementFavoriteEmojiCount (unicodeOrName) {
+  async incrementFavoriteEmojiCount(unicodeOrName) {
     assertNonEmptyString(unicodeOrName);
     await this.ready();
     return incrementFavoriteEmojiCount(this._db, unicodeOrName)
   }
 
-  async getTopFavoriteEmoji (limit) {
+  async getTopFavoriteEmoji(limit) {
     assertNumber(limit);
     await this.ready();
     return (await getTopFavoriteEmoji(this._db, this._custom, limit)).map(cleanEmoji)
   }
 
-  set customEmoji (customEmojis) {
+  set customEmoji(customEmojis) {
     this._custom = customEmojiIndex(customEmojis);
   }
 
-  get customEmoji () {
+  get customEmoji() {
     return this._custom.all
   }
 
-  async _shutdown () {
+  async _shutdown() {
     await this.ready(); // reopen if we've already been closed/deleted
     try {
       await this._lazyUpdate; // allow any lazy updates to process before closing/deleting
@@ -962,7 +962,7 @@ class Database {
   }
 
   // clear references to IDB, e.g. during a close event
-  _clear () {
+  _clear() {
     // We don't need to call removeEventListener or remove the manual "close" listeners.
     // The memory leak tests prove this is unnecessary. It's because:
     // 1) IDBDatabases that can no longer fire "close" automatically have listeners GCed
@@ -970,12 +970,12 @@ class Database {
     this._db = this._ready = this._lazyUpdate = undefined;
   }
 
-  async close () {
+  async close() {
     await this._shutdown();
     await closeDatabase(this._dbName);
   }
 
-  async delete () {
+  async delete() {
     await this._shutdown();
     await deleteDatabase(this._dbName);
   }

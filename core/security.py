@@ -27,22 +27,14 @@ def init_security(app):
             "'self'",
             "'unsafe-inline'",  # Needed for Alpine/Tailwind config in HTML
             "'unsafe-eval'",    # Needed for standard Alpine.js
-            "blob:",            # Needed for Tone.js workers
-            "https://cdn.jsdelivr.net",  # Fallback for emoji-picker only
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.tailwindcss.com"
+            "blob:"            # Needed for Tone.js workers
         ],
         'style-src': [
             "'self'",
-            "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.tailwindcss.com"
+            "'unsafe-inline'"
         ],
         'font-src': [
-            "'self'",
-            "https://fonts.gstatic.com",
-            "https://cdnjs.cloudflare.com"
+            "'self'"
         ],
         'connect-src': ["'self'", "blob:", "wss:", "ws:", "https://*"],  # Allow outgoing API/Websocket and blob: for Tone.js
         'media-src': ["'self'", "blob:", "data:", "https://*", "http://*"],  # Allow external audio streams
