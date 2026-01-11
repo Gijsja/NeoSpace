@@ -43,3 +43,9 @@ Flask-Limiter==3.5.0
 
 # Database Migrations
 alembic==1.13.1
+
+# Security & Sanitization
+bleach==6.1.0
+
+# HTTP Client (for scripts/utils)
+requests==2.31.0
