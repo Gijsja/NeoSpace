@@ -40,7 +40,9 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    avatar_color TEXT
+    avatar_color TEXT,
+    is_staff INTEGER DEFAULT 0,
+    is_banned INTEGER DEFAULT 0
 );
 
 -- Sprint 6: User Profiles
@@ -283,6 +285,11 @@ class ConnectionPool:
             return self._pool.get(timeout=timeout)
         except queue.Empty:
             # Pool exhausted, create a new connection
+            import logging
+            logging.getLogger(__name__).warning(
+                "Connection pool exhausted (size=%d) - creating temporary connection", 
+                self.pool_size
+            )
             return self._create_connection()
     
     def return_connection(self, conn):

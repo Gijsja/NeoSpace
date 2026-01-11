@@ -6,6 +6,8 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from db import get_db, db_retry
 
+from core.responses import success_response, error_response
+
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
@@ -17,7 +19,11 @@ def register():
         from core.schemas import RegisterRequest
         req = msgspec.json.decode(request.get_data(), type=RegisterRequest)
     except msgspec.ValidationError as e:
-        return jsonify(error=f"Invalid request: {e}"), 400
+        return error_response(f"Invalid request: {e}")
+    
+    from core.validators import validate_username
+    v_err = validate_username(req.username)
+    if v_err: return error_response(v_err)
     
     username = req.username
     password = req.password
@@ -40,9 +46,9 @@ def register():
     try:
         db_retry(do_register)
     except sqlite3.IntegrityError:
-        return jsonify(error=f"User {username} is already registered."), 400
+        return error_response(f"User {username} is already registered.")
     except sqlite3.OperationalError:
-        return jsonify(error="Database busy, please retry"), 503
+        return error_response("Database busy, please retry", 503)
 
     # Auto login
     user = db.execute(
@@ -66,7 +72,7 @@ def register():
     session['user_id'] = user['id']
     session['username'] = user['username']
     
-    return jsonify(ok=True, redirect=url_for('views.index'))
+    return success_response(redirect=url_for('views.index'))
 
 @auth_bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -76,7 +82,7 @@ def login():
             from core.schemas import LoginRequest
             req = msgspec.json.decode(request.get_data(), type=LoginRequest)
         except msgspec.ValidationError as e:
-            return jsonify(error=f"Invalid request: {e}"), 400
+            return error_response(f"Invalid request: {e}")
         
         username = req.username
         password = req.password
@@ -87,15 +93,15 @@ def login():
         ).fetchone()
 
         if user is None:
-            return jsonify(error="Incorrect username."), 401
+            return error_response("Incorrect username.", 401)
         elif not check_password_hash(user['password_hash'], password):
-            return jsonify(error="Incorrect password."), 401
+            return error_response("Incorrect password.", 401)
 
         session.clear()
         session['user_id'] = user['id']
         session['username'] = user['username']
         
-        return jsonify(ok=True, redirect=url_for('views.index'))
+        return success_response(redirect=url_for('views.index'))
 
     return render_template("login.html")
 
@@ -107,12 +113,12 @@ def logout():
 @auth_bp.route('/me')
 def me():
     if g.user:
-        return jsonify(
+        return success_response(
             logged_in=True, 
             username=g.user['username'],
             avatar_color=g.user['avatar_color']
         )
-    return jsonify(logged_in=False)
+    return success_response(logged_in=False)
 
 def login_required(view):
     @functools.wraps(view)

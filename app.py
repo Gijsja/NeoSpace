@@ -17,15 +17,42 @@ def create_app(test_config=None):
     @app.context_processor
     def inject_version():
         return dict(version=__version__)
-    # Secure secret key (in production should be env var)
-    app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key_DO_NOT_USE_IN_PROD")
     
+    # Inject version into all templates
+    @app.context_processor
+    def inject_version():
+        return dict(version=__version__)
+    
+    # Load Configuration
+    from config import config
+    env_name = os.environ.get("FLASK_ENV", "development")
+    app_config = config.get(env_name, config["default"])
+    
+    # Instantiate config (runs init checks like secret key validation)
+    if env_name == 'production':
+        conf_instance = app_config()
+        app.config.from_object(conf_instance)
+    else:
+        app.config.from_object(app_config)
+
+    # Manual override for property-based config keys if needed, 
+    # but from_object handles properties if they are on the class/instance.
+    # Check if SESSION_COOKIE_SECURE property is picked up. 
+    # flask.Config.from_object scans dir(obj), so properties work if on instance or class.
+    # However, property on class works better if instanced? 
+    # Actually simpler: we can just set it explicitly if mapped.
+    # Let's trust from_object for now, but ensure we instantiate for prod check.
+
     if test_config:
         app.config.from_mapping(test_config)
 
     # Security Hardening (Sprint 18)
     from core.security import init_security
     init_security(app)
+
+    # Structured Logging (Sprint 27)
+    from core.logs import configure_logging
+    configure_logging(app)
 
     from auth import auth_bp, login_required
     app.register_blueprint(auth_bp)

@@ -29,8 +29,9 @@ class TestSendMessage:
         with app.app_context():
             db = get_db()
             row = db.execute("SELECT content FROM messages ORDER BY id DESC LIMIT 1").fetchone()
+            # Bleach removes script tags entirely
             assert "<script>" not in row["content"]
-            assert "&lt;script&gt;" in row["content"]
+            assert "alert('xss')" in row["content"]
 
 
 class TestEditMessage:

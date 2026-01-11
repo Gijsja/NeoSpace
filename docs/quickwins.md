@@ -1,5 +1,15 @@
 # Quick Wins & CatNetwork Backlog
 
+## 🛠️ Code Quality & Tech Debt (New via Review)
+
+- [ ] **Type Hinting**: Add Python type hints to `schemas.py` and service layers for mypy readiness.
+- [ ] **Config Centralization**: Move env var reads from `app.py` to `core/config.py`.
+- [ ] **Mutation Decorators**: Create `@mutation_handler` to reduce boilerplate (try/catch/retry) in mutation functions.
+- [ ] **API Documentation**: generating OpenAPI spec using `Flask-RESTX` or similar.
+- [ ] **Frontend Reconnect**: Add exponential backoff to `ChatSocket.js`.
+- [ ] **Test Coverage**: Add non-IO domain logic tests.
+- [ ] **Prometheus**: Add basic `/metrics` endpoint.
+
 ## 🚨 CatNetwork Support & Security (High Priority)
 
 - [ ] **Audit Logs**: Track admin actions in `admin_ops` table.
@@ -19,14 +29,6 @@
 
 - [ ] **Database Archival**: Move old messages to `messages_archive` table to keep queries fast.
 - [ ] **Bun Integration**: Evaluate replacing `npm` with `bun` for 25x faster installs and zero-config testing.
-
-## ❤️ Emotional Intelligence Upgrade (Completed)
-
-> **Status**: Successfully implemented PAD Model, Relationship Graph, and Dynamic Avatars in Sprint 26.
-
-## 🔮 Future: The "Rimworld" Relationship Layer
-
-> **Status**: Core logic (Affinity -100 to +100) implemented. Next step: Complex behavioral trees based on affinity.
 
 ---
 

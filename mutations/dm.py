@@ -4,8 +4,9 @@ Handles sending, reading, and deleting encrypted DMs.
 """
 
 from flask import request, g, jsonify
+from core.security import limiter
 
-
+@limiter.limit("20/minute")
 def send_dm():
     """
     Send an encrypted direct message.

@@ -4,6 +4,7 @@ Delegates to wall_service.
 """
 
 from flask import request, jsonify, g
+from core.security import limiter
 
 def get_wall_posts(profile_id, limit=20, offset=0):
     """
@@ -13,6 +14,7 @@ def get_wall_posts(profile_id, limit=20, offset=0):
     from services import wall_service
     return wall_service.get_posts_for_profile(profile_id, limit, offset)
 
+@limiter.limit("10/minute")
 def add_wall_post():
     if g.user is None:
         return jsonify(error="Auth required"), 401

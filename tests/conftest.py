@@ -12,11 +12,14 @@ def app():
     os.close(fd)
     
     # Override database path
-    db_module.DB_PATH = db_path
+    # We must pass this to create_app so it overrides the config.py default
+    test_config = {
+        'DATABASE': db_path,
+        'TESTING': True,
+        'WTF_CSRF_ENABLED': False
+    }
     
-    app = create_app()
-    app.config["TESTING"] = True
-    app.config["WTF_CSRF_ENABLED"] = False # Disable for regression tests
+    app = create_app(test_config)
     
     yield app
     
