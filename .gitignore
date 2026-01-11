@@ -69,3 +69,21 @@ docs/
 
 # --- Large Assets ---
 static/catsounds/
+.caddy/
+
+# --- User Content & Local State ---
+uploads/
+static/uploads/
+static/avatars/
+static/voice_intros/
+state/
+
+# --- OS Metadata ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Local Dev ---
+.python-version
+*.bak
+*.tmp
