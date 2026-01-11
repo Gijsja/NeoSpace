@@ -28,6 +28,7 @@ def follow():
     return jsonify(ok=True, **(result.data or {}))
 
 
+@limiter.limit("20/minute")
 def unfollow():
     """Unfollow a user."""
     if g.user is None:
@@ -48,6 +49,7 @@ def unfollow():
     return jsonify(ok=True)
 
 
+@limiter.limit("10/minute")
 def set_top8():
     """
     Set Top 8 order.

@@ -29,6 +29,17 @@ class SendMessageRequest(msgspec.Struct):
     content: str
 
 
+class UpdateMessageRequest(msgspec.Struct):
+    """Request to update a message."""
+    id: int
+    content: str
+
+
+class DeleteMessageRequest(msgspec.Struct):
+    """Request to delete a message."""
+    id: int
+
+
 class AddWallPostRequest(msgspec.Struct):
     """Request to add a wall post."""
     module_type: str

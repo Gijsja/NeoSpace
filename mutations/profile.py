@@ -5,6 +5,7 @@ Delegates to profile_service and sticker_service.
 
 from flask import request, jsonify, g, current_app
 from services import profile_service, sticker_service
+from core.security import limiter
 
 def get_profile():
     """
@@ -31,6 +32,7 @@ def get_profile():
     return jsonify(**result.data)
 
 
+@limiter.limit("5/minute")
 def update_profile():
     """
     Update the current user's profile.
@@ -42,9 +44,27 @@ def update_profile():
         import msgspec
         from core.schemas import UpdateProfileRequest
         req = msgspec.json.decode(request.get_data(), type=UpdateProfileRequest)
+        
+        # Semantic validation
+        from core.validators import validate_display_name, validate_bio, validate_content_length
+        from core.responses import error_response
+        
+        if req.display_name:
+            v_err = validate_display_name(req.display_name)
+            if v_err: return error_response(v_err)
+        
+        if req.bio:
+            v_err = validate_bio(req.bio)
+            if v_err: return error_response(v_err)
+            
+        if req.status_message:
+            v_err = validate_content_length(req.status_message, 100, "Status message")
+            if v_err: return error_response(v_err)
+
         data = msgspec.to_builtins(req)
     except msgspec.ValidationError as e:
-        return jsonify(error=f"Invalid request: {e}"), 400
+        from core.responses import error_response
+        return error_response(f"Invalid request: {e}")
     
     result = profile_service.update_profile_fields(g.user["id"], data)
     
