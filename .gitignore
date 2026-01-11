@@ -59,6 +59,8 @@ yarn-error.log
 COMMIT_MSG.txt
 bandit_report*.json
 rawlinks.txt
+rawlinksforreview.txt
+docs/
 
 # --- Database ---
 *.db
