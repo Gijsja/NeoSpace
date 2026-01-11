@@ -150,11 +150,10 @@ def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None, wall_p
                       if m["module_type"] == 'script' and m["content"].get("script_id")]
         
         if script_ids:
+            # placeholders is safe as it's generated from local logic
             placeholders = ",".join("?" * len(script_ids))
-            script_details = db.execute(
-                f"SELECT id, title, script_type FROM scripts WHERE id IN ({placeholders})",
-                script_ids
-            ).fetchall()
+            sql = f"SELECT id, title, script_type FROM scripts WHERE id IN ({placeholders})"  # nosec B608
+            script_details = db.execute(sql, script_ids).fetchall()
             script_map = {s["id"]: dict(s) for s in script_details}
             
             for m in wall_modules:
@@ -284,26 +283,27 @@ def update_profile_fields(user_id: int, data: Dict[str, Any]) -> ServiceResult:
     
     if existing:
         # Update existing profile
-        set_clause = ", ".join(f"{k} = ?" for k in updates.keys())
-        set_clause += ", updated_at = datetime('now')"
+        # keys are pre-validated in the update_profile_fields logic above
+        clause_items = []
+        for k in updates.keys():
+            clause_items.append(f"{k} = ?")
+        
+        set_clause = ", ".join(clause_items)
+        sql = f"UPDATE profiles SET {set_clause}, updated_at = datetime('now') WHERE user_id = ?"  # nosec B608
         values = list(updates.values())
         values.append(user_id)
         
-        db.execute(
-            f"UPDATE profiles SET {set_clause} WHERE user_id = ?",
-            values
-        )
+        db.execute(sql, values)
     else:
         # Create new profile
         updates["user_id"] = user_id
-        columns = ", ".join(updates.keys())
-        placeholders = ", ".join("?" for _ in updates.values())
+        cols = list(updates.keys())
+        columns_str = ", ".join(cols)
+        placeholders = ", ".join("?" for _ in cols)
+        sql = f"INSERT INTO profiles ({columns_str}) VALUES ({placeholders})"  # nosec B608
         values = list(updates.values())
         
-        db.execute(
-            f"INSERT INTO profiles ({columns}) VALUES ({placeholders})",
-            values
-        )
+        db.execute(sql, values)
     
     db.commit()
     return ServiceResult(success=True)

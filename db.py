@@ -515,7 +515,19 @@ def execute_with_retry(sql, params=(), fetchone=False, fetchall=False):
     
     for attempt in range(MAX_RETRIES):
         try:
+            start_time = time.time()
             cursor = db.execute(sql, params)
+            duration = time.time() - start_time
+            
+            # Sentinel: Performance Benchmarking
+            if duration > 0.1:  # 100ms threshold
+                import logging
+                logging.getLogger(__name__).warning(
+                    "SLOW QUERY: %.2fms | SQL: %s", 
+                    duration * 1000, 
+                    sql.strip()[:100] + "..." if len(sql) > 100 else sql
+                )
+            
             if fetchone:
                 return cursor.fetchone()
             elif fetchall:

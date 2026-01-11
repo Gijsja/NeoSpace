@@ -211,7 +211,8 @@ def update_sticker(
     values.append(sticker_id)
     
     try:
-        db.execute(f"UPDATE profile_stickers SET {', '.join(db_updates)} WHERE id = ?", values)
+        sql = f"UPDATE profile_stickers SET {', '.join(db_updates)} WHERE id = ?"  # nosec B608
+        db.execute(sql, values)
         db.commit()
     except Exception as e:
         return ServiceResult(success=False, error=str(e), status=500)

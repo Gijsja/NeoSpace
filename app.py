@@ -18,8 +18,17 @@ def create_app(test_config=None):
     def inject_version():
         return dict(version=__version__)
     
+    # Initialize Sentry if DSN is provided
+    if os.environ.get("SENTRY_DSN"):
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        sentry_sdk.init(
+            dsn=os.environ.get("SENTRY_DSN"),
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.1,
+            profiles_sample_rate=0.1,
+        )
 
-    
     # Load Configuration
     from config import config
     env_name = os.environ.get("FLASK_ENV", "development")

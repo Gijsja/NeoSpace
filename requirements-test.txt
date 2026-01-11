@@ -3,3 +3,5 @@ pytest
 flake8
 bandit
 pytest-cov
+locust
+safety

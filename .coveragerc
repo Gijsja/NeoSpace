@@ -1,0 +1,21 @@
+[run]
+branch = True
+source = .
+omit =
+    tests/*
+    .venv/*
+    setup.py
+    startlocal.py
+    scripts/*
+    backups/*
+    db_schema.py
+    rollback.py
+
+[report]
+show_missing = True
+precision = 2
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__.:
+    raise NotImplementedError

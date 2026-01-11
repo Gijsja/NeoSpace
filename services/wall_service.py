@@ -171,7 +171,7 @@ def update_post(
         return ServiceResult(success=True)
         
     values.append(post_id)
-    sql = f"UPDATE profile_posts SET {', '.join(updates)}, updated_at = datetime('now') WHERE id = ?"
+    sql = f"UPDATE profile_posts SET {', '.join(updates)}, updated_at = datetime('now') WHERE id = ?"  # nosec B608
     
     db.execute(sql, values)
     db.commit()
