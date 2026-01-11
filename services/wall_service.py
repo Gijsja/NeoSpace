@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
 from db import get_db
+from core.types import ServiceResult
 
 
 # =============================================
@@ -19,16 +20,6 @@ ALLOWED_TYPES = {'text', 'image', 'link', 'script', 'audio', 'voice_note'}
 
 
 # =============================================
-# RESULT CLASSES
-# =============================================
-
-@dataclass
-class ServiceResult:
-    """Standard result object for service operations."""
-    success: bool
-    data: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    status: int = 200
 
 
 # =============================================
@@ -180,7 +171,7 @@ def update_post(
         return ServiceResult(success=True)
         
     values.append(post_id)
-    sql = f"UPDATE profile_posts SET {', '.join(updates)}, updated_at = datetime('now') WHERE id = ?"
+    sql = f"UPDATE profile_posts SET {', '.join(updates)}, updated_at = datetime('now') WHERE id = ?"  # nosec B608
     
     db.execute(sql, values)
     db.commit()

@@ -1,25 +1,28 @@
-"""
-NeoSpace Concurrency Load Test
-
-Run: locust -f locustfile.py --users 50 --spawn-rate 5
-
-Success Metric:
-- Old Setup: Write operations spike read latency to >2000ms
-- New Setup: Read latency stays <200ms during writes
-"""
-
 from locust import HttpUser, task, between
 
-
 class NeoSpaceUser(HttpUser):
-    wait_time = between(1, 5)
+    wait_time = between(1, 2)
+    
+    def on_start(self):
+        """Login before starting tasks."""
+        # Note: auth prefix is used in app.py
+        # Data must be JSON for msgspec
+        self.client.post("/auth/login", json={
+            "username": "admin",
+            "password": "password"
+        })
 
     @task(3)
-    def view_feed(self):
-        """Read operation - should not block during writes."""
-        self.client.get("/wall/public")
+    def view_posts(self):
+        """Read operation - hits the JSON posts endpoint."""
+        # Using a valid profile ID
+        self.client.get("/wall/posts/1")
 
     @task(1)
-    def post_message(self):
-        """Write operation - tests SQLite lock behavior."""
-        self.client.post("/api/messages", json={"content": "Stress Test!"})
+    def send_chat(self):
+        """Write operation - hits the chat send endpoint."""
+        # SendMessageRequest: {content: str}
+        # Note: /send uses msgspec.json.decode(request.get_data())
+        self.client.post("/send", json={
+            "content": "Stress Test Message"
+        })

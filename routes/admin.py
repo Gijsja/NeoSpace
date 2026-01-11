@@ -2,6 +2,7 @@ import functools
 from flask import Blueprint, g, render_template, abort
 from db import get_db
 from mutations.moderation import resolve_report, submit_report as submit_report_mutation
+from utils.decorators import log_admin_action
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -37,5 +38,6 @@ def dashboard():
 
 @bp.route('/resolve', methods=['POST'])
 @staff_required
+@log_admin_action("resolve_report")
 def resolve():
     return resolve_report()

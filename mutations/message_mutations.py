@@ -2,9 +2,8 @@
 from flask import request, g, jsonify
 from db import get_db, db_retry
 from utils.sanitize import clean_html
+from utils.decorators import mutation_handler
 import sqlite3
-
-
 
 from core.security import limiter
 from core.permissions import check_ownership
@@ -14,6 +13,7 @@ import msgspec
 from core.schemas import SendMessageRequest, UpdateMessageRequest, DeleteMessageRequest
 
 @limiter.limit("60/minute")
+@mutation_handler
 def send_message():
     """
     Send a chat message with msgspec-based parsing.
@@ -43,14 +43,14 @@ def send_message():
         db.commit()
         return row
     
-    try:
-        row = db_retry(do_insert)
-        return success_response(id=row['id'])
-    except sqlite3.OperationalError:
-        return error_response("Database busy, please retry", 503)
+    # db_retry is still useful for the retry logic itself, 
+    # but the outer exception handling is now done by the decorator
+    row = db_retry(do_insert)
+    return success_response(id=row['id'])
 
 
 @limiter.limit("20/minute")
+@mutation_handler
 def edit_message():
     """Edit message content."""
     db = get_db()
@@ -83,14 +83,12 @@ def edit_message():
         )
         db.commit()
     
-    try:
-        db_retry(do_update)
-        return success_response(id=req.id)
-    except sqlite3.OperationalError:
-        return error_response("Database busy, please retry", 503)
+    db_retry(do_update)
+    return success_response(id=req.id)
 
 
 @limiter.limit("20/minute")
+@mutation_handler
 def delete_message():
     """Soft-delete a message."""
     db = get_db()
@@ -117,9 +115,6 @@ def delete_message():
         )
         db.commit()
     
-    try:
-        db_retry(do_delete)
-        return success_response(id=req.id)
-    except sqlite3.OperationalError:
-        return error_response("Database busy, please retry", 503)
+    db_retry(do_delete)
+    return success_response(id=req.id)
 

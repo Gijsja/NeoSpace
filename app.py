@@ -18,11 +18,17 @@ def create_app(test_config=None):
     def inject_version():
         return dict(version=__version__)
     
-    # Inject version into all templates
-    @app.context_processor
-    def inject_version():
-        return dict(version=__version__)
-    
+    # Initialize Sentry if DSN is provided
+    if os.environ.get("SENTRY_DSN"):
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        sentry_sdk.init(
+            dsn=os.environ.get("SENTRY_DSN"),
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.1,
+            profiles_sample_rate=0.1,
+        )
+
     # Load Configuration
     from config import config
     env_name = os.environ.get("FLASK_ENV", "development")
@@ -62,6 +68,14 @@ def create_app(test_config=None):
 
     @app.before_request
     def load_user():
+        # Optimization: Skip DB call for static assets and user files
+        # These endpoints handle their own auth or are public, and don't need g.user
+        if (request.path.startswith('/static/') or
+            request.path.startswith('/files/') or
+            request.path == '/favicon.ico'):
+            g.user = None
+            return
+
         user_id = session.get('user_id')
         if user_id is None:
             g.user = None
@@ -163,6 +177,27 @@ def create_app(test_config=None):
     def favicon():
         return send_from_directory(os.path.join(app.root_path, 'static'),
                                    'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+    # --- Permetheus Metrics (Bolt) ---
+    # Simple in-memory counters (per worker)
+    metrics_state = {'requests': 0}
+
+    @app.before_request
+    def track_request():
+        if request.path != '/metrics':
+            metrics_state['requests'] += 1
+
+    @app.route('/metrics')
+    def metrics():
+        # Simple request counter only
+        return f'''# HELP neospace_requests_total Total number of HTTP requests
+# TYPE neospace_requests_total counter
+neospace_requests_total {metrics_state['requests']}
+# HELP neospace_info Application info
+# TYPE neospace_info gauge
+neospace_info{{version="{__version__}"}} 1
+''', 200, {'Content-Type': 'text/plain; version=0.0.4'}
+
 
     init_sockets(app)
     return app

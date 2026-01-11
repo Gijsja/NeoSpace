@@ -10,13 +10,15 @@ ALLOWED_TAGS = [
     'b', 'i', 'u', 's', 'strong', 'em', 
     'a', 'code', 'pre', 'br',
     'ul', 'ol', 'li',
-    'blockquote', 'p'
+    'blockquote', 'p',
+    'img', 'div', 'span'
 ]
 
 # Allowed attributes per tag
 ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title', 'rel'],
-    '*': ['class']  # Allow class on any tag for styling
+    'img': ['src', 'alt', 'width', 'height', 'style'],
+    '*': ['class', 'style', 'id']  # Allow class/style/id on any tag for customization
 }
 
 # Allowed URL schemes for links

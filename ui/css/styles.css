@@ -1,4 +1,4 @@
-/* LocalBBS Design System */
+/* NeoSpace Design System */
 
 :root {
   /* Color palette */
@@ -837,7 +837,7 @@ input, textarea {
 
 /* ========================================
    CONSOLIDATED DESIGN SYSTEM
-   LocalBBS Creative OS v2.0
+   NeoSpace Creative OS v2.0
    ======================================== */
 
 /* Extended Color Palette */
@@ -1159,4 +1159,146 @@ input, textarea {
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- From base.html --- */
+
+/* Animation: Equalizer */
+@keyframes equalize {
+  0% { height: 30%; }
+  50% { height: 100%; }
+  100% { height: 30%; }
+}
+
+/* Glitch Effect */
+.animate-glitch:hover {
+  animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+  color: var(--color-danger); /* Fallback or specific color */
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* Button Spring Physics */
+.btn-spring {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-spring:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+.btn-spring:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 1px 1px 0px 0px #000000;
+}
+
+/* Page Transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* --- From app.html (Chat) --- */
+
+/* Message Content Images */
+.message-content img {
+  max-width: 100%;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0px #000;
+}
+
+/* Message Bubbles */
+.message.own .nb-bubble {
+  background-color: var(--color-success); /* acid-green replacement */
+  color: black;
+  border-color: black;
+}
+.message:not(.own) .nb-bubble {
+  background-color: white;
+  color: black;
+}
+
+/* Message Pop Animation */
+@keyframes message-pop {
+  0% {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+  }
+}
+.animate-fade-in {
+  animation: message-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Organic Margins */
+.margin-1 { margin-left: 0px; }
+.margin-2 { margin-left: 4px; }
+.margin-3 { margin-left: 8px; }
+.margin-4 { margin-left: 12px; }
+
+/* Scribble Rotations */
+.scribble-1 { transform: rotate(-0.5deg); }
+.scribble-2 { transform: rotate(0.5deg); }
+.scribble-3 { transform: rotate(-1deg); }
+.scribble-4 { transform: rotate(1deg); }
+
+/* Avatar Glitch */
+.message-avatar:hover {
+  animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  background-color: var(--color-danger) !important; /* Hot Pink */
+  color: white;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-10deg); }
+  40% { transform: skew(10deg); }
+  60% { transform: skew(-5deg); }
+  80% { transform: skew(5deg); }
+  100% { transform: skew(0deg); }
+}
+
+/* Empty State Overrides */
+.empty-state-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  opacity: 0.5;
+}
+.empty-state-chat-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(4px 4px 0px #000);
+}
+.empty-state-chat-text {
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: black;
+  color: white;
+  padding: 0.5rem 1rem;
+  transform: rotate(-2deg);
 }

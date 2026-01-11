@@ -10,5 +10,5 @@ if [ ! -f ".venv/bin/activate" ]; then
 fi
 
 source .venv/bin/activate
-echo "Starting LocalBBS..."
+echo "Starting NeoSpace..."
 python3 startlocal.py

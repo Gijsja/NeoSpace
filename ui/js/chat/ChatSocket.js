@@ -7,12 +7,21 @@ import { state } from './ChatState.js';
 
 export function initSocket(callbacks) {
     console.log('ChatSocket initializing...');
-    
+
     try {
         if (!state.socket) {
-            state.socket = io();
+            // Bolt ⚡: Exponential backoff for reconnection
+            // randomizationFactor: 0.5 (default) -> jitter between 50% below and 50% above the delay
+            state.socket = io({
+                reconnection: true,
+                reconnectionDelay: 1000,      // Start with 1s
+                reconnectionDelayMax: 10000,  // Cap at 10s (don't hammer server)
+                reconnectionAttempts: Infinity,
+                randomizationFactor: 0.5,
+                timeout: 20000
+            });
         }
-        
+
         const s = state.socket;
 
         s.on('connect', () => {
@@ -20,24 +29,37 @@ export function initSocket(callbacks) {
         });
 
         s.on('connected', (data) => {
-             // Join room
-             s.emit('join_room', { room: state.currentRoom });
-             if (data && data.username) {
-                 state.currentUser = data.username;
-                 localStorage.setItem('neospace_username', state.currentUser);
-             }
+            // Join room
+            s.emit('join_room', { room: state.currentRoom });
+            if (data && data.username) {
+                state.currentUser = data.username;
+                localStorage.setItem('neospace_username', state.currentUser);
+            }
         });
 
         s.on('room_joined', () => {
-             s.emit('request_backfill', { after_id: 0 });
+            s.emit('request_backfill', { after_id: 0 });
         });
 
         s.on('disconnect', () => {
             if (callbacks.onDisconnect) callbacks.onDisconnect();
         });
 
-        s.on('reconnect', () => {
+        s.on('reconnect', (attemptNumber) => {
+            console.log(`[ChatSocket] Reconnected after ${attemptNumber} attempts`);
             if (callbacks.onReconnect) callbacks.onReconnect();
+        });
+
+        s.on('reconnect_attempt', (attemptNumber) => {
+            console.log(`[ChatSocket] Reconnect attempt #${attemptNumber}...`);
+        });
+
+        s.on('reconnect_error', (error) => {
+            console.log('[ChatSocket] Reconnect error:', error);
+        });
+
+        s.on('connect_error', (error) => {
+            console.log('[ChatSocket] Connection error:', error);
         });
 
         s.on('message', (msg) => {
@@ -47,7 +69,7 @@ export function initSocket(callbacks) {
         s.on('backfill', (payload) => {
             if (callbacks.onBackfill) callbacks.onBackfill(payload);
         });
-        
+
         s.on('typing', (data) => {
             if (callbacks.onTyping) callbacks.onTyping(data);
         });
