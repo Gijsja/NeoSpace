@@ -4,3 +4,4 @@ flask
 flask-socketio
 flake8
 bandit
+pytest-cov

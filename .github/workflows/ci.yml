@@ -25,13 +25,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-test.txt
-          pip install pytest-cov bandit
 
       - name: Run tests with coverage
         run: pytest -v --tb=short --cov=. --cov-report=term-missing
 
       - name: Security scan
-        run: bandit -r . -x ./.venv,./tests --skip B101
+        run: bandit -r . -x ./.venv,./tests,./docs --skip B101
         continue-on-error: true
 
   lint:
