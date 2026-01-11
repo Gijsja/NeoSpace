@@ -1,4 +1,4 @@
-# NeoSpace
+# 🐱 NeoSpace v0.5.3 🐱
 
 [![CI](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml/badge.svg)](https://github.com/Gijsja/NeoSpace/actions/workflows/ci.yml)
 ![Version](https://img.shields.io/badge/version-0.5.2-blue)
