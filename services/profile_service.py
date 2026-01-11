@@ -201,7 +201,8 @@ def get_profile_by_user_id(user_id: int, viewer_id: Optional[int] = None, wall_p
         "following_count": following_count,
         "viewer_is_following": viewer_is_following,
         "pinned_scripts": [],  # Deprecated
-        "viewer_id": viewer_id
+        "viewer_id": viewer_id,
+        "profile_id": row["profile_id"]
     }
     
     return ServiceResult(success=True, data=profile_data)
@@ -222,55 +223,55 @@ def update_profile_fields(user_id: int, data: Dict[str, Any]) -> ServiceResult:
     updates = {}
     
     # Validate and sanitize each field
-    if "display_name" in data:
+    if data.get("display_name") is not None:
         updates["display_name"] = sanitize_display_name(data["display_name"])
     
-    if "bio" in data:
+    if data.get("bio") is not None:
         updates["bio"] = sanitize_bio(data["bio"])
     
-    if "status_message" in data:
+    if data.get("status_message") is not None:
         updates["status_message"] = html.escape(data["status_message"].strip()[:100])
     
-    if "status_emoji" in data:
+    if data.get("status_emoji") is not None:
         updates["status_emoji"] = data["status_emoji"][:4]
     
-    if "now_activity" in data:
+    if data.get("now_activity") is not None:
         updates["now_activity"] = html.escape(data["now_activity"].strip()[:50])
         
     if "now_activity_type" in data:
         updates["now_activity_type"] = data["now_activity_type"]
     
-    if "theme_preset" in data:
+    if data.get("theme_preset") is not None:
         theme = data["theme_preset"]
         if theme not in ALLOWED_THEMES:
             return ServiceResult(success=False, error=f"Invalid theme. Choose from: {ALLOWED_THEMES}", status=400)
         updates["theme_preset"] = theme
     
-    if "accent_color" in data:
+    if data.get("accent_color") is not None:
         try:
             updates["accent_color"] = validate_hex_color(data["accent_color"])
         except ValueError as e:
             return ServiceResult(success=False, error=str(e), status=400)
     
-    if "is_public" in data:
+    if data.get("is_public") is not None:
         updates["is_public"] = 1 if data["is_public"] else 0
     
-    if "show_online_status" in data:
+    if data.get("show_online_status") is not None:
         updates["show_online_status"] = 1 if data["show_online_status"] else 0
     
-    if "dm_policy" in data:
+    if data.get("dm_policy") is not None:
         policy = data["dm_policy"]
         if policy not in ALLOWED_DM_POLICIES:
             return ServiceResult(success=False, error=f"Invalid DM policy. Choose from: {ALLOWED_DM_POLICIES}", status=400)
         updates["dm_policy"] = policy
     
-    if "anthem_url" in data:
+    if data.get("anthem_url") is not None:
         url = data["anthem_url"].strip() if data["anthem_url"] else ""
         if url and not (url.startswith("http://") or url.startswith("https://")):
             return ServiceResult(success=False, error="Anthem URL must be http:// or https://", status=400)
         updates["anthem_url"] = url[:500]
     
-    if "anthem_autoplay" in data:
+    if data.get("anthem_autoplay") is not None:
         updates["anthem_autoplay"] = 1 if data["anthem_autoplay"] else 0
     
     if not updates:

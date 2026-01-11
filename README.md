@@ -37,12 +37,13 @@ The application will be available at: [http://localhost:5000](http://localhost:5
 ---
 
 ## 📚 Documentation
-
 Detailed documentation is located in the `docs/` directory.
 
-- **[NeoSpace Documentation](docs/NEOSPACE.md)** — Architecture, Philosophy, Roadmap
+- **[Rules & Architecture](docs/NEOSPACE.md)** — The single source of truth for system rules and architecture.
+- **[Sprint Status](docs/SPRINT.md)** — Current objectives, active tasks, and recent changes.
+- **[Memory & Personality](docs/feature_concepts/CAT_PERSONALITY_REFERENCE.md)** — Cat system emotional states and personality traits.
 - [UI Components](docs/ui_components.md)
-- [Archive](docs/archive/) — Historical docs and sprint logs
+- [Archive](docs/archive/) — Superseded documents and historical logs
 
 ---
 

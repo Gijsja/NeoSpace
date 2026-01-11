@@ -3,7 +3,7 @@ import sys
 
 BASE_URL = "http://localhost:5000"
 USERNAME = "AuditBot"
-PASSWORD = "safe_audit_password"
+PASSWORD = "safe_audit_password" # nosec B105
 
 def login(session):
     print(f"Attempting login/register with {USERNAME}...")
@@ -81,7 +81,7 @@ def check_route(session, path, description):
         if is_blank:
             print(f"    WARNING: Page seems empty/small!")
             # Save snippet for debug
-            with open(f"/tmp/debug_{path.replace('/', '_')}.html", "w") as f:
+            with open(f"/tmp/debug_{path.replace('/', '_')}.html", "w") as f: # nosec B108
                 f.write(response.text)
                 
     except Exception as e:

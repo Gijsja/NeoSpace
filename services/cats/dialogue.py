@@ -60,4 +60,4 @@ class CatDialogue:
         # Try specific event, then default, then fallback
         options = mode_templates.get(event, mode_templates.get("default", ["..."]))
         
-        return random.choice(options)
+        return random.SystemRandom().choice(options)

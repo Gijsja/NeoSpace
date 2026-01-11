@@ -1,0 +1,94 @@
+[main]	INFO	profile include tests: None
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: B101
+[main]	INFO	running on Python 3.12.3
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 155
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 292
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 303
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 303
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 214
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 214
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 174
+[tester]	WARNING	nosec encountered (B608), but no failed test on line 174
+Working... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+[95mRun started:2026-01-11 19:06:11.188172+00:00[0m
+[95m
+Test results:[0m
+[94m>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'dev_secret_key_DO_NOT_USE_IN_PROD'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: ./core/crypto.py:18:21[0m
+17	        secret = current_app.secret_key
+18	        if secret == "dev_secret_key_DO_NOT_USE_IN_PROD":
+19	            # Generate deterministic dev key
+
+--------------------------------------------------
+[94m>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'safe_audit_password'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b105_hardcoded_password_string.html
+   Location: ./scripts/audit_site.py:6:11[0m
+5	USERNAME = "AuditBot"
+6	PASSWORD = "safe_audit_password"
+7	
+
+--------------------------------------------------
+[93m>> Issue: [B108:hardcoded_tmp_directory] Probable insecure usage of temp file/directory.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-377 (https://cwe.mitre.org/data/definitions/377.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/plugins/b108_hardcoded_tmp_directory.html
+   Location: ./scripts/audit_site.py:84:24[0m
+83	            # Save snippet for debug
+84	            with open(f"/tmp/debug_{path.replace('/', '_')}.html", "w") as f:
+85	                f.write(response.text)
+
+--------------------------------------------------
+[94m>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: ./scripts/cron_cat.py:106:19[0m
+105	    # Fallback
+106	    base_thought = random.choice(FALLBACK_THOUGHTS)
+107	    
+
+--------------------------------------------------
+[94m>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: ./scripts/cron_cat.py:140:14[0m
+139	        # 2. Pick a random cat
+140	        bot = random.choice(bots)
+141	        username = bot["username"]
+
+--------------------------------------------------
+[94m>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.2/blacklists/blacklist_calls.html#b311-random
+   Location: ./scripts/cron_cat.py:159:11[0m
+158	        # 3. Check for laziness (Cats don't always post when the cron runs)
+159	        if random.random() < LAZY_CAT_CHANCE:
+160	            print("💤 Cat decided to sleep instead of posting.")
+
+--------------------------------------------------
+[95m
+Code scanned:[0m
+	Total lines of code: 7412
+	Total lines skipped (#nosec): 0
+[95m
+Run metrics:[0m
+	Total issues (by severity):
+		Undefined: 0
+		Low: 5
+		Medium: 1
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 3
+		High: 3
+[95mFiles skipped (0):[0m

@@ -103,7 +103,7 @@ def generate_cat_thought(cat_name: str, traits: dict) -> str:
             # Fall through to fallback
             
     # Fallback
-    base_thought = random.choice(FALLBACK_THOUGHTS)
+    base_thought = random.choice(FALLBACK_THOUGHTS) # nosec B311
     
     # Customize slightly based on name/traits
     if "glitch" in cat_name:
@@ -137,7 +137,7 @@ def main():
             return
 
         # 2. Pick a random cat
-        bot = random.choice(bots)
+        bot = random.choice(bots) # nosec B311
         username = bot["username"]
         user_id = bot["id"]
         
@@ -156,7 +156,7 @@ def main():
         print(f"🐱 Selected Cat: {username}")
 
         # 3. Check for laziness (Cats don't always post when the cron runs)
-        if random.random() < LAZY_CAT_CHANCE:
+        if random.random() < LAZY_CAT_CHANCE: # nosec B311
             print("💤 Cat decided to sleep instead of posting.")
             return
 

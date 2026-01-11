@@ -60,8 +60,8 @@ class CatAudio:
         if not candidates:
             # Fallback to any file if specific ones missing
             if cls._cached_files:
-                return random.choice(cls._cached_files)
+                return random.SystemRandom().choice(cls._cached_files)
             return "B_ANI01_MC_FN_SIM01_101.wav" # Ultimate fallback
             
-        return random.choice(candidates)
+        return random.SystemRandom().choice(candidates)
 

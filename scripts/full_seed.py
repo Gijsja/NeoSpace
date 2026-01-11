@@ -38,9 +38,9 @@ CONTENT_TEMPLATES = {
 }
 
 def generate_name(faction_id):
-    prefix = random.choice(NAMES_PREFIX)
-    suffix = random.choice(NAMES_SUFFIX)
-    num = random.randint(100, 999)
+    prefix = random.choice(NAMES_PREFIX) # nosec B311
+    suffix = random.choice(NAMES_SUFFIX) # nosec B311
+    num = random.randint(100, 999) # nosec B311
     return f"{prefix}{suffix}_{num}_F{faction_id}"
 
 def wipe_db(conn):
@@ -55,7 +55,7 @@ def wipe_db(conn):
     ]
     for table in tables:
         try:
-            cursor.execute(f"DELETE FROM {table}")
+            cursor.execute(f"DELETE FROM {table}") # nosec B608
             print(f"  - Cleared {table}")
         except sqlite3.OperationalError as e:
             print(f"  - Failed to clear {table} (might not exist): {e}")
@@ -102,7 +102,7 @@ def seed_cats(conn):
             bio = f"Unit of {f_name}. {f_desc}"
             # Avatar path (using default for now, randomly colored in frontend maybe?)
             # or we can assume there are some default cat avatars
-            avatar = f"/static/avatars/cat_{random.randint(1, 5)}.png" # Assuming 5 generic files exist
+            avatar = f"/static/avatars/cat_{random.randint(1, 5)}.png" # nosec B311 # Assuming 5 generic files exist
             
             cursor.execute(
                 "INSERT INTO profiles (user_id, display_name, bio, avatar_path, theme_preset) VALUES (?, ?, ?, ?, ?)",
@@ -124,11 +124,11 @@ def seed_cats(conn):
             
             # 4. Create Content (Posts)
             # Generate 5-10 posts
-            num_posts = random.randint(5, 10)
+            num_posts = random.randint(5, 10) # nosec B311
             templates = CONTENT_TEMPLATES.get(f_id, ["Meow."])
             
             for _ in range(num_posts):
-                text = random.choice(templates).format(n=random.randint(1, 99))
+                text = random.choice(templates).format(n=random.randint(1, 99)) # nosec B311
                 # Module type text
                 cursor.execute(
                     """INSERT INTO profile_posts (profile_id, module_type, content_payload, display_order)

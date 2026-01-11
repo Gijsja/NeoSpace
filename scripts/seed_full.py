@@ -122,12 +122,12 @@ def seed():
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
                         (user_id, 
                          handle.upper(), 
-                         random.choice(BIOS),
-                         random.choice(STATUSES),
+                         random.choice(BIOS), # nosec B311
+                         random.choice(STATUSES), # nosec B311
                          "👋",
-                         random.choice(ACTIVITIES)[1],
-                         random.choice(ACTIVITIES)[0],
-                         random.choice(THEMES))
+                         random.choice(ACTIVITIES)[1], # nosec B311
+                         random.choice(ACTIVITIES)[0], # nosec B311
+                         random.choice(THEMES)) # nosec B311
                     )
                 
                 created_users.append({'id': user_id, 'name': handle})
@@ -145,21 +145,21 @@ def seed():
         if profiles:
             print(f"  📝 generating 50 mixed posts...")
             for i in range(50):
-                p_id = random.choice(profiles)['id']
-                type_choice = random.choice(['text', 'image', 'link', 'code'])
+                p_id = random.choice(profiles)['id'] # nosec B311
+                type_choice = random.choice(['text', 'image', 'link', 'code']) # nosec B311
                 
                 payload = {}
                 if type_choice == 'text':
-                    payload = {"text": random.choice(TEXTS)}
+                    payload = {"text": random.choice(TEXTS)} # nosec B311
                 elif type_choice == 'image':
-                    url = f"{random.choice(IMAGES)}?r={i}"
+                    url = f"{random.choice(IMAGES)}?r={i}" # nosec B311
                     payload = {"url": url}
                 elif type_choice == 'link':
-                    link = random.choice(LINKS)
+                    link = random.choice(LINKS) # nosec B311
                     payload = {"url": link['url'], "title": link['title']}
                 elif type_choice == 'code':
                     type_choice = 'text' 
-                    payload = {"text": f"Found this snippet:\n\n{random.choice(CODE_SNIPPETS)}"}
+                    payload = {"text": f"Found this snippet:\n\n{random.choice(CODE_SNIPPETS)}"} # nosec B311
 
                 db.execute(
                     """INSERT INTO profile_posts 
@@ -172,11 +172,11 @@ def seed():
         if rooms and created_users:
             print("  💬 Generating Chat Messages...")
             for _ in range(100):
-                room = random.choice(rooms)
-                user = random.choice(created_users)
-                msg = random.choice(TEXTS)
+                room = random.choice(rooms) # nosec B311
+                user = random.choice(created_users) # nosec B311
+                msg = random.choice(TEXTS) # nosec B311
                 
-                delta = timedelta(minutes=random.randint(1, 10000))
+                delta = timedelta(minutes=random.randint(1, 10000)) # nosec B311
                 ts = (datetime.now() - delta).isoformat()
 
                 db.execute(

@@ -197,6 +197,8 @@ class AddStickerRequest(msgspec.Struct):
     target_user_id: int
     x: int = 0
     y: int = 0
+    rotation: float = 0
+    scale: float = 1.0
 
 
 # Script CRUD Operations

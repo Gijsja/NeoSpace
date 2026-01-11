@@ -4,7 +4,7 @@ import json
 
 BASE_URL = "http://localhost:5000"
 USERNAME = "vibecoder"
-PASSWORD = "password"
+PASSWORD = "password" # nosec B105
 
 def add_audio():
     s = requests.Session()

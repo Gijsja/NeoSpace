@@ -15,7 +15,7 @@ def get_dm_key() -> bytes:
         # In development, derive from secret key (NOT for production!)
         from flask import current_app
         secret = current_app.secret_key
-        if secret == "dev_secret_key_DO_NOT_USE_IN_PROD":
+        if secret == "dev_secret_key_DO_NOT_USE_IN_PROD": # nosec B105
             # Generate deterministic dev key
             key_hex = hashlib.sha256(b"dev_dm_key_DO_NOT_USE_IN_PROD").hexdigest()
         else:

@@ -5,7 +5,7 @@ import json
 
 BASE_URL = "http://localhost:5000"
 USERNAME = "vibecoder"
-PASSWORD = "password"
+PASSWORD = "password" # nosec B105
 
 def get_session():
     s = requests.Session()
@@ -55,7 +55,7 @@ def populate():
     ]
 
     for i in range(50):
-        t = random.choice(types)
+        t = random.choice(types) # nosec B311
         payload = {
             "module_type": t,
             "content": {},
@@ -63,12 +63,12 @@ def populate():
         }
         
         if t == 'text':
-            payload["content"]["text"] = f"{random.choice(texts)}\n\n*Item #{i+1}*"
+            payload["content"]["text"] = f"{random.choice(texts)}\n\n*Item #{i+1}*" # nosec B311
         elif t == 'image':
             # Add random query param to avoid cache and ensure unique images
-            payload["content"]["url"] = f"{random.choice(images)}?random={i}"
+            payload["content"]["url"] = f"{random.choice(images)}?random={i}" # nosec B311
         elif t == 'link':
-            l = random.choice(links)
+            l = random.choice(links) # nosec B311
             payload["content"]["url"] = l["url"]
             payload["content"]["title"] = f"{l['title']} (#{i+1})"
 

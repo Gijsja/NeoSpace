@@ -190,8 +190,12 @@ class CatStore:
                     compatibility = 30.0 # Same Faction Bonus
                 else:
                     compatibility = -10.0 # Rival Faction (Generic)
-        except Exception:
-            pass
+        except Exception as e:
+            # Filter expected errors (e.g. missing tables during initial seed)
+            # Otherwise log the issue
+            if "no such table" not in str(e).lower():
+                import logging
+                logging.warning(f"Failed to calculate cat compatibility: {e}")
         
         # 3. Update Table
         total_affinity = max(-100, min(100, affinity_memories + compatibility))

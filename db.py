@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS profile_stickers (
     profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     sticker_type TEXT, -- Emoji char or 'image'
     image_path TEXT,   -- Path to uploaded image (Sprint 11)
+    text_content TEXT,
     x_pos REAL NOT NULL,
     y_pos REAL NOT NULL,
     rotation REAL DEFAULT 0,
