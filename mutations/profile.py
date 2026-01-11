@@ -40,7 +40,7 @@ def update_profile():
     
     try:
         import msgspec
-        from msgspec_models import UpdateProfileRequest
+        from core.schemas import UpdateProfileRequest
         req = msgspec.json.decode(request.get_data(), type=UpdateProfileRequest)
         data = msgspec.to_builtins(req)
     except msgspec.ValidationError as e:
@@ -138,7 +138,7 @@ def add_sticker():
         # JSON (Emoji)
         try:
             import msgspec
-            from msgspec_models import AddStickerRequest
+            from core.schemas import AddStickerRequest
             req = msgspec.json.decode(request.get_data(), type=AddStickerRequest)
             sticker_type = req.sticker_type
             target_user_id = req.target_user_id
@@ -202,7 +202,7 @@ def update_sticker():
     
     try:
         import msgspec
-        from msgspec_models import UpdateStickerRequest
+        from core.schemas import UpdateStickerRequest
         req = msgspec.json.decode(request.get_data(), type=UpdateStickerRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -229,7 +229,7 @@ def remove_sticker():
     
     try:
         import msgspec
-        from msgspec_models import RemoveStickerRequest
+        from core.schemas import RemoveStickerRequest
         req = msgspec.json.decode(request.get_data(), type=RemoveStickerRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

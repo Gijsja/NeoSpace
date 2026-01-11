@@ -5,7 +5,7 @@ High-performance struct definitions for hot-path JSON serialization.
 msgspec provides 10-80x faster encoding/decoding than stdlib json.
 
 Usage:
-    from structs import Message, WallPost, encode_json, decode_json
+    from core.structs import Message, WallPost, encode_json, decode_json
 """
 
 import msgspec

@@ -22,7 +22,7 @@ def send_dm():
     
     try:
         import msgspec
-        from msgspec_models import SendDMRequest
+        from core.schemas import SendDMRequest
         req = msgspec.json.decode(request.get_data(), type=SendDMRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -73,7 +73,7 @@ def mark_dm_read():
     
     try:
         import msgspec
-        from msgspec_models import MarkDMReadRequest
+        from core.schemas import MarkDMReadRequest
         req = msgspec.json.decode(request.get_data(), type=MarkDMReadRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -93,7 +93,7 @@ def delete_dm():
     
     try:
         import msgspec
-        from msgspec_models import DeleteDMRequest
+        from core.schemas import DeleteDMRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteDMRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

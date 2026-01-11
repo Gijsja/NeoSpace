@@ -15,7 +15,7 @@ def save_song():
         return jsonify(ok=False, error="Auth required"), 401
 
     try:
-        from msgspec_models import SaveSongRequest
+        from core.schemas import SaveSongRequest
         req = msgspec.json.decode(request.get_data(), type=SaveSongRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
@@ -46,7 +46,7 @@ def delete_song():
         return jsonify(ok=False, error="Auth required"), 401
 
     try:
-        from msgspec_models import DeleteSongRequest
+        from core.schemas import DeleteSongRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteSongRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400

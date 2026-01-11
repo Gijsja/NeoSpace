@@ -73,7 +73,7 @@ def create_room():
     
     try:
         import msgspec
-        from msgspec_models import CreateRoomRequest
+        from core.schemas import CreateRoomRequest
         req = msgspec.json.decode(request.get_data(), type=CreateRoomRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

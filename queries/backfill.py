@@ -2,7 +2,7 @@
 from flask import jsonify, current_app
 from db import get_db
 import msgspec
-from msgspec_models import Message, BackfillResponse
+from core.schemas import Message, BackfillResponse
 
 
 def backfill_messages():

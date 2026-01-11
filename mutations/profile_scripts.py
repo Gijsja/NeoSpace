@@ -174,7 +174,7 @@ def get_pinned_scripts(profile_id):
 def pin_script_view():
     try:
         import msgspec
-        from msgspec_models import PinScriptRequest
+        from core.schemas import PinScriptRequest
         req = msgspec.json.decode(request.get_data(), type=PinScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -189,7 +189,7 @@ def pin_script_view():
 def unpin_script_view():
     try:
         import msgspec
-        from msgspec_models import UnpinScriptRequest
+        from core.schemas import UnpinScriptRequest
         req = msgspec.json.decode(request.get_data(), type=UnpinScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -203,7 +203,7 @@ def unpin_script_view():
 def reorder_pins_view():
     try:
         import msgspec
-        from msgspec_models import ReorderScriptsRequest
+        from core.schemas import ReorderScriptsRequest
         req = msgspec.json.decode(request.get_data(), type=ReorderScriptsRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

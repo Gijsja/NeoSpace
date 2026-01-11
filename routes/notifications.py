@@ -46,7 +46,7 @@ def mark_one_read():
     """Mark a notification as read."""
     try:
         import msgspec
-        from msgspec_models import MarkNotificationReadRequest
+        from core.schemas import MarkNotificationReadRequest
         req = msgspec.json.decode(request.get_data(), type=MarkNotificationReadRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -69,7 +69,7 @@ def delete():
     """Delete a notification."""
     try:
         import msgspec
-        from msgspec_models import DeleteNotificationRequest
+        from core.schemas import DeleteNotificationRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteNotificationRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

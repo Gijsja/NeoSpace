@@ -62,7 +62,7 @@ def update_sticker():
 
     try:
         import msgspec
-        from msgspec_models import UpdateStickerRequest
+        from core.schemas import UpdateStickerRequest
         req = msgspec.json.decode(request.get_data(), type=UpdateStickerRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -92,7 +92,7 @@ def delete_sticker():
         
     try:
         import msgspec
-        from msgspec_models import RemoveStickerRequest
+        from core.schemas import RemoveStickerRequest
         req = msgspec.json.decode(request.get_data(), type=RemoveStickerRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

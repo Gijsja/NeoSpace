@@ -5,7 +5,7 @@ Delegates to friends_service.
 
 from flask import g, jsonify, request
 from services import friends_service
-from security import limiter
+from core.security import limiter
 
 @limiter.limit("20/minute")
 def follow():
@@ -15,7 +15,7 @@ def follow():
     
     try:
         import msgspec
-        from msgspec_models import FollowRequest
+        from core.schemas import FollowRequest
         req = msgspec.json.decode(request.get_data(), type=FollowRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -35,7 +35,7 @@ def unfollow():
     
     try:
         import msgspec
-        from msgspec_models import UnfollowRequest
+        from core.schemas import UnfollowRequest
         req = msgspec.json.decode(request.get_data(), type=UnfollowRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -58,7 +58,7 @@ def set_top8():
     
     try:
         import msgspec
-        from msgspec_models import UpdateTop8Request
+        from core.schemas import UpdateTop8Request
         req = msgspec.json.decode(request.get_data(), type=UpdateTop8Request)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

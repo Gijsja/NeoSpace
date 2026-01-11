@@ -19,7 +19,7 @@ def add_wall_post():
     
     try:
         import msgspec
-        from msgspec_models import AddWallPostRequest
+        from core.schemas import AddWallPostRequest
         req = msgspec.json.decode(request.get_data(), type=AddWallPostRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -45,7 +45,7 @@ def update_wall_post():
     
     try:
         import msgspec
-        from msgspec_models import UpdateWallPostRequest
+        from core.schemas import UpdateWallPostRequest
         req = msgspec.json.decode(request.get_data(), type=UpdateWallPostRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -71,7 +71,7 @@ def delete_wall_post():
     
     try:
         import msgspec
-        from msgspec_models import DeleteWallPostRequest
+        from core.schemas import DeleteWallPostRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteWallPostRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -88,7 +88,7 @@ def reorder_wall_posts():
     
     try:
         import msgspec
-        from msgspec_models import ReorderWallPostsRequest
+        from core.schemas import ReorderWallPostsRequest
         req = msgspec.json.decode(request.get_data(), type=ReorderWallPostsRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400

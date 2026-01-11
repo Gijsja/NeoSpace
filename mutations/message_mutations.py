@@ -6,9 +6,9 @@ import sqlite3
 
 
 
-from security import limiter
+from core.security import limiter
 import msgspec
-from msgspec_models import SendMessageRequest
+from core.schemas import SendMessageRequest
 
 @limiter.limit("60/minute")
 def send_message():

@@ -15,7 +15,7 @@ def save_script():
         return jsonify(ok=False, error="Auth required"), 401
 
     try:
-        from msgspec_models import SaveScriptRequest
+        from core.schemas import SaveScriptRequest
         req = msgspec.json.decode(request.get_data(), type=SaveScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
@@ -74,7 +74,7 @@ def delete_script():
         return jsonify(ok=False, error="Auth required"), 401
 
     try:
-        from msgspec_models import DeleteScriptRequest
+        from core.schemas import DeleteScriptRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400

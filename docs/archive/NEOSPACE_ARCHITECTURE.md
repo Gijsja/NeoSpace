@@ -142,7 +142,7 @@ SBBS/
 ├── db.py                  # Database schema, connection pool, retry logic
 ├── auth.py                # Authentication blueprint (login/register/logout)
 ├── sockets.py             # WebSocket event handlers
-├── crypto_utils.py        # AES-256-GCM encryption utilities
+├── core.crypto.py        # AES-256-GCM encryption utilities
 │
 ├── routes/                # HTTP route blueprints
 ├── mutations/             # Database write operations

@@ -18,7 +18,7 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     # Security Hardening (Sprint 18)
-    from security import init_security
+    from core.security import init_security
     init_security(app)
 
     from auth import auth_bp, login_required

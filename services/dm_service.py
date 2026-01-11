@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
 from db import get_db
-from crypto_utils import (
+from core.crypto import (
     get_dm_key, 
     derive_conversation_key, 
     get_conversation_id,

@@ -14,7 +14,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def register():
     try:
         import msgspec
-        from msgspec_models import RegisterRequest
+        from core.schemas import RegisterRequest
         req = msgspec.json.decode(request.get_data(), type=RegisterRequest)
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
@@ -73,7 +73,7 @@ def login():
     if request.method == 'POST':
         try:
             import msgspec
-            from msgspec_models import LoginRequest
+            from core.schemas import LoginRequest
             req = msgspec.json.decode(request.get_data(), type=LoginRequest)
         except msgspec.ValidationError as e:
             return jsonify(error=f"Invalid request: {e}"), 400

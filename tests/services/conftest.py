@@ -35,7 +35,7 @@ def db_session():
     app = Flask(__name__)
     app.config["DATABASE"] = db_path
     app.config["TESTING"] = True
-    # Required for DM encryption (crypto_utils derives key from this)
+    # Required for DM encryption (core.crypto derives key from this)
     app.secret_key = "dev_secret_key_DO_NOT_USE_IN_PROD"
     
     with app.app_context():

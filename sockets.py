@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
 from flask import g, session, request
 from db import get_db
 from mutations.message_mutations import send_message
-from structs import Message, row_to_message
+from core.structs import Message, row_to_message
 import msgspec
 import os
 import html
