@@ -62,6 +62,14 @@ def create_app(test_config=None):
 
     @app.before_request
     def load_user():
+        # Optimization: Skip DB call for static assets and user files
+        # These endpoints handle their own auth or are public, and don't need g.user
+        if (request.path.startswith('/static/') or
+            request.path.startswith('/files/') or
+            request.path == '/favicon.ico'):
+            g.user = None
+            return
+
         user_id = session.get('user_id')
         if user_id is None:
             g.user = None
