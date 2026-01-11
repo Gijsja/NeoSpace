@@ -25,25 +25,9 @@ def speak():
     POST body: {"event": "login_success"}
     Returns: {"cat": "beans", "state": "Playful", "sound": "purr.wav", "line": "..."}
     """
-    print(f"[cats.speak] Request JSON: {request.get_json(silent=True)}")
     data = request.get_json() or {}
     event = data.get("event", "idle")
     cat_name = data.get("cat", "beans") # Default
     
-    # Optional: Authentication check (TODO)
-    
-    print(f"[cats.speak] Triggering event '{event}' for cat '{cat_name}'")
-    response = trigger_event(cat_name, event, user_id=g.user['id'] if g.user else None)
-    print(f"[cats.speak] Response: {response}")
+    response = trigger_event(cat_name, event, user_id=g.user['id'])
     return jsonify(response)
-
-
-@cats_bp.route("/seed", methods=["POST"])
-@login_required
-def seed():
-    """
-    Seed cat personalities (internal use).
-    """
-    # seed_db() needs implementation in __init__ or store if we want to call it here
-    # For now, we rely on the manual scripts run earlier
-    return jsonify({"status": "ok", "message": "Seeding handled manually via scripts."})

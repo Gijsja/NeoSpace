@@ -18,10 +18,7 @@ def create_app(test_config=None):
     def inject_version():
         return dict(version=__version__)
     
-    # Inject version into all templates
-    @app.context_processor
-    def inject_version():
-        return dict(version=__version__)
+
     
     # Load Configuration
     from config import config

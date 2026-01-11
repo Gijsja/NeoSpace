@@ -42,8 +42,11 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     avatar_color TEXT,
     is_staff INTEGER DEFAULT 0,
-    is_banned INTEGER DEFAULT 0
+    is_banned INTEGER DEFAULT 0,
+    is_bot INTEGER DEFAULT 0,
+    bot_personality_id INTEGER
 );
+CREATE INDEX IF NOT EXISTS idx_users_is_bot ON users(is_bot);
 
 -- Sprint 6: User Profiles
 CREATE TABLE IF NOT EXISTS profiles (
@@ -216,6 +219,58 @@ CREATE TABLE IF NOT EXISTS rooms (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_messages_room ON messages(room_id, created_at);
+
+-- Cat System Tables
+CREATE TABLE IF NOT EXISTS cat_factions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    traits TEXT -- JSON
+);
+
+CREATE TABLE IF NOT EXISTS cat_personalities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    priority INTEGER DEFAULT 5,
+    triggers TEXT,              -- JSON array
+    mode TEXT DEFAULT 'cute',   -- 'cute', 'pirate', 'formal'
+    silence_bias REAL DEFAULT 0.5,
+    global_observer INTEGER DEFAULT 0,
+    pleasure_weight REAL DEFAULT 1.0,
+    arousal_weight REAL DEFAULT 0.5,
+    dominance_weight REAL DEFAULT 1.0,
+    dialogues TEXT,             -- JSON
+    avatar_url TEXT,
+    faction_id INTEGER REFERENCES cat_factions(id),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cat_states (
+    cat_id INTEGER PRIMARY KEY REFERENCES cat_personalities(id),
+    pleasure REAL,
+    arousal REAL,
+    dominance REAL,
+    last_updated TEXT DEFAULT CURRENT_TIMESTAMP,
+    last_deed_id TEXT
+);
+
+CREATE TABLE IF NOT EXISTS cat_memories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_cat_id INTEGER REFERENCES cat_personalities(id),
+    target_user_id INTEGER REFERENCES users(id),
+    memory_type TEXT,
+    opinion_modifier REAL,
+    expires_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS cat_relationships (
+    source_cat_id INTEGER NOT NULL,
+    target_user_id INTEGER NOT NULL,
+    affinity REAL DEFAULT 0.0,
+    compatibility REAL DEFAULT 0.0,
+    last_updated TEXT DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (source_cat_id, target_user_id)
+);
 '''
 
 
@@ -398,16 +453,30 @@ def _configure_connection(db, path):
     
     if path == ":memory:":
         return
+        
+    # Load PRAGMAs from config or fall back to conservative defaults
+    try:
+        pragmas = current_app.config.get('SQLITE_PRAGMAS', {})
+    except RuntimeError:
+        # Fallback if outside app context
+        pragmas = {
+            'busy_timeout': 30000,
+            'journal_mode': 'WAL',
+            'synchronous': 'NORMAL',
+            'foreign_keys': 'ON',
+            'mmap_size': 268435456,
+            'cache_size': -64000,
+            'temp_store': 'MEMORY'
+        }
     
-    db.execute(f"PRAGMA busy_timeout = {BUSY_TIMEOUT_MS};")
-    db.execute("PRAGMA journal_mode = WAL;")
-    db.execute("PRAGMA synchronous = NORMAL;")
-    # JUICED: 2GB memory-mapped I/O (zero-copy reads)
-    db.execute("PRAGMA mmap_size = 2147483648;")
-    # JUICED: 512MB RAM cache (negative = kilobytes)
-    db.execute("PRAGMA cache_size = -512000;")
-    db.execute("PRAGMA temp_store = MEMORY;")
-    db.execute("PRAGMA foreign_keys = ON;")
+    # Apply settings
+    db.execute(f"PRAGMA busy_timeout = {pragmas.get('busy_timeout', 30000)};")
+    db.execute(f"PRAGMA journal_mode = {pragmas.get('journal_mode', 'WAL')};")
+    db.execute(f"PRAGMA synchronous = {pragmas.get('synchronous', 'NORMAL')};")
+    db.execute(f"PRAGMA mmap_size = {pragmas.get('mmap_size', 268435456)};")
+    db.execute(f"PRAGMA cache_size = {pragmas.get('cache_size', -64000)};")
+    db.execute(f"PRAGMA temp_store = {pragmas.get('temp_store', 'MEMORY')};")
+    db.execute(f"PRAGMA foreign_keys = {pragmas.get('foreign_keys', 'ON')};")
 
 
 def get_db():

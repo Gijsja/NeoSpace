@@ -66,12 +66,23 @@ active:shadow-none" %}
 {# --- INPUTS --- #}
 {% macro input(name, label=None, placeholder='', type='text', value='', class='', id=None, attrs='',
 wrapper_class='w-full') -%}
-<div class="flex flex-col gap-1 {{ wrapper_class }}">
+<div class="flex flex-col gap-1 {{ wrapper_class }}" {% if type=='password' %}x-data="{ show: false }" {% endif %}>
     {% if label %}
     <label for="{{ id or name }}" class="font-bold text-xs uppercase">{{ label }}</label>
     {% endif %}
-    <input type="{{ type }}" name="{{ name }}" id="{{ id or name }}" placeholder="{{ placeholder }}" value="{{ value }}"
-        class="nb-input h-10 {{ class }}" {{ attrs|safe }}>
+    <div class="relative">
+        <input {% if type=='password' %}:type="show ? 'text' : 'password'" type="password" {% else %}type="{{ type }}"
+            {% endif %} name="{{ name }}" id="{{ id or name }}" placeholder="{{ placeholder }}" value="{{ value }}"
+            class="nb-input h-10 {{ class }} {% if type == 'password' %}pr-10{% endif %}" {{ attrs|safe }}>
+
+        {% if type == 'password' %}
+        <button type="button" @click="show = !show"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black focus:outline-none transition-transform"
+            tabindex="-1">
+            <i class="ph-bold text-lg" :class="show ? 'ph-eye-slash' : 'ph-eye'"></i>
+        </button>
+        {% endif %}
+    </div>
 </div>
 {%- endmacro %}
 

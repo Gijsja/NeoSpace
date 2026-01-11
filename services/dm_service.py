@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
 from db import get_db
+from core.types import ServiceResult
 from core.crypto import (
     get_dm_key, 
     derive_conversation_key, 
@@ -15,19 +16,6 @@ from core.crypto import (
     encrypt_message, 
     decrypt_message
 )
-
-
-# =============================================
-# RESULT CLASSES
-# =============================================
-
-@dataclass
-class ServiceResult:
-    """Standard result object for service operations."""
-    success: bool
-    data: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    status: int = 200
 
 
 # =============================================

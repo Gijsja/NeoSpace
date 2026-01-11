@@ -143,6 +143,7 @@
 
 {% block main_container %}
 {% from "components/ui_macros.html" import button, input %}
+{% from "components/tooltip.html" import tooltip %}
 <div class="flex h-full overflow-hidden relative" x-data="{ contextOpen: false }">
 
     <!-- Chat Stream Area -->
@@ -161,8 +162,11 @@
                     class="hidden text-xs font-mono font-bold text-gray-500 mr-2 flex items-center gap-1">
                     <span class="animate-pulse">Typing...</span>
                 </div>
+                {% call tooltip('Toggle Context', position='left') %}
                 {{ button(None, variant='secondary', class='w-8 h-8 p-0 flex items-center justify-center shadow-hard-sm
-                hover:bg-yellow-300', icon='ph-bold ph-sidebar-simple', attrs='@click="contextOpen = !contextOpen"') }}
+                hover:bg-yellow-300', icon='ph-bold ph-sidebar-simple', attrs='@click="contextOpen = !contextOpen"
+                aria-label="Toggle Context Sidebar"') }}
+                {% endcall %}
             </div>
         </div>
 
@@ -178,12 +182,17 @@
             <form id="message-form" class="flex gap-2 relative">
 
                 <!-- Tools -->
+                {% call tooltip('Insert Emoji', position='top') %}
                 {{ button(None, variant='secondary', id='emoji-btn', class='w-10 h-10 p-0 flex items-center
                 justify-center shadow-hard-sm hover:bg-yellow-300 bg-gray-100', icon='ph-bold ph-smiley text-xl',
-                attrs='type="button"') }}
+                attrs='type="button" aria-label="Insert Emoji"') }}
+                {% endcall %}
+
+                {% call tooltip('Upload Image', position='top') %}
                 {{ button(None, variant='secondary', id='upload-btn', class='w-10 h-10 p-0 flex items-center
                 justify-center shadow-hard-sm hover:bg-electric-blue bg-gray-100', icon='ph-bold ph-image text-xl',
-                attrs='type="button"') }}
+                attrs='type="button" aria-label="Upload Image"') }}
+                {% endcall %}
 
                 <!-- Input -->
                 <div class="flex-1 relative">

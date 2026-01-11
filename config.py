@@ -51,6 +51,17 @@ class ProductionConfig(Config):
         if not self.SECRET_KEY or self.SECRET_KEY.startswith('dev_'):
             raise ValueError("CRITICAL SECURITY ERROR: SECRET_KEY must be set to a secure value in production!")
 
+    # Database Performance (SQLite)
+    SQLITE_PRAGMAS = {
+        'busy_timeout': 30000,
+        'journal_mode': 'WAL',
+        'synchronous': 'NORMAL',
+        'foreign_keys': 'ON',
+        'mmap_size': 268435456, # 256 MB default (conservative for generic environments)
+        'cache_size': -64000,   # 64MB
+        'temp_store': 'MEMORY'
+    }
+
 # Config selector
 config = {
     "development": DevelopmentConfig,

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
 from db import get_db
+from core.types import ServiceResult
 
 
 # =============================================
@@ -19,16 +20,6 @@ ALLOWED_TYPES = {'text', 'image', 'link', 'script', 'audio', 'voice_note'}
 
 
 # =============================================
-# RESULT CLASSES
-# =============================================
-
-@dataclass
-class ServiceResult:
-    """Standard result object for service operations."""
-    success: bool
-    data: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    status: int = 200
 
 
 # =============================================
