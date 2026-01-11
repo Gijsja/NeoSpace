@@ -4,7 +4,7 @@ import random
 import time
 from werkzeug.security import generate_password_hash
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 FACTIONS = [
     (1, "The Concrete Sentinels", "Hypervigilant, territorial, and watchful; guardians of rigid boundaries and silent observation."),

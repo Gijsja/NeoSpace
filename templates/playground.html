@@ -31,33 +31,7 @@
 </head>
 
 <body class="bg-slate-50 min-h-screen text-slate-800 p-8 font-sans selection:bg-acid-green selection:text-black pb-32">
-    <!-- CDN Failure Detector -->
-    <div id="cdn-error"
-        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(255,0,0,0.9); z-index:9999; padding:2rem; color:white; font-family:sans-serif;">
-        <h1 style="font-size:3rem; font-weight:bold; text-transform:uppercase;">Critical System Failure</h1>
-        <p style="font-size:1.5rem;">The styling engine (Tailwind) or logic core (Alpine.js) failed to load.</p>
-        <p style="margin-top:1rem;">Possible causes:</p>
-        <ul style="list-style:disc; margin-left:2rem;">
-            <li>No internet connection (CDNs are unreachable)</li>
-            <li>Ad-blocker or Firewall blocking `cdn.tailwindcss.com` or `unpkg.com`</li>
-        </ul>
-        <button onclick="location.reload()"
-            style="margin-top:2rem; padding:1rem 2rem; background:black; color:white; border:2px solid white; cursor:pointer; font-weight:bold; text-transform:uppercase;">Retry
-            Connection</button>
-    </div>
-    <script>
-        window.addEventListener('load', function () {
-            // Check if Tailwind loaded (it adds a style tag or classes work)
-            const tailwindLoaded = typeof tailwind !== 'undefined';
-            // Check if Alpine loaded
-            const alpineLoaded = typeof Alpine !== 'undefined';
 
-            if (!tailwindLoaded || !alpineLoaded) {
-                document.getElementById('cdn-error').style.display = 'block';
-                console.error('Critical: CDNs failed to load. Tailwind:', tailwindLoaded, 'Alpine:', alpineLoaded);
-            }
-        });
-    </script>
 
     <!-- Imports -->
     {% from "components/ui_macros.html" import button, input, card, badge, textarea, select %}
@@ -96,12 +70,10 @@
         <section class="space-y-8 md:col-span-2 lg:col-span-1">
             <div class="space-y-4">
                 <h2 class="text-xl font-bold uppercase border-l-4 border-black pl-3">Media</h2>
-                {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Neon
-                City.mp3")
+                {{ audio_player(src="/static/audio/ui_click.wav", title="Neon City.wav")
                 }}
                 <div class="h-4"></div>
-                {{ audio_player(src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3", title="Voice Note
-                001",
+                {{ audio_player(src="/static/audio/ui_click.wav", title="Voice Note 001",
                 is_voice=True) }}
             </div>
 
@@ -304,7 +276,7 @@
                 <div>
                     <h3 class="font-bold text-sm mb-2">Avatars</h3>
                     <div class="flex gap-4 items-center">
-                        {{ avatar(src='https://i.pravatar.cc/150?u=neo', size='lg') }}
+                        {{ avatar(src='/static/images/cats/beans.png', size='lg') }}
                         {{ avatar(text='JD', size='md') }}
                         {% call avatar(text='ON', size='md') %}
                         <span
@@ -505,7 +477,7 @@
                             <div
                                 class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-indigo-500 to-cyan-400 opacity-30 blur-lg transition-opacity group-hover:opacity-50">
                             </div>
-                            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300&auto=format&fit=crop"
+                            <img src="/static/images/cats/miso.png&auto=format&fit=crop"
                                 alt="Album Art"
                                 class="relative h-64 w-64 rounded-2xl object-cover shadow-lg transition-transform duration-500 group-hover:scale-105"
                                 :class="isPlaying ? 'scale-105' : 'scale-100 grayscale-[20%]'">
@@ -612,7 +584,7 @@
                     </div>
 
                     <div class="relative mb-5">
-                        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                        <img src="/static/images/cats/miso.png"
                             class="w-full h-48 object-cover border-4 border-black grayscale transition-all duration-300"
                             :class="isPlaying ? 'grayscale-0' : 'grayscale'">
                         <div
@@ -683,7 +655,7 @@
                             class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_4px,6px_100%]">
                         </div>
 
-                        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                        <img src="/static/images/cats/miso.png"
                             class="w-full h-full object-cover sepia hue-rotate-90 contrast-125 brightness-75">
                     </div>
 
@@ -733,7 +705,7 @@
                         <div class="p-6 pt-12 text-center relative">
                             <div
                                 class="absolute -top-16 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full border-4 border-black overflow-hidden bg-yellow-300 z-20 shadow-[4px_4px_0_0_#000]">
-                                <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300"
+                                <img src="/static/images/cats/miso.png"
                                     class="w-full h-full object-cover">
                             </div>
 

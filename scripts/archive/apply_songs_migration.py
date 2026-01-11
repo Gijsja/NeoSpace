@@ -1,7 +1,7 @@
 
 import sqlite3
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 sql_songs = """
 CREATE TABLE IF NOT EXISTS songs (

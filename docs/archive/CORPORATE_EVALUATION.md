@@ -132,7 +132,7 @@ Covers database schema, wall snapshot model, permissions, performance, and non-g
 | Specified          | Current LocalBBS                  | Status  |
 | ------------------ | --------------------------------- | ------- |
 | Flask backend      | `app.py`, `auth.py`, `sockets.py` | ✅ Done |
-| SQLite persistence | `app.db` with WAL                 | ✅ Done |
+| SQLite persistence | `neospace.db` with WAL                 | ✅ Done |
 | REST-first         | `/api/*` endpoints                | ✅ Done |
 | WebSocket-optional | Flask-SocketIO                    | ✅ Done |
 | Permissions        | Auth + ownership checks           | ✅ Done |

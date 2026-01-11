@@ -1,5 +1,5 @@
 import sqlite3
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 conn = sqlite3.connect(DB_PATH)
 try:
     print("Adding last_deed_id column...")

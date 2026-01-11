@@ -7,7 +7,7 @@ import queue
 from contextlib import contextmanager
 from flask import g, current_app
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 # =============================================================================
 # Concurrency Settings

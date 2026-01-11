@@ -357,7 +357,7 @@
                 <!-- Music Player (Tape Deck Style) -->
                 <div class="nb-card p-2 flex items-center gap-3 bg-red-50" x-data="{ 
                     playing: false, 
-                    audio: new Audio('/static/audio/ui_click.mp3'),
+                    audio: new Audio('/static/audio/ui_click.wav'),
                     init() { this.audio.loop = true; this.audio.volume = 0.5; },
                     toggle() { this.playing = !this.playing; this.playing ? this.audio.play() : this.audio.pause(); }
                 }">

@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = 'app.db'
+DB_PATH = 'neospace.db'
 
 def run_migration():
     if not os.path.exists(DB_PATH):

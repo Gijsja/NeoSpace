@@ -2,7 +2,7 @@
 import sqlite3
 import json
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 FACTIONS = [
     (1, "The Concrete Sentinels", "Hypervigilant, territorial, and watchful; guardians of rigid boundaries and silent observation."),

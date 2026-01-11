@@ -38,7 +38,7 @@ def test_timestamp():
         print(f"Sent message ID: {mid}")
         
         # Check DB
-        conn = sqlite3.connect("app.db")
+        conn = sqlite3.connect("neospace.db")
         row = conn.execute("SELECT created_at FROM messages WHERE id=?", (mid,)).fetchone()
         conn.close()
         

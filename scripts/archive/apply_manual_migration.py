@@ -1,7 +1,7 @@
 
 import sqlite3
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 sql_factions = """
 CREATE TABLE IF NOT EXISTS cat_factions (

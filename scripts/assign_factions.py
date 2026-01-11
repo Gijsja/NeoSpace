@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 # Faction IDs (from manual migration):
 # 1: Concrete Sentinels

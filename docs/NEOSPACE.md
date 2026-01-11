@@ -143,7 +143,7 @@ Violating any invariant is a **critical bug**.
 <!-- Refactored from: NEOSPACE_ARCHITECTURE.md "Database 'God Mode' Configuration" -->
 
 ```python
-db = sqlite3.connect('app.db', timeout=15)  # 15s retry window
+db = sqlite3.connect('neospace.db', timeout=15)  # 15s retry window
 
 db.execute('PRAGMA journal_mode = WAL;')           # Readers don't block writers
 db.execute('PRAGMA synchronous = NORMAL;')         # Balanced durability

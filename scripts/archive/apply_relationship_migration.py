@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 sql_memories = """
 CREATE TABLE IF NOT EXISTS cat_memories (

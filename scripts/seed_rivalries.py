@@ -1,7 +1,7 @@
 import sqlite3
 import random
 
-DB_PATH = "app.db"
+DB_PATH = "neospace.db"
 
 def seed_rivalries():
     conn = sqlite3.connect(DB_PATH)

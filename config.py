@@ -5,7 +5,7 @@ class Config:
     """Base configuration."""
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret_key_DO_NOT_USE_IN_PROD")
     FLASK_ENV = os.environ.get("FLASK_ENV", "development")
-    DATABASE = os.environ.get("DATABASE", "app.db")
+    DATABASE = os.environ.get("DATABASE", "neospace.db")
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)

@@ -25,7 +25,7 @@
 
 ```python
 # db.py - Connection Settings
-db = sqlite3.connect('app.db', timeout=15)  # 15s retry window
+db = sqlite3.connect('neospace.db', timeout=15)  # 15s retry window
 
 # THE JUICE CONFIG
 db.execute('PRAGMA journal_mode = WAL;')           # Readers don't block writers
