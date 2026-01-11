@@ -8,9 +8,15 @@ from queries.backfill import backfill_messages
 from queries.unread import unread_count
 import secrets
 import os
+from core import __version__
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    
+    # Inject version into all templates
+    @app.context_processor
+    def inject_version():
+        return dict(version=__version__)
     # Secure secret key (in production should be env var)
     app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key_DO_NOT_USE_IN_PROD")
     
