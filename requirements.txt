@@ -25,7 +25,7 @@ gevent-websocket==0.10.1
 greenlet==3.3.0
 
 # Utilities
-Jinja2==3.1.2
+Jinja2==3.1.6
 MarkupSafe==2.1.5
 Werkzeug==3.0.3
 click==8.3.1
