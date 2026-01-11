@@ -48,6 +48,7 @@ alembic==1.18.0
 
 # Security & Sanitization
 bleach==6.3.0
+tinycss2==1.2.1
 
 # HTTP Client (for scripts/utils)
 requests==2.32.5
