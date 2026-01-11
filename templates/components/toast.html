@@ -20,7 +20,13 @@
     remove(id) {
         this.toasts = this.toasts.filter(t => t.id !== id);
     }
-}" @toast.window="add($event)" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+}" @toast.window="add($event)"
+   class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"
+   role="log"
+   aria-live="polite"
+   aria-relevant="additions"
+   aria-atomic="false"
+   aria-label="Notifications">
 
     <template x-for="toast in toasts" :key="toast.id">
         <div class="pointer-events-auto min-w-[300px] max-w-sm bg-white border-2 border-black shadow-[4px_4px_0_0_#000] p-4 flex gap-3 transition-all"
@@ -31,7 +37,7 @@
             x-transition:leave-end="translate-x-full opacity-0">
 
             <!-- Icon or Avatar -->
-            <div class="shrink-0 pt-0.5">
+            <div class="shrink-0 pt-0.5" aria-hidden="true">
                 <template x-if="toast.avatar">
                     <div class="w-10 h-10 border-2 border-black rounded-full overflow-hidden bg-white">
                         <img :src="toast.avatar" class="w-full h-full object-cover">
@@ -62,9 +68,9 @@
                 <p class="text-xs text-gray-500 font-mono mt-1" x-text="toast.message"></p>
             </div>
 
-            <button @click="remove(toast.id)"
+            <button @click="remove(toast.id)" aria-label="Close notification"
                 class="shrink-0 h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors">
-                <i class="ph-bold ph-x"></i>
+                <i class="ph-bold ph-x" aria-hidden="true"></i>
             </button>
         </div>
     </template>
