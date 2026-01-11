@@ -10,10 +10,20 @@ def backfill_messages():
     Fetch all chat messages using msgspec for high-performance serialization.
     10-80x faster than standard jsonify.
     """
+    # Limit backfill to latest 500 messages to prevent performance degradation
     rows = get_db().execute(
-        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL"
+        """
+        SELECT id, user, content, created_at, edited_at, deleted_at
+        FROM messages
+        WHERE deleted_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT 500
+        """
     ).fetchall()
     
+    # Reverse to restore chronological order (oldest -> newest) for client
+    rows.reverse()
+
     # Convert SQLite rows to msgspec Message structs
     messages = [
         Message(

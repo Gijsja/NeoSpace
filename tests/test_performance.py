@@ -2,6 +2,7 @@
 import pytest
 from flask import session
 from unittest.mock import MagicMock, patch
+from db import get_db
 
 def test_static_file_skips_db(app):
     """
@@ -44,13 +45,44 @@ def test_files_route_skips_db(app):
             'password': 'password123'
         })
 
-        # We need to simulate a file existing?
-        # Actually we just want to check if load_user skips DB.
-        # Even if the file doesn't exist (404), load_user runs before the route.
-        # But wait, send_from_directory raises 404 if file not found.
-        # But load_user runs BEFORE request dispatching? Yes, before_request.
-
         with patch('app.get_db') as mock_get_db:
             # We don't care if it returns 404, we care if load_user hit the DB.
             client.get('/files/some_shard/user_1/avatars/me.jpg')
             assert not mock_get_db.called, "get_db should NOT be called for /files/..."
+
+def test_backfill_limit(auth_client, app):
+    """
+    Test that backfill endpoint limits the number of messages returned.
+    This prevents loading the entire message history into memory.
+    """
+    # 1. Seed database with 600 messages
+    # We do this directly via DB to be fast
+    with app.app_context():
+        db = get_db()
+        # Create a user first (testuser is created by auth_client fixture)
+        # But we need their ID or just use any username
+
+        # Use executemany for speed
+        messages = [
+            ("testuser", f"Message {i}", 1) for i in range(600)
+        ]
+        db.executemany(
+            "INSERT INTO messages (user, content, room_id) VALUES (?, ?, ?)",
+            messages
+        )
+        db.commit()
+
+    # 2. Fetch backfill
+    res = auth_client.get("/backfill")
+    assert res.status_code == 200
+    data = res.get_json()
+
+    # 3. Assert count
+    # Optimization: Should be capped at 500
+    assert len(data["messages"]) == 500, "Backfill should be limited to 500 messages"
+
+    # Verify we got the LATEST messages (Message 599 should be present)
+    # Since we inserted them in order, the last one is Message 599.
+    # The returned list is chronological, so the last element should be Message 599.
+    last_msg = data["messages"][-1]
+    assert last_msg["content"] == "Message 599"
