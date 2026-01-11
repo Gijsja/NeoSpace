@@ -7,12 +7,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db import get_db, db_retry
 
 from core.responses import success_response, error_response
+from core.security import limiter
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 
 @auth_bp.route('/register', methods=('POST',))
+@limiter.limit("5/minute")
 def register():
     try:
         import msgspec
@@ -75,6 +77,7 @@ def register():
     return success_response(redirect=url_for('views.index'))
 
 @auth_bp.route('/login', methods=('GET', 'POST'))
+@limiter.limit("10/minute")
 def login():
     if request.method == 'POST':
         try:
