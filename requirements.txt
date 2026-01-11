@@ -39,7 +39,7 @@ msgspec==0.20.0
 # Security Hardening (Phase 5)
 Flask-WTF==1.2.1
 Flask-Talisman==1.1.0
-Flask-Limiter==3.5.0
+Flask-Limiter==4.1.1
 structlog==24.1.0
 sentry-sdk==2.8.0
 
