@@ -1,122 +1,88 @@
+"""
+Script mutations.
+Delegates to script_service.
+"""
 
 from flask import request, g, jsonify
-from db import get_db
+import msgspec
+from services import script_service
 
 def save_script():
     """
-    Create or update a script (Strict Validation).
+    Create or update a script.
     """
-    db = get_db()
-    user_id = g.user['id']
-    
+    if g.user is None:
+        return jsonify(ok=False, error="Auth required"), 401
+
     try:
-        import msgspec
         from msgspec_models import SaveScriptRequest
         req = msgspec.json.decode(request.get_data(), type=SaveScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
 
-    if req.id:
-        # Update existing
-        row = db.execute("SELECT user_id FROM scripts WHERE id=?", (req.id,)).fetchone()
-        if not row:
-            return jsonify(ok=False, error="Script not found"), 404
-        if row['user_id'] != user_id:
-            return jsonify(ok=False, error="Not authorized"), 403
-            
-        db.execute(
-            """UPDATE scripts 
-               SET title=?, content=?, script_type=?, is_public=?, updated_at=datetime('now') 
-               WHERE id=?""",
-            (req.title, req.content, req.script_type, req.is_public, req.id)
-        )
-        db.commit()
-        return jsonify(ok=True, id=req.id, message="Updated")
-    else:
-        # Create new
-        parent_id = req.parent_id
-        root_id = None
+    result = script_service.save_script(
+        user_id=g.user['id'],
+        title=req.title,
+        content=req.content,
+        script_type=req.script_type,
+        is_public=req.is_public,
+        script_id=req.id,
+        parent_id=req.parent_id
+    )
+    
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
         
-        if parent_id:
-            parent = db.execute("SELECT id, root_id FROM scripts WHERE id=?", (parent_id,)).fetchone()
-            if parent:
-                # If parent has a root, that's our root. Else parent is root.
-                root_id = parent['root_id'] if parent['root_id'] else parent['id']
-            else:
-                # Invalid parent, ignore
-                parent_id = None
-
-        try:
-            row = db.execute(
-                """INSERT INTO scripts (user_id, title, content, script_type, is_public, parent_id, root_id) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?) 
-                   RETURNING id""",
-                (user_id, req.title, req.content, req.script_type, req.is_public, parent_id, root_id)
-            ).fetchone()
-            db.commit()
-            return jsonify(ok=True, id=row['id'], message="Created", parent_id=parent_id, root_id=root_id)
-        except Exception as e:
-            return jsonify(ok=False, error=str(e)), 500
+    return jsonify(ok=True, **(result.data or {}))
 
 def list_scripts():
     """List scripts for the current user."""
-    db = get_db()
-    user_id = g.user['id']
+    if g.user is None:
+        return jsonify(ok=False, error="Auth required"), 401
     
-    rows = db.execute(
-        "SELECT id, title, script_type, updated_at, created_at, parent_id, root_id FROM scripts WHERE user_id=? ORDER BY updated_at DESC, created_at DESC",
-        (user_id,)
-    ).fetchall()
+    result = script_service.list_user_scripts(g.user['id'])
     
-    scripts = [dict(
-        id=r['id'], 
-        title=r['title'], 
-        script_type=r['script_type'],
-        last_modified=r['updated_at'] or r['created_at'],
-        parent_id=r['parent_id'],
-        root_id=r['root_id']
-    ) for r in rows]
-    
-    return jsonify(ok=True, scripts=scripts)
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
+        
+    return jsonify(ok=True, **result.data)
 
 def get_script():
     """Get a single script by ID."""
-    db = get_db()
     script_id = request.args.get('id')
     
     if not script_id:
         return jsonify(ok=False, error="Missing ID"), 400
         
-    row = db.execute("SELECT * FROM scripts WHERE id=?", (script_id,)).fetchone()
-    
-    if not row:
-        return jsonify(ok=False, error="Script not found"), 404
+    try:
+        script_id = int(script_id)
+    except ValueError:
+        return jsonify(ok=False, error="Invalid ID"), 400
         
-    is_owner = g.user and row['user_id'] == g.user['id']
-    if not row['is_public'] and not is_owner:
-         return jsonify(ok=False, error="Private script"), 403
-
-    return jsonify(ok=True, script=dict(row))
+    user_id = g.user['id'] if g.user else None
+    
+    result = script_service.get_script_by_id(script_id, user_id)
+    
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
+        
+    return jsonify(ok=True, **result.data)
 
 def delete_script():
-    """Delete a script (Strict Validation)."""
-    db = get_db()
-    user_id = g.user['id']
-    
+    """Delete a script."""
+    if g.user is None:
+        return jsonify(ok=False, error="Auth required"), 401
+
     try:
-        import msgspec
         from msgspec_models import DeleteScriptRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteScriptRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
 
-    # Check ownership
-    row = db.execute("SELECT user_id FROM scripts WHERE id=?", (req.id,)).fetchone()
-    if not row:
-        return jsonify(ok=False, error="Not found"), 404
-    if row['user_id'] != user_id:
-        return jsonify(ok=False, error="Not authorized"), 403
+    result = script_service.delete_script(g.user['id'], req.id)
+    
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
         
-    db.execute("DELETE FROM scripts WHERE id=?", (req.id,))
-    db.commit()
-    return jsonify(ok=True, deleted=req.id)
+    return jsonify(ok=True, **(result.data or {}))
+

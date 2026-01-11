@@ -1,13 +1,10 @@
 """
 Sprint #14: Social Graph — Friend Mutations
-
-CRUD operations for follow/unfollow and Top 8 management.
+Delegates to friends_service.
 """
 
 from flask import g, jsonify, request
-from db import get_db
-
-
+from services import friends_service
 from security import limiter
 
 @limiter.limit("20/minute")
@@ -23,48 +20,12 @@ def follow():
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
     
-    target_user_id = req.user_id
+    result = friends_service.follow_user(g.user["id"], req.user_id)
     
-    if target_user_id == g.user["id"]:
-        return jsonify(error="Cannot follow yourself"), 400
-    
-    db = get_db()
-    
-    # Check target exists
-    target = db.execute("SELECT id FROM users WHERE id = ?", (target_user_id,)).fetchone()
-    if not target:
-        return jsonify(error="User not found"), 404
-    
-    # Check if already following
-    existing = db.execute(
-        "SELECT id FROM friends WHERE follower_id = ? AND following_id = ?",
-        (g.user["id"], target_user_id)
-    ).fetchone()
-    
-    if existing:
-        return jsonify(ok=True, already_following=True)
-    
-    # Insert follow
-    try:
-        db.execute(
-            "INSERT INTO friends (follower_id, following_id) VALUES (?, ?)",
-            (g.user["id"], target_user_id)
-        )
-        db.commit()
+    if not result.success:
+        return jsonify(error=result.error), result.status
         
-        # Sprint 15: Create notification for followed user
-        from mutations.notifications import create_notification
-        create_notification(
-            user_id=target_user_id,
-            notif_type="follow",
-            title=f"{g.user['username']} started following you",
-            link=f"/wall?user_id={g.user['id']}",
-            actor_id=g.user["id"]
-        )
-    except Exception as e:
-        return jsonify(error=str(e)), 500
-    
-    return jsonify(ok=True)
+    return jsonify(ok=True, **(result.data or {}))
 
 
 def unfollow():
@@ -79,23 +40,18 @@ def unfollow():
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
     
-    target_user_id = req.user_id
+    result = friends_service.unfollow_user(g.user["id"], req.user_id)
     
-    db = get_db()
-    db.execute(
-        "DELETE FROM friends WHERE follower_id = ? AND following_id = ?",
-        (g.user["id"], target_user_id)
-    )
-    db.commit()
-    
+    if not result.success:
+        return jsonify(error=result.error), result.status
+        
     return jsonify(ok=True)
 
 
 def set_top8():
     """
     Set Top 8 order.
-    Expects: { "order": [user_id_1, user_id_2, ...] }
-    Max 8 users.
+    Expects: { "friend_ids": [user_id_1, user_id_2, ...] }
     """
     if g.user is None:
         return jsonify(error="Auth required"), 401
@@ -107,28 +63,10 @@ def set_top8():
     except msgspec.ValidationError as e:
         return jsonify(error=f"Invalid request: {e}"), 400
     
-    order = req.friend_ids
+    result = friends_service.set_top8(g.user["id"], req.friend_ids)
     
-    if len(order) > 8:
-        return jsonify(error="Max 8 users"), 400
-    
-    db = get_db()
-    my_id = g.user["id"]
-    
-    # Clear all existing Top 8 positions
-    db.execute(
-        "UPDATE friends SET top8_position = NULL WHERE follower_id = ?",
-        (my_id,)
-    )
-    
-    # Set new positions (only for users we follow)
-    for idx, user_id in enumerate(order, start=1):
-        db.execute(
-            """UPDATE friends 
-               SET top8_position = ? 
-               WHERE follower_id = ? AND following_id = ?""",
-            (idx, my_id, user_id)
-        )
-    
-    db.commit()
+    if not result.success:
+        return jsonify(error=result.error), result.status
+        
     return jsonify(ok=True)
+

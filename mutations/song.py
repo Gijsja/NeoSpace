@@ -1,74 +1,60 @@
+"""
+Song mutations.
+Delegates to song_service.
+"""
 
 from flask import request, g, jsonify
-from db import get_db
 import msgspec
-from msgspec_models import SaveSongRequest, DeleteSongRequest
+from services import song_service
 
 def save_song():
     """
     Create or update a song project.
     """
-    db = get_db()
-    user_id = g.user['id']
-    
+    if g.user is None:
+        return jsonify(ok=False, error="Auth required"), 401
+
     try:
+        from msgspec_models import SaveSongRequest
         req = msgspec.json.decode(request.get_data(), type=SaveSongRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
 
     # Encode data dict to JSON string for storage
+    # Service expects the JSON string for data_json
     try:
         data_json = msgspec.json.encode(req.data).decode('utf-8')
     except Exception as e:
         return jsonify(ok=False, error="Invalid song data"), 400
 
-    if req.id:
-        # Update existing
-        row = db.execute("SELECT user_id FROM songs WHERE id=?", (req.id,)).fetchone()
-        if not row:
-            return jsonify(ok=False, error="Song not found"), 404
-        if row['user_id'] != user_id:
-            return jsonify(ok=False, error="Not authorized"), 403
-            
-        db.execute(
-            """UPDATE songs 
-               SET title=?, data_json=?, is_public=?, updated_at=datetime('now') 
-               WHERE id=?""",
-            (req.title, data_json, req.is_public, req.id)
-        )
-        db.commit()
-        return jsonify(ok=True, id=req.id, message="Saved")
-    else:
-        # Create new
-        try:
-            cur = db.execute(
-                """INSERT INTO songs (user_id, title, data_json, is_public) 
-                   VALUES (?, ?, ?, ?) 
-                   RETURNING id""",
-                (user_id, req.title, data_json, req.is_public)
-            )
-            row = cur.fetchone()
-            db.commit()
-            return jsonify(ok=True, id=row['id'], message="Created")
-        except Exception as e:
-            return jsonify(ok=False, error=str(e)), 500
+    result = song_service.save_song(
+        user_id=g.user['id'],
+        title=req.title,
+        data_json=data_json,
+        is_public=req.is_public,
+        song_id=req.id
+    )
+    
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
+        
+    return jsonify(ok=True, **(result.data or {}))
 
 def delete_song():
     """Delete a song project."""
-    db = get_db()
-    user_id = g.user['id']
-    
+    if g.user is None:
+        return jsonify(ok=False, error="Auth required"), 401
+
     try:
+        from msgspec_models import DeleteSongRequest
         req = msgspec.json.decode(request.get_data(), type=DeleteSongRequest)
     except msgspec.ValidationError as e:
         return jsonify(ok=False, error=str(e)), 400
 
-    row = db.execute("SELECT user_id FROM songs WHERE id=?", (req.id,)).fetchone()
-    if not row:
-        return jsonify(ok=False, error="Not found"), 404
-    if row['user_id'] != user_id:
-        return jsonify(ok=False, error="Not authorized"), 403
+    result = song_service.delete_song(g.user['id'], req.id)
+    
+    if not result.success:
+        return jsonify(ok=False, error=result.error), result.status
         
-    db.execute("DELETE FROM songs WHERE id=?", (req.id,))
-    db.commit()
-    return jsonify(ok=True, deleted=req.id)
+    return jsonify(ok=True, **(result.data or {}))
+

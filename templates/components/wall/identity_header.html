@@ -1,0 +1,78 @@
+{% from "components/ui_macros.html" import button %}
+
+{% macro identity_header() %}
+<div class="nb-card p-0 relative group">
+    <!-- Banner Pattern -->
+    <div class="h-32 bg-slate-900 border-b-2 border-black relative overflow-hidden">
+        <!-- Abstract Pattern -->
+        <div class="absolute inset-0 opacity-20"
+            style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, transparent 10px, transparent 20px);">
+        </div>
+    </div>
+
+    <div class="relative p-6 pt-16 md:pt-6 md:pl-48">
+        <!-- Avatar Glitch (Square, Offset) -->
+        <div class="absolute -top-12 left-6 md:left-8 group/avatar">
+            <div
+                class="w-32 h-32 bg-black absolute top-2 left-2 z-0 transition-transform group-hover/avatar:translate-x-0 group-hover/avatar:translate-y-0">
+            </div>
+            <div id="avatar-container"
+                class="w-32 h-32 bg-white border-2 border-black relative z-10 flex items-center justify-center overflow-hidden">
+                <span id="avatar-initial" class="text-6xl font-black text-slate-200">?</span>
+            </div>
+
+            <!-- Online Dot (Square) -->
+            <div id="online-indicator"
+                class="absolute -bottom-1 -right-1 w-6 h-6 bg-acid-green border-2 border-black hidden" title="Online">
+            </div>
+
+            <!-- Edit Button -->
+            <button id="edit-avatar-btn" @click="$dispatch('open-edit-modal')"
+                class="absolute bottom-2 right-2 p-1 bg-white border-2 border-black hover:bg-hot-pink transition opacity-0 group-hover/avatar:opacity-100 z-20 hidden pointer-events-auto shadow-hard-sm">
+                <i class="ph-bold ph-camera"></i>
+            </button>
+        </div>
+
+        <!-- Identity Info -->
+        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-black mb-1"
+                    id="display-name">Loading...</h1>
+                <div class="flex items-center gap-3">
+                    <p class="text-lg font-mono font-bold bg-black text-white px-2" id="username-handle">@...</p>
+                    {{ button('Edit Identity', variant='secondary', size='sm', icon='ph-bold ph-pencil-simple',
+                    attrs='@click="$dispatch(\'open-edit-modal\')"', class='hidden flex hover:bg-yellow-300') }}
+                    <!-- Follow Button (Sprint 20) -->
+                    {{ button('FOLLOW', variant='primary', size='sm', attrs='id="follow-btn"', class='bg-black
+                    text-white hover:bg-neutral-800 hidden') }}
+                    <!-- Voice Intro Section -->
+                    <div id="voice-intro-section" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- Status Line (Raw Input Style) -->
+            <div
+                class="relative w-full md:w-auto max-w-lg bg-white border-2 border-black p-3 shadow-hard-sm group hover:bg-warm-beige transition-colors">
+                <div class="flex items-start gap-3">
+                    <span id="status-emoji"
+                        class="text-3xl pt-0.5 filter grayscale group-hover:grayscale-0 transition">👋</span>
+                    <div class="flex-1">
+                        <p id="status-message" class="text-lg font-bold leading-snug font-mono">...</p>
+                        <p class="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider border-t border-black pt-1 inline-block"
+                            id="status-label">Signal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anthem Controls -->
+        <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group">
+            <div
+                class="w-10 h-10 bg-white border-2 border-black hover:bg-hot-pink flex items-center justify-center transition-colors shadow-hard-sm">
+                <i id="anthem-icon" class="ph-bold ph-speaker-high text-xl"></i>
+            </div>
+        </div>
+        <audio id="anthem-player" preload="auto" loop></audio>
+    </div>
+</div>
+{% endmacro %}

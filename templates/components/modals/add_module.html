@@ -1,0 +1,88 @@
+{% from "components/ui_macros.html" import button, input, textarea, select %}
+
+{% macro add_module_modal() %}
+<!-- Add Module Modal -->
+<div id="add-module-modal" x-data="{ open: false, type: 'text' }" x-show="open" style="display: none;"
+    @open-add-module.window="open = true; type = 'text'" @close-add-modal.window="open = false"
+    @keydown.escape.window="open = false" x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+
+    <div class="bg-white border-2 border-black w-full max-w-md shadow-hard-xl overflow-hidden animate-pop">
+        <div class="p-4 border-b-2 border-black flex justify-between items-center bg-electric-blue">
+            <h2 class="font-black text-black uppercase flex items-center gap-2">
+                Add Content
+            </h2>
+            <button type="button" @click="open = false"
+                class="close-add-modal w-8 h-8 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 p-4 border-b-2 border-black bg-white" id="module-type-selector">
+            <button @click.prevent="type = 'text'"
+                :class="type === 'text' ? 'active border-black bg-acid-green shadow-hard-sm' : 'border-transparent hover:border-black hover:shadow-hard-sm'"
+                class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 transition">
+                <i class="ph-duotone ph-text-t text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Text</span>
+            </button>
+            <button @click.prevent="type = 'image'"
+                :class="type === 'image' ? 'active border-black bg-acid-green shadow-hard-sm' : 'border-transparent hover:border-black hover:shadow-hard-sm'"
+                class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 transition">
+                <i class="ph-duotone ph-image text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Image</span>
+            </button>
+            <button @click.prevent="type = 'link'"
+                :class="type === 'link' ? 'active border-black bg-acid-green shadow-hard-sm' : 'border-transparent hover:border-black hover:shadow-hard-sm'"
+                class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 transition">
+                <i class="ph-duotone ph-link text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Link</span>
+            </button>
+            <button @click.prevent="type = 'audio'"
+                :class="type === 'audio' ? 'active border-black bg-acid-green shadow-hard-sm' : 'border-transparent hover:border-black hover:shadow-hard-sm'"
+                class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 transition">
+                <i class="ph-duotone ph-music-notes text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Audio</span>
+            </button>
+        </div>
+
+        <form id="add-module-form" class="p-4 space-y-4">
+            <input type="hidden" name="module_type" id="new-module-type" :value="type">
+
+            <div x-show="type === 'text'" class="space-y-2">
+                {{ textarea('text_content', 'Content (Markdown)', class='h-32 custom-scrollbar', placeholder='# Hello
+                World...') }}
+            </div>
+
+            <div x-show="type === 'image'" class="space-y-2" style="display: none;">
+                {{ input('image_url', 'Image URL', type='url', placeholder='https://...') }}
+            </div>
+
+            <div x-show="type === 'link'" class="space-y-2" style="display: none;">
+                {{ input('link_url', 'Link URL', type='url', placeholder='https://...') }}
+                {{ input('link_title', 'Title (Optional)', placeholder='Link Title') }}
+                {{ input('link_thumb', 'Thumbnail URL (Optional)', type='url',
+                placeholder='https://example.com/image.jpg') }}
+
+                {{ select('link_style', [
+                ('simple', 'Simple Row'),
+                ('button', 'Button'),
+                ('card', 'Card (Large Image)')
+                ], label='Display Style') }}
+            </div>
+
+            <div x-show="type === 'audio'" class="space-y-2" style="display: none;">
+                {{ input('audio_url', 'Audio URL (MP3)', type='url', placeholder='https://...') }}
+                {{ input('audio_title', 'Caption (Optional)', placeholder='Song Title') }}
+            </div>
+
+            <div class="flex justify-end pt-2">
+                {{ button('Add', variant='primary', class='bg-electric-blue hover:bg-hot-pink', icon='ph-bold ph-plus',
+                attrs='type="submit"') }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}

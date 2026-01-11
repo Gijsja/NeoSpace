@@ -358,6 +358,49 @@ def save_avatar(user_id: int, file_data: bytes, extension: str, app_root: str) -
     return ServiceResult(success=True, data={"avatar_path": avatar_path})
 
 
+def save_voice_intro(user_id: int, file: Any, app_root: str, waveform_json: str = "[]") -> ServiceResult:
+    """
+    Save voice intro file and update profile.
+    
+    Args:
+        user_id: Profile owner ID
+        file: Flask/Werkzeug FileStorage object
+        app_root: App root path
+        waveform_json: JSON string of waveform data
+    
+    Returns:
+        ServiceResult with voice_path on success
+    """
+    if not file:
+        return ServiceResult(success=False, error="No audio file", status=400)
+        
+    filename = f"voice_{user_id}.webm" # Single file per user, overwrite
+    
+    voice_dir = os.path.join(app_root, 'static/voice_intros')
+    os.makedirs(voice_dir, exist_ok=True)
+    
+    filepath = os.path.join(voice_dir, filename)
+    file.save(filepath)
+    
+    path_url = f"/static/voice_intros/{filename}"
+    
+    db = get_db()
+    existing = db.execute("SELECT id FROM profiles WHERE user_id = ?", (user_id,)).fetchone()
+    
+    if existing:
+        db.execute(
+            """UPDATE profiles 
+               SET voice_intro_path = ?, voice_waveform_json = ?, updated_at = datetime('now') 
+               WHERE user_id = ?""",
+            (path_url, waveform_json, user_id)
+        )
+        db.commit()
+        return ServiceResult(success=True, data={"voice_path": path_url})
+    
+    return ServiceResult(success=False, error="Profile not found", status=404)
+
+
+
 def create_default_profile(user_id: int, username: str) -> ServiceResult:
     """
     Create a default profile for a new user.

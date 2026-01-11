@@ -1,0 +1,872 @@
+Login status: 400
+CSRF Token: ImQ5YWU5Y2E5NjQwMDJmNzhkZTcyYTcwZmUwODg1OWIyNWNjZTAzZDEi.aWKtUg.CYUpLQ3_c3COmK8kQqMy3syUew0
+Speak status: 200
+Speak response: <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="ImQ5YWU5Y2E5NjQwMDJmNzhkZTcyYTcwZmUwODg1OWIyNWNjZTAzZDEi.aWKtUg.CYUpLQ3_c3COmK8kQqMy3syUew0">
+
+    <title>Login - NeoSpace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
+    <script src="/static/vendor/tailwindcss.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
+    <link rel="stylesheet" href="/static/css/neospace.css">
+
+    
+    
+    
+    <!-- UI Macros -->
+    
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bbs-bg': '#FFFAF0',
+                        'bbs-surface': '#FFFFFF',
+                        'bbs-border': '#000000',
+                        'acid-green': '#a3e635',
+                        'hot-pink': '#ff6b6b',
+                        'electric-blue': '#22d3ee',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['monospace']
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px #000000',
+                        'hard-sm': '2px 2px 0px 0px #000000',
+                        'hard-xl': '8px 8px 0px 0px #000000',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-gradient-overlay {
+            background: linear-gradient(to bottom, rgba(255, 250, 240, 0.2) 0%, rgba(255, 250, 240, 0.8) 100%);
+        }
+
+        .bg-carousel-item {
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* CRT Effects */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .crt-scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+            z-index: 2;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-bbs-bg text-black flex items-center justify-center min-h-screen px-4">
+
+    <!-- Marquee Banner -->
+    <div
+        class="fixed top-0 left-0 right-0 h-8 bg-black text-white overflow-hidden z-50 flex items-center border-b border-acid-green/30">
+        <div class="animate-marquee whitespace-nowrap font-mono text-xs font-bold tracking-widest">
+            ★ NEOSPACE ★ 🐱 WELCOME TO THE MEOW-GRID 🐱 ★ LOGIN OR REGISTER ★ 🐾 PURR-JECT CONCRETE 🐾 ★ NEOSPACE ★ 🐱
+            WELCOME TO THE MEOW-GRID 🐱 ★
+        </div>
+        <div class="absolute right-4 z-50 flex items-center gap-2">
+            <span class="flex h-2 w-2 rounded-full bg-acid-green animate-pulse"></span>
+            
+
+
+<span class="inline-block px-2 py-0.5 border border-black text-[10px] font-bold uppercase shadow-hard-sm bg-acid-green text-black">
+    SERVER ONLINE
+</span>
+        </div>
+    </div>
+    <style>
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 20s linear infinite;
+        }
+    </style>
+
+    <!-- Rotating Background -->
+    <div x-data="bgCarousel()" x-init="start()" class="fixed inset-0 -z-10 overflow-hidden">
+        <template x-for="(bg, index) in backgrounds" :key="index">
+            <div class="absolute inset-0 bg-carousel-item" :style="`background-image: url(${bg});`"
+                x-show="currentBg === index" x-transition:enter="transition ease-out duration-1000"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-1000" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0">
+            </div>
+        </template>
+        <div class="absolute inset-0 bg-gradient-overlay backdrop-blur-[2px]"></div>
+        <div class="crt-overlay"></div>
+        <div class="crt-scanline"></div>
+    </div>
+
+    <!-- Floating Ghettoblaster -->
+    <div class="fixed bottom-6 left-6 w-72 z-50 hidden lg:block">
+        
+<!-- 
+  Neopunk Ghettoblaster 
+  Retro-futurist hardware audio player.
+  Dependencies: Alpine.js, Tailwind CSS
+-->
+<div x-data="{ 
+        playing: false, 
+        audio: null, 
+        progress: 0, 
+        duration: 0,
+        volume: 0.8,
+        init() {
+            this.audio = this.$refs.audioEl;
+            this.audio.volume = this.volume;
+            this.audio.addEventListener('loadedmetadata', () => {
+                this.duration = this.audio.duration;
+            });
+            this.audio.addEventListener('timeupdate', () => {
+                this.progress = (this.audio.currentTime / this.duration) * 100;
+            });
+            this.audio.addEventListener('ended', () => {
+                this.playing = false;
+                this.progress = 0;
+            });
+            
+        },
+        toggle() {
+            if (this.playing) this.pause();
+            else this.play();
+        },
+        play() {
+            this.audio.play();
+            this.playing = true;
+        },
+        pause() {
+            this.audio.pause();
+            this.playing = false;
+        },
+        seek(e) {
+            // Click on progress bar
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const per = x / rect.width;
+            this.audio.currentTime = per * this.duration;
+        }
+    }"
+    class="ghettoblaster-shell relative w-full bg-slate-900 border-2 border-slate-700 rounded-sm shadow-xl overflow-hidden font-mono group select-none">
+    
+    <!-- Audio Element (Hidden) -->
+    <audio x-ref="audioEl" src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="metadata"></audio>
+
+    <!-- Top Screw Header -->
+    <div class="h-6 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-2">
+        <div class="flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+        </div>
+        <div class="text-[10px] text-slate-500 tracking-widest uppercase">Sonyk-9000</div>
+        <div class="flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+        </div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="p-4 flex flex-col gap-4 relative">
+        
+        <!-- LCD Display -->
+        <div class="lcd-screen bg-[#1a2d28] border border-slate-600 h-16 rounded-sm relative overflow-hidden flex flex-col justify-center px-3 shadow-inner">
+            <!-- Scanlines overlay -->
+            <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 pointer-events-none bg-[length:100%_2px,3px_100%]"></div>
+            
+            <!-- Metadata -->
+            <div class="relative z-20">
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-cyan-400 text-xs tracking-wider animate-pulse" x-show="playing">PLAYING >></span>
+                    <span class="text-slate-500 text-xs tracking-wider" x-show="!playing">STANDBY</span>
+                    <span class="text-cyan-500 font-bold text-xs" x-text="new Date(progress * duration * 10).toISOString().substr(14, 5)">00:00</span>
+                </div>
+                <div class="text-cyan-300 font-bold text-sm truncate uppercase tracking-widest text-shadow-glow">NIGHT_DRIVE.mid</div>
+            </div>
+
+            <!-- Fake digital waveform -->
+            <div class="absolute bottom-1 left-0 right-0 h-4 flex gap-0.5 items-end opacity-50 px-3">
+                <template x-for="i in 20">
+                    <div class="flex-1 bg-cyan-700 transition-all duration-75" 
+                         :style="`height: ${playing ? Math.random() * 100 : 10}%;`"></div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="flex items-center gap-4">
+            <!-- Play/Pause Button (Chunky) -->
+            <button @click="toggle()" 
+                    class="w-12 h-12 bg-slate-800 rounded border-b-4 border-slate-950 active:border-b-0 active:translate-y-1 transition text-cyan-400 flex items-center justify-center hover:bg-slate-700 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                <i class="ph-fill text-2xl" :class="playing ? 'ph-pause' : 'ph-play'"></i>
+            </button>
+
+            <!-- Progress Bar -->
+            <div class="flex-1 h-12 bg-slate-950 rounded border border-slate-800 relative cursor-crosshair group/bar" @click="seek($event)">
+                <!-- Track -->
+                <div class="absolute top-1/2 left-2 right-2 h-1 bg-slate-800 -translate-y-1/2 rounded-full overflow-hidden pointer-events-none">
+                    <div class="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.8)] transition-all duration-100 ease-linear" :style="`width: ${progress}%`"></div>
+                </div>
+                <!-- Thumb (Visual) -->
+                <div class="absolute top-1/2 w-4 h-6 bg-slate-200 border border-black -translate-y-1/2 -ml-2 transition-all duration-100 ease-linear pointer-events-none shadow-lg" 
+                     :style="`left: calc(16px + (100% - 32px) * ${progress/100})`">
+                    <div class="w-full h-full flex flex-col justify-center items-center gap-[1px]">
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                        <div class="w-3 h-[1px] bg-black/20"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Volume Dial (Visual only for MVP, or could implement) -->
+            <div class="w-12 h-12 bg-slate-800 rounded-full border-4 border-slate-900 flex items-center justify-center relative transform rotate-45 shadow-inner">
+                <div class="w-1 h-5 bg-slate-950 absolute top-1 rounded-full"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sticker Deco -->
+    <div class="absolute top-2 right-12 text-[9px] text-yellow-400/50 font-bold -rotate-2 border border-yellow-400/30 px-1">HI-FI</div>
+</div>
+
+    </div>
+
+    <!-- Global Toast Shell -->
+    <!-- 
+  Toast Component (Notification System)
+  Style: Neubrutalist
+  Usage: Include this once in your base layout. 
+         Dispatch event 'toast' with { title, message, type, avatar? }.
+-->
+<div x-data="{ 
+    toasts: [],
+    add(e) {
+        const id = Date.now();
+        this.toasts.push({ 
+            id, 
+            title: e.detail.title || 'Notification', 
+            message: e.detail.message, 
+            type: e.detail.type || 'info',
+            avatar: e.detail.avatar
+        });
+        setTimeout(() => this.remove(id), 5000);
+    },
+    remove(id) {
+        this.toasts = this.toasts.filter(t => t.id !== id);
+    }
+}" @toast.window="add($event)" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+
+    <template x-for="toast in toasts" :key="toast.id">
+        <div class="pointer-events-auto min-w-[300px] max-w-sm bg-white border-2 border-black shadow-[4px_4px_0_0_#000] p-4 flex gap-3 transition-all"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="translate-y-full opacity-0 scale-95"
+            x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0 opacity-100"
+            x-transition:leave-end="translate-x-full opacity-0">
+
+            <!-- Icon or Avatar -->
+            <div class="shrink-0 pt-0.5">
+                <template x-if="toast.avatar">
+                    <div class="w-10 h-10 border-2 border-black rounded-full overflow-hidden bg-white">
+                        <img :src="toast.avatar" class="w-full h-full object-cover">
+                    </div>
+                </template>
+                <template x-if="!toast.avatar && toast.type === 'success'">
+                    <div
+                        class="w-6 h-6 bg-acid-green border-2 border-black flex items-center justify-center rounded-full">
+                        <i class="ph-bold ph-check text-xs"></i>
+                    </div>
+                </template>
+                <template x-if="!toast.avatar && toast.type === 'error'">
+                    <div
+                        class="w-6 h-6 bg-red-500 text-white border-2 border-black flex items-center justify-center rounded-full">
+                        <i class="ph-bold ph-warning text-xs"></i>
+                    </div>
+                </template>
+                <template x-if="!toast.avatar && toast.type === 'info'">
+                    <div
+                        class="w-6 h-6 bg-black text-white border-2 border-transparent flex items-center justify-center rounded-full">
+                        <i class="ph-bold ph-info text-xs"></i>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex-1">
+                <h4 class="font-bold text-sm uppercase tracking-wide" x-text="toast.title"></h4>
+                <p class="text-xs text-gray-500 font-mono mt-1" x-text="toast.message"></p>
+            </div>
+
+            <button @click="remove(toast.id)"
+                class="shrink-0 h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+    </template>
+</div>
+
+    <!-- Auth Card -->
+    <div x-data="{ isLogin: true }">
+        <div class="nb-card p-4 w-full max-w-md mt-12 bg-white/90 backdrop-blur-sm relative z-10">
+    
+    
+
+        <!-- Header -->
+        <div class="text-center mb-8 relative">
+            <div class="absolute -top-10 -left-12 transform -rotate-12">
+                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-20 h-20 object-contain opacity-80">
+            </div>
+            <div
+                class="inline-flex items-center justify-center w-24 h-24 bg-black text-white mb-4 border-2 border-black shadow-hard overflow-hidden">
+                <img src="/static/images/cats/login_cat.png" alt="NeoSpace Cat" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter mb-1">NeoSpace</h1>
+            <p class="text-sm font-mono text-gray-600">Access the Meow-Grid</p>
+        </div>
+
+        <!-- Tab Toggle -->
+        <div class="flex border-2 border-black mb-6">
+            <button @click="isLogin = true"
+                :class="isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 border-r-2 border-black">
+                <i class="ph-bold ph-sign-in"></i> Sign In
+            </button>
+            <button @click="isLogin = false"
+                :class="!isLogin ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="flex-1 py-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                <i class="ph-bold ph-user-plus"></i> Register
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5">
+            <div class="flex flex-col gap-1 w-full">
+    
+    <label for="username" class="font-bold text-xs uppercase">Username</label>
+    
+    <input type="text" name="username" id="username" placeholder="your_handle" value=""
+        class="nb-input h-10 " x-model="username" required>
+</div>
+            <div class="flex flex-col gap-1 w-full">
+    
+    <label for="password" class="font-bold text-xs uppercase">Password</label>
+    
+    <input type="password" name="password" id="password" placeholder="••••••••" value=""
+        class="nb-input h-10 " x-model="password"
+            required>
+</div>
+
+            <!-- Progress -->
+            <div x-show="loading" x-transition class="pt-2">
+                
+<!-- 
+  Penguin UI: Progress Bar
+  Style: Striped, Animated, Brutalist
+-->
+<div class="w-full" x-data="{ pVal: 0, pMax: 100 }" x-effect="pVal = progressValue">
+    
+    <div class="flex justify-between items-end mb-1">
+        
+        <span class="text-xs font-bold uppercase tracking-widest">Authenticating...</span>
+        
+        
+    </div>
+    
+
+    <div class="w-full bg-white border-2 border-black h-6 relative shadow-[4px_4px_0_0_#000]">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 10px 10px;">
+        </div>
+
+        <!-- Fill -->
+        <div class="h-full bg-acid-green border-r-2 border-black relative overflow-hidden transition-all duration-500 ease-out"
+            :style="`width: ${(pVal / pMax) * 100}%`" style="width: 0.0%">
+
+            
+            <div class="absolute inset-0 animate-[move_1s_linear_infinite]"
+                style="background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px); background-size: 28px 28px;">
+            </div>
+            
+        </div>
+    </div>
+    <style>
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 28px 0;
+            }
+        }
+    </style>
+</div>
+
+            </div>
+
+            <!-- Error -->
+            <div x-show="error" x-text="error" x-transition
+                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+            </div>
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+<button 
+    class="inline-flex items-center justify-center gap-2 border-2 border-black font-bold uppercase
+shadow-hard transition-all hover:-translate-y-0.5 hover:shadow-hard-md active:translate-x-[2px] active:translate-y-[2px]
+active:shadow-none px-4 py-2 text-sm bg-acid-green text-black hover:bg-green-400 w-full py-4" type="submit"
+            :disabled="loading">
+    <i class="ph-bold ph-sign-in text-lg"></i>
+    <span>Enter Grid</span>
+    
+</button>
+
+
+            <div class="absolute -bottom-6 -right-6 transform rotate-12 z-0">
+                <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-16 h-16 object-contain">
+            </div>
+        </form>
+
+        <!-- Register Form -->
+        <form x-show="!isLogin" x-data="registerForm()" @submit.prevent="submit()" x-cloak x-transition
+            class="space-y-5">
+            <div>
+                <div class="relative group">
+                    <div class="flex flex-col gap-1 w-full">
+    
+    <label for="username" class="font-bold text-xs uppercase">Username</label>
+    
+    <input type="text" name="username" id="username" placeholder="new_handle" value=""
+        class="nb-input h-10 " x-model="username" required>
+</div>
+                    
+<!-- 
+  Penguin UI: Tooltip
+  Style: High-Contrast, Black & White
+  Usage: Wrap element with this macro or use as attribute
+-->
+<div x-data="{ show: false }" class="relative inline-block" @mouseenter="show = true" @mouseleave="show = false">
+    
+                    <div class="absolute right-3 top-9 text-gray-400">
+                        <i class="ph-bold ph-question"></i>
+                    </div>
+                    
+    
+    <div x-show="show" 
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="opacity-0 scale-90"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-90"
+         class="absolute z-50 px-2 py-1 text-xs font-bold text-white bg-black border border-white shadow-[2px_2px_0_0_rgba(255,255,255,0.5)] whitespace-nowrap pointer-events-none uppercase tracking-wider
+          left-full top-1/2 -translate-y-1/2 ml-2
+         ">
+        Alphanumeric only, 3-15 chars
+    </div>
+</div>
+
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="flex flex-col gap-1 w-full">
+    
+    <label for="password" class="font-bold text-xs uppercase">Password</label>
+    
+    <input type="password" name="password" id="password" placeholder="••••••••" value=""
+        class="nb-input h-10 " x-model="password"
+                required>
+</div>
+                <div class="flex flex-col gap-1 w-full">
+    
+    <label for="confirmPassword" class="font-bold text-xs uppercase">Confirm Password</label>
+    
+    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="••••••••" value=""
+        class="nb-input h-10 " x-model="confirmPassword" required>
+</div>
+            </div>
+
+            <!-- Progress -->
+            <div x-show="loading" x-transition class="pt-2">
+                
+<!-- 
+  Penguin UI: Progress Bar
+  Style: Striped, Animated, Brutalist
+-->
+<div class="w-full" x-data="{ pVal: 0, pMax: 100 }" x-effect="pVal = progressValue">
+    
+    <div class="flex justify-between items-end mb-1">
+        
+        <span class="text-xs font-bold uppercase tracking-widest">Creating Identity...</span>
+        
+        
+    </div>
+    
+
+    <div class="w-full bg-white border-2 border-black h-6 relative shadow-[4px_4px_0_0_#000]">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 10px 10px;">
+        </div>
+
+        <!-- Fill -->
+        <div class="h-full bg-acid-green border-r-2 border-black relative overflow-hidden transition-all duration-500 ease-out"
+            :style="`width: ${(pVal / pMax) * 100}%`" style="width: 0.0%">
+
+            
+            <div class="absolute inset-0 animate-[move_1s_linear_infinite]"
+                style="background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px); background-size: 28px 28px;">
+            </div>
+            
+        </div>
+    </div>
+    <style>
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 28px 0;
+            }
+        }
+    </style>
+</div>
+
+            </div>
+
+            <!-- Error -->
+            <div x-show="error" x-text="error" x-transition
+                class="text-black text-sm text-center bg-hot-pink border-2 border-black p-3 shadow-hard-sm font-bold">
+            </div>
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+<button 
+    class="inline-flex items-center justify-center gap-2 border-2 border-black font-bold uppercase
+shadow-hard transition-all hover:-translate-y-0.5 hover:shadow-hard-md active:translate-x-[2px] active:translate-y-[2px]
+active:shadow-none px-4 py-2 text-sm bg-acid-green text-black hover:bg-green-400 w-full py-4 bg-electric-blue" type="submit" :disabled="loading">
+    <i class="ph-bold
+            ph-user-plus text-lg"></i>
+    <span>Create Identity</span>
+    
+</button>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-center gap-2 mt-6 border-t-2 border-black pt-4">
+            <i class="ph-bold ph-cat text-xl"></i>
+            <p class="text-center text-xs font-mono text-gray-500">
+                NeoSpace v1.0.cat // Project Purrcrete
+            </p>
+        </div>
+        
+</div>
+    </div>
+
+    <!-- Cat Companion Widget -->
+    
+    
+<div id="cat-companion-widget" x-data="catCompanion('cute')" x-show="visible"
+    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-4 opacity-0"
+    x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+    @login-success.window="speak('login_success')" @login-failure.window="speak('login_failure')"
+    @friend-added.window="speak('friend_added')" @post-created.window="speak('post_created')"
+    @message-sent.window="speak('message_sent')" class="fixed bottom-4 right-4 z-50 max-w-xs">
+    <!-- Cat Card -->
+    <div class="nb-card p-0 overflow-hidden shadow-lg animate-bounce-subtle">
+        <!-- Header with cat face -->
+        <div class="bg-acid-green border-b-2 border-black p-2 flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full border-2 border-black overflow-hidden bg-white">
+                <img :src="avatar || '/static/images/cats/cat_stickers.png'" :alt="cat"
+                    class="w-full h-full object-cover" onerror="this.src='/static/images/cats/cat_stickers.png'">
+            </div>
+            <div class="flex-1">
+                <span class="font-bold text-sm uppercase tracking-tight" x-text="cat || 'cat'"></span>
+                <!-- Relationship Label (e.g., 'RIVAL') -->
+                <span class="text-xs font-bold opacity-80 block text-purple-600"
+                    x-text="relationship_label || 'cat companion'" :title="status_tag"></span>
+            </div>
+            <button @click="dismiss()" class="p-1 hover:bg-black hover:text-acid-green transition-colors">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+
+        <!-- Speech bubble -->
+        <div class="p-3 bg-white">
+            <p class="font-mono text-sm" x-text="line || '...'"></p>
+        </div>
+
+        <!-- Mode switcher -->
+        <div class="bg-gray-100 border-t-2 border-black p-2 flex gap-1">
+            <button @click="mode = 'cute'" :class="mode === 'cute' ? 'bg-pink-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🥰 cute</button>
+            <button @click="mode = 'pirate'" :class="mode === 'pirate' ? 'bg-purple-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🏴‍☠️ pirate</button>
+            <button @click="mode = 'formal'" :class="mode === 'formal' ? 'bg-blue-300' : 'bg-white'"
+                class="nb-button px-2 py-1 text-xs">🎩 formal</button>
+        </div>
+    </div>
+
+    <!-- Tail decoration -->
+    <div class="absolute -bottom-2 right-8 w-4 h-4 bg-white border-2 border-black rotate-45"></div>
+</div>
+
+<style>
+    @keyframes bounce-subtle {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    .animate-bounce-subtle {
+        animation: bounce-subtle 2s ease-in-out infinite;
+    }
+</style>
+
+<script src="/ui/js/components/CatCompanion.js"></script>
+
+
+    <script>
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+        function loginForm() {
+            return {
+                username: '',
+                password: '',
+                error: '',
+                loading: false,
+                progressValue: 0,
+
+                async submit() {
+                    this.loading = true;
+                    this.error = '';
+                    this.progressValue = 0;
+
+                    let interval = setInterval(() => {
+                        if (this.progressValue < 90) this.progressValue += 5;
+                    }, 50);
+
+                    try {
+                        const res = await fetch('/auth/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken()
+                            },
+                            body: JSON.stringify({
+                                username: this.username,
+                                password: this.password
+                            })
+                        });
+                        const data = await res.json();
+
+                        if (res.ok && data.ok) {
+                            this.progressValue = 100;
+                            // Trigger Cat
+                            this.$dispatch('login-success');
+
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 2500); // Wait for cat to speak
+                        } else {
+                            // Trigger Cat
+                            this.$dispatch('login-failure');
+
+                            this.error = data.error || 'Authentication failed';
+                            this.$dispatch('toast', {
+                                title: 'Access Denied',
+                                message: this.error,
+                                type: 'error'
+                            });
+                        }
+                    } catch (err) {
+                        this.error = 'Network error: ' + err.message;
+                        this.$dispatch('toast', {
+                            title: 'System Failure',
+                            message: this.error,
+                            type: 'error'
+                        });
+                    } finally {
+                        clearInterval(interval);
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function registerForm() {
+            return {
+                username: '',
+                password: '',
+                confirmPassword: '',
+                error: '',
+                loading: false,
+                progressValue: 0,
+
+                async submit() {
+                    if (this.password !== this.confirmPassword) {
+                        this.error = "Passwords do not match.";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = '';
+                    this.progressValue = 0;
+
+                    let interval = setInterval(() => {
+                        if (this.progressValue < 90) this.progressValue += 5;
+                    }, 50);
+
+                    try {
+                        const res = await fetch('/auth/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken()
+                            },
+                            body: JSON.stringify({
+                                username: this.username,
+                                password: this.password
+                            })
+                        });
+                        const data = await res.json();
+
+                        if (res.ok && data.ok) {
+                            this.progressValue = 100;
+                            // Trigger cat (using login success for now as welcome)
+                            this.$dispatch('login-success');
+
+                            this.$dispatch('toast', {
+                                title: 'Identity Created',
+                                message: 'Welcome to the grid, ' + this.username,
+                                type: 'success'
+                            });
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 2500);
+                        } else {
+                            // Trigger Cat
+                            this.$dispatch('login-failure');
+
+                            this.error = data.error || 'Registration failed';
+                            this.$dispatch('toast', {
+                                title: 'Registration Error',
+                                message: this.error,
+                                type: 'error'
+                            });
+                        }
+                    } catch (err) {
+                        this.error = 'Network error: ' + err.message;
+                    } finally {
+                        clearInterval(interval);
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function bgCarousel() {
+            return {
+                currentBg: 0,
+                backgrounds: [
+                    '/static/images/backgrounds/bg1.png',
+                    '/static/images/backgrounds/bg2.png',
+                    '/static/images/backgrounds/bg3.png',
+                    '/static/images/backgrounds/bg4.png',
+                    '/static/images/backgrounds/bg5.png'
+                ],
+                start() {
+                    setInterval(() => {
+                        this.currentBg = (this.currentBg + 1) % this.backgrounds.length;
+                    }, 8000);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

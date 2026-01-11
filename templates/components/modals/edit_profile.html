@@ -1,0 +1,124 @@
+{% from "components/ui_macros.html" import button, input, select %}
+
+{% macro edit_profile_modal() %}
+<!-- Edit Profile Modal -->
+<div id="edit-modal" x-data="{ open: false }" x-show="open" style="display: none;"
+    @open-edit-modal.window="open = true" @close-edit-modal.window="open = false"
+    @keydown.escape.window="open = false" x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border-2 border-black w-full max-w-lg shadow-hard-xl overflow-hidden animate-pop">
+        <div class="p-4 border-b-2 border-black flex justify-between items-center bg-acid-green">
+            <h2 class="font-black text-black uppercase flex items-center gap-2">
+                Edit Identity
+            </h2>
+            <button type="button"
+                class="close-modal w-8 h-8 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition"
+                @click="open = false">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+        </div>
+        <form id="edit-form" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+
+            <!-- Avatar & Intro Group -->
+            <div class="flex gap-4">
+                <div class="w-20 h-20 bg-gray-100 border-2 border-black flex items-center justify-center overflow-hidden shrink-0"
+                    id="preview-avatar"></div>
+                <div class="flex-1 space-y-2">
+                    <label
+                        class="block text-xs uppercase font-bold text-black bg-yellow-200 inline-block px-1">Avatar
+                        Image</label>
+                    <input type="file" id="avatar-input" accept="image/*"
+                        class="block w-full text-xs file:mr-2 file:py-2 file:px-3 file:border-2 file:border-black file:text-xs file:font-bold file:bg-white file:text-black hover:file:bg-black hover:file:text-white transition" />
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="space-y-2">
+                <label class="block text-xs uppercase font-bold text-black">Status Signal</label>
+                <div class="flex gap-2">
+                    <input type="text" name="status_emoji" id="input-status-emoji"
+                        class="nb-input w-20 text-center text-xl" placeholder="👋" maxlength="4" />
+                    <input type="text" name="status_message" id="input-status-msg" class="nb-input flex-1"
+                        placeholder="What's your vibe?" maxlength="100" />
+                </div>
+            </div>
+
+            <!-- Now Block -->
+            <div class="bg-yellow-50 p-4 border-2 border-black space-y-2">
+                <label class="block text-xs uppercase font-bold text-black flex items-center gap-2">
+                    <i class="ph-bold ph-clock"></i> The "Now" Block
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-1">
+                        {{ select('now_activity_type', [
+                        ('thinking', 'Thinking'),
+                        ('listening', 'Listening'),
+                        ('working', 'Working'),
+                        ('playing', 'Playing'),
+                        ('reading', 'Reading'),
+                        ('watching', 'Watching')
+                        ], id='input-now-type', class='text-xs font-bold') }}
+                    </div>
+                    <div class="col-span-2">
+                        {{ input('now_activity', id='input-now-activity', placeholder='e.g. Creating art...',
+                        attrs='maxlength="50"') }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Info -->
+            <div class="grid grid-cols-1 gap-4">
+                {{ input('display_name', 'Display Name', id='input-name', attrs='required maxlength="50"') }}
+                <input type="hidden" name="bio" id="input-bio">
+            </div>
+
+            <!-- Anthem -->
+            <div class="p-4 border-2 border-black bg-white space-y-2 shadow-hard-sm">
+                {{ input('anthem_url', 'Anthem (MP3/URL)', id='input-anthem-url', type='url',
+                placeholder='https://example.com/song.mp3') }}
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="anthem_autoplay" id="input-anthem-autoplay"
+                        class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
+                    <span class="text-xs font-bold uppercase">Autoplay</span>
+                </label>
+            </div>
+
+            <!-- Settings -->
+            <div class="pt-4 border-t-2 border-black space-y-2">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="is_public" id="input-public"
+                        class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
+                    <span class="text-sm font-bold">Public Profile</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="show_online_status" id="input-online"
+                        class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
+                    <span class="text-sm font-bold">Show Online Indicator</span>
+                </label>
+                <input type="hidden" name="accent_color" id="input-accent" value="#a3e635">
+
+                <!-- Theme Selector -->
+                <div class="pt-4 border-t-2 border-black">
+                    <label class="block text-xs uppercase font-bold mb-2 flex items-center gap-2">
+                        <i class="ph-bold ph-paint-brush"></i> Wall Theme
+                    </label>
+                    {{ select('theme_preset', [
+                    ('default', 'Default (Brutalist)'),
+                    ('hacker', '🖥️ Hacker Terminal')
+                    ], id='input-theme') }}
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                {{ button('Cancel', variant='ghost', class='close-modal border-2 border-transparent hover:border-black',
+                attrs='type="button" @click="open = false"') }}
+                {{ button('Save Changes', variant='primary', class='hover:bg-hot-pink', icon='ph-bold ph-check',
+                attrs='type="submit"') }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}

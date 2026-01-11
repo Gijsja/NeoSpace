@@ -34,6 +34,9 @@
 {% block content %}
 {% from "components/ui_macros.html" import button, input, card, badge, textarea, select %}
 {% from "components/skeleton.html" import skeleton %}
+{% from "components/modals/edit_profile.html" import edit_profile_modal %}
+{% from "components/modals/add_module.html" import add_module_modal %}
+{% from "components/wall/identity_header.html" import identity_header %}
 <!-- Loading State -->
 <!-- Loading State (Skeleton) -->
 <div id="loading" class="animate-pulse space-y-8 pb-20 pt-4">
@@ -64,80 +67,7 @@
 <div id="wall-container" class="hidden animate-fade-in space-y-8 pb-20 pt-4">
 
     <!-- 1. Identity Header (Neubrutalist Card) -->
-    <div class="nb-card p-0 relative group">
-        <!-- Banner Pattern -->
-        <div class="h-32 bg-slate-900 border-b-2 border-black relative overflow-hidden">
-            <!-- Abstract Pattern -->
-            <div class="absolute inset-0 opacity-20"
-                style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, transparent 10px, transparent 20px);">
-            </div>
-        </div>
-
-        <div class="relative p-6 pt-16 md:pt-6 md:pl-48">
-            <!-- Avatar Glitch (Square, Offset) -->
-            <div class="absolute -top-12 left-6 md:left-8 group/avatar">
-                <div
-                    class="w-32 h-32 bg-black absolute top-2 left-2 z-0 transition-transform group-hover/avatar:translate-x-0 group-hover/avatar:translate-y-0">
-                </div>
-                <div id="avatar-container"
-                    class="w-32 h-32 bg-white border-2 border-black relative z-10 flex items-center justify-center overflow-hidden">
-                    <span id="avatar-initial" class="text-6xl font-black text-slate-200">?</span>
-                </div>
-
-                <!-- Online Dot (Square) -->
-                <div id="online-indicator"
-                    class="absolute -bottom-1 -right-1 w-6 h-6 bg-acid-green border-2 border-black hidden"
-                    title="Online"></div>
-
-                <!-- Edit Button -->
-                <button id="edit-avatar-btn"
-                    class="absolute bottom-2 right-2 p-1 bg-white border-2 border-black hover:bg-hot-pink transition opacity-0 group-hover/avatar:opacity-100 z-20 hidden pointer-events-auto shadow-hard-sm">
-                    <i class="ph-bold ph-camera"></i>
-                </button>
-            </div>
-
-            <!-- Identity Info -->
-            <div class="flex flex-col md:flex-row justify-between items-start gap-4">
-                <div>
-                    <h1 class="text-4xl md:text-5xl font-black uppercase tracking-tighter text-black mb-1"
-                        id="display-name">Loading...</h1>
-                    <div class="flex items-center gap-3">
-                        <p class="text-lg font-mono font-bold bg-black text-white px-2" id="username-handle">@...</p>
-                        {{ button('Edit Identity', variant='secondary', size='sm', icon='ph-bold ph-pencil-simple',
-                        attrs='id="edit-profile-btn"', class='hidden flex hover:bg-yellow-300') }}
-                        <!-- Follow Button (Sprint 20) -->
-                        {{ button('FOLLOW', variant='primary', size='sm', attrs='id="follow-btn"', class='bg-black
-                        text-white hover:bg-neutral-800 hidden') }}
-                        <!-- Voice Intro Section -->
-                        <div id="voice-intro-section" class="hidden"></div>
-                    </div>
-                </div>
-
-                <!-- Status Line (Raw Input Style) -->
-                <div
-                    class="relative w-full md:w-auto max-w-lg bg-white border-2 border-black p-3 shadow-hard-sm group hover:bg-warm-beige transition-colors">
-                    <div class="flex items-start gap-3">
-                        <span id="status-emoji"
-                            class="text-3xl pt-0.5 filter grayscale group-hover:grayscale-0 transition">👋</span>
-                        <div class="flex-1">
-                            <p id="status-message" class="text-lg font-bold leading-snug font-mono">...</p>
-                            <p class="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider border-t border-black pt-1 inline-block"
-                                id="status-label">Signal</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Anthem Controls -->
-            <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group">
-                <div
-                    class="w-10 h-10 bg-white border-2 border-black hover:bg-hot-pink flex items-center justify-center transition-colors shadow-hard-sm">
-                    <i id="anthem-icon" class="ph-bold ph-speaker-high text-xl"></i>
-                </div>
-            </div>
-            <audio id="anthem-player" preload="auto" loop></audio>
-        </div>
-    </div>
+    {{ identity_header() }}
 
     <!-- 2. Grid Layout -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -273,203 +203,15 @@
     <!-- Modals (Neubrutalist Style) -->
 
     <!-- Edit Profile Modal -->
-    <div id="edit-modal" x-data="{ open: false }" x-show="open" style="display: none;"
-        @open-edit-modal.window="open = true" @close-edit-modal.window="open = false"
-        @keydown.escape.window="open = false" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white border-2 border-black w-full max-w-lg shadow-hard-xl overflow-hidden animate-pop">
-            <div class="p-4 border-b-2 border-black flex justify-between items-center bg-acid-green">
-                <h2 class="font-black text-black uppercase flex items-center gap-2">
-                    Edit Identity
-                </h2>
-                <button type="button"
-                    class="close-modal w-8 h-8 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition">
-                    <i class="ph-bold ph-x text-lg"></i>
-                </button>
-            </div>
-            <form id="edit-form" class="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
-
-                <!-- Avatar & Intro Group -->
-                <div class="flex gap-4">
-                    <div class="w-20 h-20 bg-gray-100 border-2 border-black flex items-center justify-center overflow-hidden shrink-0"
-                        id="preview-avatar"></div>
-                    <div class="flex-1 space-y-2">
-                        <label
-                            class="block text-xs uppercase font-bold text-black bg-yellow-200 inline-block px-1">Avatar
-                            Image</label>
-                        <input type="file" id="avatar-input" accept="image/*"
-                            class="block w-full text-xs file:mr-2 file:py-2 file:px-3 file:border-2 file:border-black file:text-xs file:font-bold file:bg-white file:text-black hover:file:bg-black hover:file:text-white transition" />
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="space-y-2">
-                    <label class="block text-xs uppercase font-bold text-black">Status Signal</label>
-                    <div class="flex gap-2">
-                        <input type="text" name="status_emoji" id="input-status-emoji"
-                            class="nb-input w-20 text-center text-xl" placeholder="👋" maxlength="4" />
-                        <input type="text" name="status_message" id="input-status-msg" class="nb-input flex-1"
-                            placeholder="What's your vibe?" maxlength="100" />
-                    </div>
-                </div>
-
-                <!-- Now Block -->
-                <div class="bg-yellow-50 p-4 border-2 border-black space-y-2">
-                    <label class="block text-xs uppercase font-bold text-black flex items-center gap-2">
-                        <i class="ph-bold ph-clock"></i> The "Now" Block
-                    </label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="col-span-1">
-                            {{ select('now_activity_type', [
-                            ('thinking', 'Thinking'),
-                            ('listening', 'Listening'),
-                            ('working', 'Working'),
-                            ('playing', 'Playing'),
-                            ('reading', 'Reading'),
-                            ('watching', 'Watching')
-                            ], id='input-now-type', class='text-xs font-bold') }}
-                        </div>
-                        <div class="col-span-2">
-                            {{ input('now_activity', id='input-now-activity', placeholder='e.g. Creating art...',
-                            attrs='maxlength="50"') }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Basic Info -->
-                <div class="grid grid-cols-1 gap-4">
-                    {{ input('display_name', 'Display Name', id='input-name', attrs='required maxlength="50"') }}
-                    <input type="hidden" name="bio" id="input-bio">
-                </div>
-
-                <!-- Anthem -->
-                <div class="p-4 border-2 border-black bg-white space-y-2 shadow-hard-sm">
-                    {{ input('anthem_url', 'Anthem (MP3/URL)', id='input-anthem-url', type='url',
-                    placeholder='https://example.com/song.mp3') }}
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="anthem_autoplay" id="input-anthem-autoplay"
-                            class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
-                        <span class="text-xs font-bold uppercase">Autoplay</span>
-                    </label>
-                </div>
-
-                <!-- Settings -->
-                <div class="pt-4 border-t-2 border-black space-y-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" name="is_public" id="input-public"
-                            class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
-                        <span class="text-sm font-bold">Public Profile</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" name="show_online_status" id="input-online"
-                            class="w-4 h-4 border-2 border-black text-black focus:ring-0 rounded-none" />
-                        <span class="text-sm font-bold">Show Online Indicator</span>
-                    </label>
-                    <input type="hidden" name="accent_color" id="input-accent" value="#a3e635">
-
-                    <!-- Theme Selector -->
-                    <div class="pt-4 border-t-2 border-black">
-                        <label class="block text-xs uppercase font-bold mb-2 flex items-center gap-2">
-                            <i class="ph-bold ph-paint-brush"></i> Wall Theme
-                        </label>
-                        {{ select('theme_preset', [
-                        ('default', 'Default (Brutalist)'),
-                        ('hacker', '🖥️ Hacker Terminal')
-                        ], id='input-theme') }}
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-2">
-                    {{ button('Cancel', variant='ghost', class='close-modal border-2 border-transparent
-                    hover:border-black', attrs='type="button"') }}
-                    {{ button('Save Changes', variant='primary', class='hover:bg-hot-pink', icon='ph-bold ph-check',
-                    attrs='type="submit"') }}
-                </div>
-            </form>
-        </div>
-    </div>
+    {{ edit_profile_modal() }}
 
     <!-- Add Module FAB (Brutalist Square) -->
-    {{ button(None, icon='ph-bold ph-plus', size='fab', attrs='id="add-module-btn"', class='fixed bottom-8 right-8 z-40
+    {{ button(None, icon='ph-bold ph-plus', size='fab', attrs='@click="$dispatch(\'open-add-module\')"', class='fixed
+    bottom-8 right-8 z-40
     bg-electric-blue hover:bg-hot-pink hidden group !text-black !border-black') }}
 
     <!-- Add Module Modal -->
-    <div id="add-module-modal"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border-2 border-black w-full max-w-md shadow-hard-xl overflow-hidden animate-pop">
-            <div class="p-4 border-b-2 border-black flex justify-between items-center bg-electric-blue">
-                <h2 class="font-black text-black uppercase flex items-center gap-2">
-                    Add Content
-                </h2>
-                <button type="button"
-                    class="close-add-modal w-8 h-8 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition">
-                    <i class="ph-bold ph-x text-lg"></i>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-4 gap-2 p-4 border-b-2 border-black bg-white" id="module-type-selector">
-                <button data-type="text"
-                    class="module-type-btn active flex flex-col items-center gap-1 p-2 border-2 border-transparent hover:border-black hover:shadow-hard-sm transition">
-                    <i class="ph-duotone ph-text-t text-xl"></i>
-                    <span class="text-[10px] font-bold uppercase">Text</span>
-                </button>
-                <button data-type="image"
-                    class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 border-transparent hover:border-black hover:shadow-hard-sm transition">
-                    <i class="ph-duotone ph-image text-xl"></i>
-                    <span class="text-[10px] font-bold uppercase">Image</span>
-                </button>
-                <button data-type="link"
-                    class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 border-transparent hover:border-black hover:shadow-hard-sm transition">
-                    <i class="ph-duotone ph-link text-xl"></i>
-                    <span class="text-[10px] font-bold uppercase">Link</span>
-                </button>
-                <button data-type="audio"
-                    class="module-type-btn flex flex-col items-center gap-1 p-2 border-2 border-transparent hover:border-black hover:shadow-hard-sm transition">
-                    <i class="ph-duotone ph-music-notes text-xl"></i>
-                    <span class="text-[10px] font-bold uppercase">Audio</span>
-                </button>
-            </div>
-
-            <form id="add-module-form" class="p-4 space-y-4">
-                <input type="hidden" name="module_type" id="new-module-type" value="text">
-
-                <div id="fields-text" class="space-y-2">
-                    {{ textarea('text_content', 'Content (Markdown)', class='h-32 custom-scrollbar', placeholder='#
-                    Hello World...') }}
-                </div>
-
-                <div id="fields-image" class="space-y-2 hidden">
-                    {{ input('image_url', 'Image URL', type='url', placeholder='https://...') }}
-                </div>
-
-                <div id="fields-link" class="space-y-2 hidden">
-                    {{ input('link_url', 'Link URL', type='url', placeholder='https://...') }}
-                    {{ input('link_title', 'Title (Optional)', placeholder='Link Title') }}
-                    {{ input('link_thumb', 'Thumbnail URL (Optional)', type='url',
-                    placeholder='https://example.com/image.jpg') }}
-
-                    {{ select('link_style', [
-                    ('simple', 'Simple Row'),
-                    ('button', 'Button'),
-                    ('card', 'Card (Large Image)')
-                    ], label='Display Style') }}
-                </div>
-
-                <div id="fields-audio" class="space-y-2 hidden">
-                    {{ input('audio_url', 'Audio URL (MP3)', type='url', placeholder='https://...') }}
-                    {{ input('audio_title', 'Caption (Optional)', placeholder='Song Title') }}
-                </div>
-
-                <div class="flex justify-end pt-2">
-                    {{ button('Add', variant='primary', class='bg-electric-blue hover:bg-hot-pink', icon='ph-bold
-                    ph-plus', attrs='type="submit"') }}
-                </div>
-            </form>
-        </div>
-    </div>
+    {{ add_module_modal() }}
 
 </div>
 {% endblock %}
@@ -486,49 +228,9 @@
     // Force init
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof fetchProfile === 'function') fetchProfile();
-    });
-
-    // Module Type Toggle Logic (Brutalist Style)
-    document.querySelectorAll('.module-type-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            // styling
-            document.querySelectorAll('.module-type-btn').forEach(b => {
-                b.classList.remove('active', 'border-black', 'bg-acid-green', 'shadow-hard-sm');
-                b.classList.add('border-transparent');
-            });
-            btn.classList.remove('border-transparent');
-            btn.classList.add('active', 'border-black', 'bg-acid-green', 'shadow-hard-sm');
-
-            // value
-            const type = btn.dataset.type;
-            document.getElementById('new-module-type').value = type;
-
-            // fields
-            ['text', 'image', 'link', 'audio'].forEach(t => {
-                const el = document.getElementById(`fields-${t}`);
-                if (el) {
-                    if (t === type) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                }
-            });
-        };
-    });
-
-    // Close Add Modal
-    document.querySelectorAll('.close-add-modal').forEach(b => {
-        b.onclick = () => {
-            document.getElementById('add-module-modal').classList.add('hidden');
-        };
-    });
-
-    // Open Add Modal bound to FAB
-    document.getElementById('add-module-btn').addEventListener('click', () => {
-        document.getElementById('add-module-form').reset();
-        delete document.getElementById('add-module-form').dataset.editId;
-        // Trigger click on text type to reset
-        document.querySelector('.module-type-btn[data-type="text"]').click();
-        document.getElementById('add-module-modal').classList.remove('hidden');
+        // Show FAB
+        const fab = document.querySelector('.fixed.bottom-8.right-8'); // selector for the FAB
+        if (fab) fab.classList.remove('hidden');
     });
 </script>
 {% endblock %}
