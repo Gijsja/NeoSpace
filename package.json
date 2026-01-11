@@ -7,6 +7,6 @@
     "build": "tailwindcss -i ./ui/css/input.css -o ./ui/css/styles.css --minify"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.0"
+    "tailwindcss": "^4.1.18"
   }
 }
