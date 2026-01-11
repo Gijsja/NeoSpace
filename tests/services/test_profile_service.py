@@ -310,7 +310,8 @@ class TestSaveAvatar:
             
             assert result.success is True
             assert "avatar_path" in result.data
-            assert result.data["avatar_path"].startswith("/static/avatars/")
+            assert result.data["avatar_path"].startswith("/files/")
+            assert "avatars" in result.data["avatar_path"]
 
     def test_save_avatar_invalid_extension(self, db_session, test_user):
         """Invalid file extension is rejected."""
