@@ -14,6 +14,8 @@ users = Table(
     Column("avatar_color", Text),
     Column("is_staff", Integer, server_default="0"),
     Column("is_banned", Integer, server_default="0"),
+    Column("is_bot", Integer, server_default="0"),
+    Column("bot_personality_id", Integer),
 )
 
 # Reports Table
@@ -32,8 +34,25 @@ reports = Table(
     Column("updated_at", Text),
 )
 Index("idx_reports_reporter", reports.c.reporter_id)
+Index("idx_reports_reporter", reports.c.reporter_id)
 Index("idx_reports_status", reports.c.status)
 
+# Admin Operations Audit Log
+admin_ops = Table(
+    "admin_ops",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("admin_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("action", Text, nullable=False), # e.g. "ban_user", "update_config"
+    Column("target", Text),                 # e.g. "user:123", "config:maintenance_mode"
+    Column("details", Text),                # JSON or details string
+    Column("ip_address", Text),
+    Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
+)
+Index("idx_admin_ops_created", admin_ops.c.created_at)
+Index("idx_admin_ops_admin", admin_ops.c.admin_id)
+
+# Messages Table
 # Messages Table
 messages = Table(
     "messages",
@@ -49,6 +68,20 @@ messages = Table(
 Index("idx_messages_created", messages.c.created_at)
 Index("idx_messages_user", messages.c.user)
 Index("idx_messages_room", messages.c.room_id, messages.c.created_at)
+
+# Messages Archive Table (Cold Storage)
+messages_archive = Table(
+    "messages_archive",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=False), # Keep original ID
+    Column("user", Text, nullable=False),
+    Column("content", Text),
+    Column("room_id", Integer),
+    Column("created_at", Text),
+    Column("archived_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
+)
+Index("idx_archive_created", messages_archive.c.created_at)
+Index("idx_archive_room", messages_archive.c.room_id)
 
 # Profiles Table
 profiles = Table(
@@ -222,3 +255,69 @@ songs = Table(
     Column("updated_at", Text),
 )
 Index("idx_songs_user", songs.c.user_id)
+
+# Cat Factions
+cat_factions = Table(
+    "cat_factions",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("description", Text),
+    Column("traits", Text),
+)
+
+# Cat Personalities
+cat_personalities = Table(
+    "cat_personalities",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("name", Text, unique=True, nullable=False),
+    Column("priority", Integer, server_default="5"),
+    Column("triggers", Text),
+    Column("mode", Text, server_default="'cute'"),
+    Column("silence_bias", Float, server_default="0.5"),
+    Column("global_observer", Integer, server_default="0"),
+    Column("pleasure_weight", Float, server_default="1.0"),
+    Column("arousal_weight", Float, server_default="0.5"),
+    Column("dominance_weight", Float, server_default="1.0"),
+    Column("dialogues", Text),
+    Column("avatar_url", Text),
+    Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
+    Column("faction_id", Integer, ForeignKey("cat_factions.id")),
+)
+
+# Cat Relationships
+cat_relationships = Table(
+    "cat_relationships",
+    metadata,
+    Column("source_cat_id", Integer, ForeignKey("cat_personalities.id"), primary_key=True),
+    Column("target_user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("affinity", Float, server_default="0.0"),
+    Column("compatibility", Float, server_default="0.0"),
+    Column("last_updated", sa.TIMESTAMP, server_default=sa.text("CURRENT_TIMESTAMP")),
+)
+
+# Cat Memories
+cat_memories = Table(
+    "cat_memories",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("source_cat_id", Integer, ForeignKey("cat_personalities.id"), nullable=False),
+    Column("target_user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("memory_type", Text, nullable=False),
+    Column("opinion_modifier", Float, server_default="0.0"),
+    Column("created_at", sa.TIMESTAMP, server_default=sa.text("CURRENT_TIMESTAMP")),
+    Column("expires_at", sa.TIMESTAMP),
+)
+
+# Cat States
+cat_states = Table(
+    "cat_states",
+    metadata,
+    Column("cat_id", Integer, ForeignKey("cat_personalities.id"), primary_key=True),
+    Column("pleasure", Float, server_default="0"),
+    Column("arousal", Float, server_default="0"),
+    Column("dominance", Float, server_default="0"),
+    Column("last_updated", sa.TIMESTAMP, server_default=sa.text("CURRENT_TIMESTAMP")),
+    Column("last_deed_id", Integer),
+)

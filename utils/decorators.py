@@ -1,8 +1,8 @@
 from functools import wraps
-from flask import jsonify
+from flask import jsonify, g, request
 import sqlite3
 from core.responses import error_response
-from db import db_retry
+from db import db_retry, get_db
 
 def mutation_handler(f):
     """
@@ -35,3 +35,35 @@ def mutation_handler(f):
             print(f"Mutation Error: {e}")
             return error_response(f"Server error: {str(e)}", 500)
     return wrapper
+
+def log_admin_action(action_name):
+    """
+    Decorator to log admin actions to the admin_ops table.
+    Usage: @log_admin_action("ban_user")
+    Expects flask.g.user to be populated.
+    """
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            # Execute the action first
+            response = f(*args, **kwargs)
+            
+            # Log after successful execution (or if it returns a response object)
+            try:
+                if g.user and g.user.get('is_staff'):
+                    db = get_db()
+                    target = request.form.get('target', request.args.get('target', 'unknown'))
+                    details = str(request.form.to_dict()) if request.form else "No form data"
+                    
+                    db.execute(
+                        "INSERT INTO admin_ops (admin_id, action, target, details, ip_address) VALUES (?, ?, ?, ?, ?)",
+                        (g.user['id'], action_name, target, details, request.remote_addr)
+                    )
+                    db.commit()
+            except Exception as e:
+                # Don't fail the request if logging fails, but log to stderr
+                print(f"[AuditLog Error] Failed to log {action_name}: {e}")
+            
+            return response
+        return wrapper
+    return decorator

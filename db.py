@@ -271,6 +271,18 @@ CREATE TABLE IF NOT EXISTS cat_relationships (
     last_updated TEXT DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (source_cat_id, target_user_id)
 );
+
+CREATE TABLE IF NOT EXISTS admin_ops (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_id INTEGER NOT NULL REFERENCES users(id),
+    action TEXT NOT NULL,
+    target TEXT,
+    details TEXT,
+    ip_address TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_admin_ops_admin ON admin_ops(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_ops_created ON admin_ops(created_at);
 '''
 
 

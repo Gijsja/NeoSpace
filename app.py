@@ -161,6 +161,27 @@ def create_app(test_config=None):
         return send_from_directory(os.path.join(app.root_path, 'static'),
                                    'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+    # --- Permetheus Metrics (Bolt) ---
+    # Simple in-memory counters (per worker)
+    metrics_state = {'requests': 0}
+
+    @app.before_request
+    def track_request():
+        if request.path != '/metrics':
+            metrics_state['requests'] += 1
+
+    @app.route('/metrics')
+    def metrics():
+        # Simple request counter only
+        return f'''# HELP neospace_requests_total Total number of HTTP requests
+# TYPE neospace_requests_total counter
+neospace_requests_total {metrics_state['requests']}
+# HELP neospace_info Application info
+# TYPE neospace_info gauge
+neospace_info{{version="{__version__}"}} 1
+''', 200, {'Content-Type': 'text/plain; version=0.0.4'}
+
+
     init_sockets(app)
     return app
 
