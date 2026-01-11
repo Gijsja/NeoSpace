@@ -24,7 +24,7 @@ def test_register_duplicate(client, app):
         "username": "dup",
         "password": "password123"
     })
-    assert res.status_code == 200
+    assert res.status_code == 400
     assert res.get_json()["ok"] is False
     assert "already registered" in res.get_json()["error"]
 

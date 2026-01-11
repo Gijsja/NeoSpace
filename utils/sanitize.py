@@ -4,6 +4,7 @@ Server-side defense against XSS for user-generated content.
 """
 
 import bleach
+from bleach.css_sanitizer import CSSSanitizer
 
 # Allowed HTML tags for user content (e.g., bios, messages)
 ALLOWED_TAGS = [
@@ -43,6 +44,7 @@ def clean_html(content: str) -> str:
         tags=ALLOWED_TAGS,
         attributes=ALLOWED_ATTRIBUTES,
         protocols=ALLOWED_PROTOCOLS,
+        css_sanitizer=CSSSanitizer(),
         strip=True
     )
 
