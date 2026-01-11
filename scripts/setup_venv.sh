@@ -5,7 +5,7 @@ set -e
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}==> Setting up LocalBBS Environment compatibility layer...${NC}"
+echo -e "${GREEN}==> Setting up NeoSpace Environment compatibility layer...${NC}"
 
 # Navigate to project root
 cd "$(dirname "$0")/.."
