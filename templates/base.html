@@ -47,6 +47,12 @@
 <body class="flex flex-col h-screen overflow-hidden selection:bg-hot-pink selection:text-white font-sans bg-bbs-bg"
     hx-boost="true" hx-target="#app-main" hx-select="#app-main" hx-swap="outerHTML">
 
+    <!-- Skip Link for Accessibility -->
+    <a href="#app-main"
+        class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-black focus:p-4 focus:font-bold focus:border-2 focus:border-black focus:shadow-hard outline-none">
+        Skip to main content
+    </a>
+
     <!-- Marquee Header -->
     <div class="h-8 bg-yellow-400 border-b-2 border-black overflow-hidden flex items-center shrink-0 relative z-50">
         <div
