@@ -137,7 +137,7 @@ Lazy adoption — apply as files are touched:
 ## 9. Directory Structure
 
 ```
-SBBS/
+NeoSpace/
 ├── app.py                 # Flask application factory
 ├── db.py                  # Database schema, connection pool, retry logic
 ├── auth.py                # Authentication blueprint (login/register/logout)

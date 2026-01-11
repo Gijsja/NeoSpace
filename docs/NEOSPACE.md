@@ -252,7 +252,7 @@ gunicorn -w 4 --threads 16 --worker-class gthread \
 <!-- Refactored from: NEOSPACE_ARCHITECTURE.md "Directory Structure" -->
 
 ```
-SBBS/
+NeoSpace/
 ├── app.py                 # Flask application factory
 ├── db.py                  # Database schema, connection pool, retry logic
 ├── auth.py                # Authentication blueprint (login/register/logout)

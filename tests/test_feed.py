@@ -79,7 +79,7 @@ class TestFeedAPI:
             # Assuming user 2 exists from previous test potentially, but tests should be isolated by pytest-flask usually if properly configured fixture-wise.
             # But here we are using same DB file likely if not using in-memory for tests. 
             # Let's check our conftest structure or just use unique IDs/fresh setup.
-            # Standard SBBS test setup uses fresh DB per session or function depending on fixture scope.
+            # Standard NeoSpace test setup uses fresh DB per session or function depending on fixture scope.
             # Assuming logging in as fresh user 1 for isolated test or reused DB. 
             # Safe bet: Insert new data.
             

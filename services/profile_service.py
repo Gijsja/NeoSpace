@@ -15,6 +15,7 @@ from typing import Optional, List, Dict, Any
 from utils.sanitize import clean_html
 
 from db import get_db
+from services.storage_service import StorageService
 
 # =============================================
 # CONSTANTS
@@ -310,16 +311,7 @@ def update_profile_fields(user_id: int, data: Dict[str, Any]) -> ServiceResult:
 
 def save_avatar(user_id: int, file_data: bytes, extension: str, app_root: str) -> ServiceResult:
     """
-    Save avatar file and update profile.
-    
-    Args:
-        user_id: Profile owner ID
-        file_data: Raw file bytes
-        extension: File extension (png, jpg, etc.)
-        app_root: Application root path for file storage
-    
-    Returns:
-        ServiceResult with avatar_path on success
+    Save avatar file and update profile using StorageService.
     """
     if extension not in ALLOWED_AVATAR_EXTENSIONS:
         return ServiceResult(success=False, error=f"Invalid file type. Allowed: {ALLOWED_AVATAR_EXTENSIONS}", status=400)
@@ -328,18 +320,14 @@ def save_avatar(user_id: int, file_data: bytes, extension: str, app_root: str) -
         return ServiceResult(success=False, error="File too large (max 2MB)", status=400)
     
     checksum = hashlib.sha256(file_data).hexdigest()
-    filename = f"avatar_{user_id}_{checksum[:16]}.{extension}"
+    filename = f"avatar_{checksum[:16]}.{extension}"
     
-    avatar_dir = os.path.join(app_root, 'static/avatars')
-    os.makedirs(avatar_dir, exist_ok=True)
+    try:
+        avatar_path = StorageService.save_file(file_data, user_id, "avatars", filename=filename)
+    except Exception as e:
+        return ServiceResult(success=False, error=f"Storage error: {str(e)}", status=500)
     
-    filepath = os.path.join(avatar_dir, filename)
-    with open(filepath, 'wb') as f:
-        f.write(file_data)
-    
-    avatar_path = f"/static/avatars/{filename}"
     db = get_db()
-    
     existing = db.execute(
         "SELECT id FROM profiles WHERE user_id = ?", (user_id,)
     ).fetchone()
@@ -361,29 +349,15 @@ def save_avatar(user_id: int, file_data: bytes, extension: str, app_root: str) -
 
 def save_voice_intro(user_id: int, file: Any, app_root: str, waveform_json: str = "[]") -> ServiceResult:
     """
-    Save voice intro file and update profile.
-    
-    Args:
-        user_id: Profile owner ID
-        file: Flask/Werkzeug FileStorage object
-        app_root: App root path
-        waveform_json: JSON string of waveform data
-    
-    Returns:
-        ServiceResult with voice_path on success
+    Save voice intro file and update profile using StorageService.
     """
     if not file:
         return ServiceResult(success=False, error="No audio file", status=400)
         
-    filename = f"voice_{user_id}.webm" # Single file per user, overwrite
-    
-    voice_dir = os.path.join(app_root, 'static/voice_intros')
-    os.makedirs(voice_dir, exist_ok=True)
-    
-    filepath = os.path.join(voice_dir, filename)
-    file.save(filepath)
-    
-    path_url = f"/static/voice_intros/{filename}"
+    try:
+        path_url = StorageService.save_file(file, user_id, "voice_intros", filename="voice_intro.webm")
+    except Exception as e:
+        return ServiceResult(success=False, error=f"Storage error: {str(e)}", status=500)
     
     db = get_db()
     existing = db.execute("SELECT id FROM profiles WHERE user_id = ?", (user_id,)).fetchone()

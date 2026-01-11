@@ -250,8 +250,8 @@ if (!window.FeedManager) {
                 <html>
                 <head>
                     <style>body { margin: 0; overflow: hidden; background: #000; }</style>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"><\/script>
+                    <script src="/static/vendor/three.min.js"><\/script>
+                    <script src="/static/vendor/p5.min.js"><\/script>
                 </head>
                 <body>
                     <script>${code}<\/script>

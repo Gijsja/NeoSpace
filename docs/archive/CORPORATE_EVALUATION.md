@@ -287,7 +287,7 @@ Continue WebOS work as planned.
 | -------------------- | -------------------- | ------------------------------ |
 | **Rebrand?**         | Yes → **NeoSpace**   | New brand for wall-based app   |
 | **Timeline?**        | Not soon             | Canvas work is R&D, not urgent |
-| **Coexistence?**     | **2 different apps** | SBBS = chat, NeoSpace = walls  |
+| **Coexistence?**     | **2 different apps** | NeoSpace = chat, NeoSpace = walls  |
 | **Budget?**          | Yes                  | Custom framework is possible   |
 | **Backward Compat?** | No                   | Fresh start, no migration      |
 
@@ -295,16 +295,16 @@ Continue WebOS work as planned.
 
 # 🚨 Strategic Pivot: Two Apps
 
-> [!IMPORTANT] > **SBBS and NeoSpace are separate products.**
+> [!IMPORTANT] > **NeoSpace and NeoSpace are separate products.**
 
 | App               | Focus             | Status            |
 | ----------------- | ----------------- | ----------------- |
-| **LocalBBS/SBBS** | Chat-first        | ✅ Continue as-is |
+| **LocalBBS/NeoSpace** | Chat-first        | ✅ Continue as-is |
 | **NeoSpace**      | Wall-first canvas | 🆕 New project    |
 
 ## Revised Document Relevance
 
-| Doc                  | SBBS                 | NeoSpace                    |
+| Doc                  | NeoSpace                 | NeoSpace                    |
 | -------------------- | -------------------- | --------------------------- |
 | 01 Product Vision    | 🟡 Inspirational     | 🟢 **Foundational**         |
 | 02 Wall System       | 🟡 Audio Anthem only | 🟢 **Core spec**            |
@@ -314,7 +314,7 @@ Continue WebOS work as planned.
 
 ## Next Steps
 
-**SBBS**: Finish Sprint 10, add Audio Anthem in Sprint 11  
+**NeoSpace**: Finish Sprint 10, add Audio Anthem in Sprint 11  
 **NeoSpace**: Create new repo when ready, use Product Vision as foundation
 
 ---

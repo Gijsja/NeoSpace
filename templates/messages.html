@@ -5,9 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
     <title>Messages - NeoSpace</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/fonts.css" />
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-regular.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
+    <link rel="stylesheet" href="/static/vendor/phosphor/phosphor-fill.css">
+    <script src="/static/vendor/tailwindcss.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -43,7 +45,7 @@
     <!-- Sidebar: Conversation List -->
     <aside class="w-80 bg-bbs-surface backdrop-blur-xl border-r border-bbs-border flex flex-col shrink-0">
         <div class="p-4 border-b border-bbs-border flex items-center justify-between">
-            <a href="/" class="text-slate-400 hover:text-white transition">
+            <a href="/wall" class="text-slate-400 hover:text-white transition">
                 <i class="ph-bold ph-arrow-left text-xl"></i>
             </a>
             <h1

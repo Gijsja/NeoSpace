@@ -105,7 +105,7 @@
 ## 📁 Directory Structure
 
 ```
-SBBS/
+NeoSpace/
 ├── app.py                 # Flask application factory
 ├── db.py                  # Database schema, connection pool, retry logic
 ├── auth.py                # Authentication blueprint (login/register/logout)

@@ -308,9 +308,9 @@ export async function activateScript(card, script) {
         // P5 Support
         let html = '';
         if (mode === 'p5') {
-            html = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; }</style><script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script></head><body><script>function windowResized(){if(typeof resizeCanvas==='function')resizeCanvas(window.innerWidth,window.innerHeight);} try{${fullScript.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e.toString()+'</pre>'}</script></body></html>`;
+            html = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; }</style><script src="/static/vendor/p5.min.js"><\/script></head><body><script>function windowResized(){if(typeof resizeCanvas==='function')resizeCanvas(window.innerWidth,window.innerHeight);} try{${fullScript.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e.toString()+'</pre>'}</script></body></html>`;
         } else if (mode === 'three') {
-            html = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; }</style></head><body><script type="module">try{${fullScript.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e.toString()+'</pre>'}</script></body></html>`;
+            html = `<!DOCTYPE html><html><head><style>body { margin: 0; overflow: hidden; }</style><script src="/static/vendor/three.min.js"><\/script></head><body><script type="module">try{${fullScript.content}}catch(e){document.body.innerHTML='<pre style="color:red">'+e.toString()+'</pre>'}</script></body></html>`;
         } else {
             html = `<!DOCTYPE html><html><body style="margin:0;overflow:hidden;color:#fff;font-family:monospace;font-size:12px;"><script>${fullScript.content}<\/script></body></html>`;
         }

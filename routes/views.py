@@ -48,7 +48,7 @@ def penguin():
 def messages():
     if g.user is None:
          return redirect(url_for("auth.login"))
-    return send_from_directory("ui/views", "messages.html")
+    return render_template("messages.html")
 
 @bp.route("/desktop")
 def desktop():
@@ -115,7 +115,7 @@ def lobby_users():
 def internals():
     if g.user is None:
          return redirect(url_for("auth.login"))
-    return send_from_directory("ui/views", "internals.html")
+    return render_template("internals.html")
 
 @bp.route("/catsound_player")
 def catsound_player_underscore():
