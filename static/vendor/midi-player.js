@@ -76,15 +76,15 @@ var Utils = /*#__PURE__*/function () {
   _createClass(Utils, null, [{
     key: "byteToHex",
     value:
-    /**
-     * Converts a single byte to a hex string.
-     * @param {number} byte
-     * @return {string}
-     */
-    function byteToHex(_byte) {
-      // Ensure hex string always has two chars
-      return ('0' + _byte.toString(16)).slice(-2);
-    }
+      /**
+       * Converts a single byte to a hex string.
+       * @param {number} byte
+       * @return {string}
+       */
+      function byteToHex(_byte) {
+        // Ensure hex string always has two chars
+        return ('0' + _byte.toString(16)).slice(-2);
+      }
     /**
      * Converts an array of bytes to a hex string.
      * @param {array} byteArray
@@ -550,7 +550,7 @@ var Track = /*#__PURE__*/function () {
           eventJson.running = true;
           eventJson.noteNumber = this.data[eventStartIndex];
           eventJson.noteName = Constants.NOTES[this.data[eventStartIndex]];
-          eventJson.velocity = this.data[eventStartIndex + 1];
+          eventJson.velocity = Math.round(this.data[eventStartIndex + 1] / 127 * 100);
 
           if (this.lastStatus <= 0x8f) {
             eventJson.name = 'Note off';
@@ -1289,4 +1289,8 @@ var index = {
   Constants: Constants
 };
 
-module.exports = index;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = index;
+} else {
+  window.MidiPlayer = index;
+}

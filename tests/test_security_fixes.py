@@ -162,7 +162,7 @@ class TestSecurityFixes:
         # Limiter storage is memory://, but we need to ensure clean slate
         try:
              limiter.reset() 
-        except:
+        except Exception:
              pass 
 
         username = 'http_spammer'

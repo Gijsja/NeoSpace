@@ -202,7 +202,23 @@ export function addMessage(msg) {
       img.loading = "lazy";
       contentEl.appendChild(img);
     }
-    // 3. Code Block
+    // 3. Audio
+    else if (rawContent.startsWith('audio:')) {
+      const src = rawContent.substring(6).trim();
+      contentEl.innerHTML = '';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = "flex items-center gap-2 mt-2 bg-gray-100 p-2 border-2 border-black rounded";
+
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = src;
+      audio.className = "w-full h-8";
+
+      wrapper.appendChild(audio);
+      contentEl.appendChild(wrapper);
+    }
+    // 4. Code Block
     else if (rawContent.includes('```')) {
       const escapeHtml = (text) => text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
       const formatted = rawContent.replace(/```([\s\S]*?)```/g, (match, code) => {

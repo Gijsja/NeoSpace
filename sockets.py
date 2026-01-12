@@ -130,6 +130,10 @@ def init_sockets(app):
         }
         
         emit("connected", {"ok": True, "username": username})
+        
+        # Broadcast presence
+        emit("user_online", {"user_id": user_id}, broadcast=True)
+        
         return True
 
     @socketio.on("disconnect")
@@ -139,11 +143,24 @@ def init_sockets(app):
         if auth_info:
             # Leave the room
             leave_room(auth_info["room_name"])
+            
+            user_id = auth_info["user_id"]
             del authenticated_sockets[request.sid]
+            
+            # Broadcast offline (check if user has other sockets open first?)
+            # For simplicity, broadcast offline. Frontend can debounce.
+            emit("user_offline", {"user_id": user_id}, broadcast=True)
             
             # Optional: Clean up rate limits if memory is concern, 
             # but getting user_id here might be tricky if cleaned up too early.
             # Leaving in memory for now as they are small deques.
+
+    @socketio.on("get_online_users")
+    def handle_get_online_users():
+        """Return list of currently online user IDs."""
+        # Set comprehension for unique user IDs
+        online_ids = list({s["user_id"] for s in authenticated_sockets.values()})
+        return {"online_ids": online_ids}
 
     @socketio.on("join_room")
     def handle_join_room(data):

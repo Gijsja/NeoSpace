@@ -27,10 +27,10 @@ greenlet==3.3.0
 # Utilities
 Jinja2==3.1.2
 MarkupSafe==2.1.5
-Werkzeug==3.0.3
+Werkzeug==3.1.0
 click==8.3.1
-itsdangerous==2.1.2
-blinker==1.7.0
+itsdangerous==2.2.0
+blinker==1.9.0
 bidict==0.23.1
 
 # JSON Performance (Phase 4)
@@ -48,6 +48,7 @@ alembic==1.18.0
 
 # Security & Sanitization
 bleach==6.3.0
+tinycss2==1.2.1
 
 # HTTP Client (for scripts/utils)
 requests==2.32.5

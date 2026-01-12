@@ -104,6 +104,75 @@ export function setupChatInput() {
             if (e.dataTransfer.files.length > 0) handleUpload(e.dataTransfer.files[0]);
         });
     }
+
+    // 6. Voice Recorder
+    const recordBtn = document.getElementById('record-btn');
+    const overlay = document.getElementById('recording-overlay');
+    const stopBtn = document.getElementById('stop-recording');
+    const cancelBtn = document.getElementById('cancel-recording');
+
+    if (recordBtn && overlay && window.VoiceRecorder) {
+        const recorder = new window.VoiceRecorder('voice-canvas');
+
+        recordBtn.addEventListener('click', async () => {
+            try {
+                await recorder.start();
+                overlay.classList.remove('hidden');
+            } catch (e) {
+                showToast('Microphone access denied', 'error');
+            }
+        });
+
+        stopBtn.addEventListener('click', async () => {
+            const result = await recorder.stop();
+            overlay.classList.add('hidden');
+
+            if (result && result.blob) {
+                // Upload Blob
+                uploadVoice(result.blob, result.waveform);
+            }
+        });
+
+        cancelBtn.addEventListener('click', async () => {
+            await recorder.stop(); // Just stop, ignore result
+            overlay.classList.add('hidden');
+        });
+    }
+}
+
+async function uploadVoice(blob, waveform) {
+    setLoading(true);
+    const formData = new FormData();
+    // Rename blob to .webm for backend detection
+    formData.append('file', blob, 'voice_message.webm');
+
+    try {
+        const res = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            // Encode waveform data to send with message
+            // format: audio:URL|waveform_data
+            // Waveform data is array [0.1, 0.5, ...]. Join with commas.
+            // But comma might break parsing? Base64?
+            // Simplest: just send audio:URL for now, and let client compute waveform? 
+            // Or use JSON string: audio:{"url":"...", "wave":[...]}
+            // ChatSocket.js expects string?
+            // Existing format: `img:URL`.
+            // Let's use `audio:URL` for now. Visualizer can compute locally or just show simple bar.
+            // Better: `audio:URL`
+            sendMessage(`audio:${data.url}`);
+        } else {
+            showToast(data.error || 'Upload failed', 'error');
+        }
+    } catch (e) {
+        showToast('Upload error', 'error');
+    } finally {
+        setLoading(false);
+    }
 }
 
 function setLoading(loading) {

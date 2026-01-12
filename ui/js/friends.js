@@ -29,7 +29,7 @@ window.FriendManager = window.FriendManager || {
                     // We will add a helper to get it.
                     'X-CSRFToken': this.getCsrfToken()
                 },
-                body: JSON.stringify({ user_id: userId })
+                body: JSON.stringify({ user_id: parseInt(userId, 10) })
             });
 
             const data = await res.json();

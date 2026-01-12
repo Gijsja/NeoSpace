@@ -1,0 +1,15 @@
+{% from "components/post.html" import render_post %}
+{% for post in posts %}
+{{ render_post(post) }}
+{% endfor %}
+
+{% if posts|length > 0 %}
+<div hx-get="/feed/?limit=10&before_id={{ posts[-1].id }}" hx-trigger="revealed" hx-swap="outerHTML"
+    class="h-20 flex items-center justify-center p-4">
+    <i class="ph-bold ph-spinner animate-spin text-2xl"></i>
+</div>
+{% else %}
+<div class="text-center py-8 text-slate-500 font-mono text-xs uppercase tracking-widest">
+    // END OF STREAM //
+</div>
+{% endif %}

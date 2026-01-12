@@ -33,6 +33,7 @@
                         </option>
                         <option value="/static/catsounds/synthwave_neubrutalist_cat_WITH_DRUMS.mid">Opus 2: Synthwave
                             Neubrutalist Cat (With Drums)</option>
+                        <option value="/static/audio/night_drive.mid">Opus 3: Night Drive</option>
                     </select>
                     <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                         <i class="ph-bold ph-caret-down text-xl"></i>
@@ -67,11 +68,8 @@
                         <span id="current-time">0:00</span>
                         <span id="total-time">--:--</span>
                     </div>
-                    <div class="h-4 border-2 border-black bg-white relative cursor-pointer group"
-                        id="progress-container">
-                        <div id="progress-bar" class="h-full bg-purple-500 w-0 transition-all duration-100 ease-linear">
-                        </div>
-                    </div>
+                    <input type="range" id="seek-slider" min="0" max="100" value="0" step="0.1"
+                        class="w-full h-4 appearance-none bg-white border-2 border-black cursor-pointer focus:outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-[14px] [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-black [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-[14px] [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-black rounded-none">
                 </div>
             </div>
 
@@ -120,105 +118,168 @@
         const playBtn = document.getElementById('play-btn');
         const stopBtn = document.getElementById('stop-btn');
         const trackSelect = document.getElementById('track-select');
-        const progressBar = document.getElementById('progress-bar');
-        const progressContainer = document.getElementById('progress-container');
+        const seekSlider = document.getElementById('seek-slider');
         const currentTimeEl = document.getElementById('current-time');
         const totalTimeEl = document.getElementById('total-time');
         const loadingIndicator = document.getElementById('loading-indicator');
         const visualizer = document.getElementById('visualizer');
 
-        // Generate visualizer bars
-        for (let i = 0; i < 32; i++) {
+        // Visualizer setup
+        const barCount = 30;
+        for (let i = 0; i < barCount; i++) {
             const bar = document.createElement('div');
-            bar.className = 'flex-1 bg-acid-green transition-all duration-75';
-            bar.style.height = '10%';
+            bar.className = 'flex-1 bg-acid-green transition-all duration-75 ease-out';
+            bar.style.height = '0%';
             visualizer.appendChild(bar);
         }
+        const visualizerBars = Array.from(visualizer.children);
 
-        function updateVisualizer() {
+        let isDragging = false;
+
+        // Update Visualizer
+        function updateVisualizer(timestamp) {
             if (!isPlaying) return;
-            const bars = visualizer.children;
-            for (let i = 0; i < bars.length; i++) {
-                bars[i].style.height = Math.random() * 100 + '%';
-            }
+
+            const activeNotes = player.getEvents().filter(e => e.name === 'Note on' && e.velocity > 0);
+            const totalVelocity = activeNotes.reduce((sum, note) => sum + note.velocity, 0);
+            const avgVelocity = activeNotes.length > 0 ? totalVelocity / activeNotes.length : 0;
+
+            const baseHeight = 10; // Minimum height for bars
+            const maxAddedHeight = 90; // Maximum additional height for bars
+
+            visualizerBars.forEach((bar, index) => {
+                // Simple sine wave based on index for variation
+                const wave = Math.sin(timestamp / 200 + index * 0.5) * 0.5 + 0.5; // 0 to 1
+                const dynamicHeight = (avgVelocity / 127) * maxAddedHeight * wave;
+                const height = Math.min(100, baseHeight + dynamicHeight);
+                bar.style.height = `${height}%`;
+            });
+
             requestAnimationFrame(updateVisualizer);
         }
 
-        // Initialize Player
-        // We use Soundfont player to handle proper instrument synthesis
-        loadingIndicator.classList.remove('hidden');
-
-        try {
-            // Load a basic soundfont instrument (e.g. acoustic_grand_piano or synth options)
-            // Ideally we map MIDI programs to instruments, but for simplicity we load a general one or set of them
-            // For this MVP, we'll try to use a "Musyng Kite" or similar if available, or just standard
-            instrument = await Soundfont.instrument(ac, 'acoustic_grand_piano');
-
-            loadingIndicator.classList.add('hidden');
-        } catch (e) {
-            console.error("Soundfont load error", e);
-            alert("Failed to load soundfont");
+        // Initialize Player Function
+        function createPlayer() {
+            return new Player({
+                output: (event) => {
+                    if (event.name == 'Note on' && instrument) {
+                        instrument.play(event.noteName, ac.currentTime, {
+                            gain: event.velocity / 127
+                        });
+                    }
+                }
+            });
         }
 
-        player = new Player((event) => {
-            if (event.name === 'Note on' && event.velocity > 0) {
-                instrument.play(event.noteName, ac.currentTime, { gain: event.velocity / 100 });
-            }
-        });
+        function setupPlayerEvents() {
+            // Events
+            player.on('playing', (event) => {
+                isPlaying = true;
+                playBtn.innerHTML = '<i class="ph-fill ph-pause"></i><span>PAUSE</span>';
+                // Start visualizer loop
+                updateVisualizer(performance.now());
+            });
+
+            player.on('fileLoaded', () => {
+                totalTimeEl.textContent = formatTime(player.getSongTime());
+            });
+
+            player.on('endOfFile', () => {
+                isPlaying = false;
+                playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>PLAY TRACK</span>';
+                seekSlider.value = 0;
+            });
+        }
 
         // Load Track
         async function loadTrack(url) {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            player.loadArrayBuffer(arrayBuffer);
-            totalTimeEl.textContent = formatTime(player.getSongTime());
+            try {
+                // Stop existing player if it exists
+                if (player) {
+                    player.stop();
+                    isPlaying = false;
+                }
+
+                // Create fresh player instance
+                player = createPlayer();
+                setupPlayerEvents();
+
+                // Reset UI
+                playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>PLAY TRACK</span>';
+                seekSlider.value = 0;
+                currentTimeEl.textContent = "0:00";
+
+                // Fetch with cache busting
+                const fetchUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+                console.log("Fetching track:", fetchUrl);
+
+                const response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const arrayBuffer = await response.arrayBuffer();
+                console.log("Loading into player, bytes:", arrayBuffer.byteLength);
+                player.loadArrayBuffer(arrayBuffer);
+
+                console.log("Track loaded. Duration:", player.getSongTime());
+                // Event listener for fileLoaded will handle time update, but good to be safe
+                totalTimeEl.textContent = formatTime(player.getSongTime());
+
+            } catch (e) {
+                console.error("Track load failed:", e);
+                alert("Failed to load track: " + e.message);
+            }
         }
+
+        // Initial setup
+        // We don't construct player here anymore, it happens in loadTrack
+
+        // Load Soundfont
+        loadingIndicator.classList.remove('hidden');
+        Soundfont.instrument(ac, 'acoustic_grand_piano', {
+            gain: 0.8
+        }).then((synth) => {
+            instrument = synth;
+            loadingIndicator.classList.add('hidden');
+            console.log("Soundfont loaded.");
+        }).catch(e => {
+            console.error("Soundfont load failed:", e);
+            alert("Failed to load soundfont: " + e.message);
+            loadingIndicator.classList.add('hidden');
+        });
 
         // Initial Load
         await loadTrack(trackSelect.value);
 
-        // Events
-        player.on('playing', (event) => {
-            isPlaying = true;
-            playBtn.innerHTML = '<i class="ph-fill ph-pause"></i><span>PAUSE</span>';
-            // Start visualizer loop
-            updateVisualizer();
-
-            // Update time
-            const p = 100 - event.remaining / player.getSongTime() * 100; // This logic depends on library
-            // midi-player-js 'playing' event gives tick, needs conversion. 
-            // Better to use setInterval for UI updates
-        });
-
         // Polling for progress (midi-player-js doesn't emit distinct 'progress' events optimally)
         setInterval(() => {
-            if (player && player.isPlaying()) {
+            if (player && player.isPlaying() && !isDragging) {
                 const p = 100 - player.getSongPercentRemaining();
-                progressBar.style.width = `${p}%`;
+                seekSlider.value = p;
                 currentTimeEl.textContent = formatTime(player.getSongTime() - player.getSongTimeRemaining());
             }
         }, 100);
 
-        player.on('fileLoaded', () => {
-            totalTimeEl.textContent = formatTime(player.getSongTime());
-        });
+        playBtn.addEventListener('click', async () => {
+            if (ac.state === 'suspended') {
+                await ac.resume();
+            }
 
-        player.on('endOfFile', () => {
-            isPlaying = false;
-            playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>PLAY TRACK</span>';
-            progressBar.style.width = '0%';
-        });
+            if (!player) return;
 
-        playBtn.addEventListener('click', () => {
             if (player.isPlaying()) {
                 player.pause();
                 isPlaying = false;
                 playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>RESUME</span>';
             } else {
-                player.play();
-                isPlaying = true;
-                playBtn.innerHTML = '<i class="ph-fill ph-pause"></i><span>PAUSE</span>';
-                updateVisualizer();
+                try {
+                    player.play();
+                    isPlaying = true;
+                    playBtn.innerHTML = '<i class="ph-fill ph-pause"></i><span>PAUSE</span>';
+                    updateVisualizer(performance.now());
+                } catch (e) {
+                    console.error("Play error:", e);
+                    alert("Playback error: " + e);
+                }
             }
         });
 
@@ -226,14 +287,39 @@
             player.stop();
             isPlaying = false;
             playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>PLAY TRACK</span>';
-            progressBar.style.width = '0%';
+            seekSlider.value = 0;
+            currentTimeEl.textContent = "0:00";
         });
 
         trackSelect.addEventListener('change', async (e) => {
             player.stop();
             isPlaying = false;
             playBtn.innerHTML = '<i class="ph-fill ph-play"></i><span>PLAY TRACK</span>';
+            seekSlider.value = 0;
+            currentTimeEl.textContent = "0:00";
             await loadTrack(e.target.value);
+        });
+
+        // Slider Events
+        seekSlider.addEventListener('input', () => {
+            isDragging = true;
+            const percent = seekSlider.value;
+            currentTimeEl.textContent = formatTime(player.getSongTime() * (percent / 100));
+        });
+
+        seekSlider.addEventListener('change', () => {
+            isDragging = false;
+            const percent = seekSlider.value;
+            const wasPlaying = player.isPlaying();
+
+            player.skipToPercent(percent);
+
+            if (wasPlaying) {
+                player.play();
+                isPlaying = true;
+                playBtn.innerHTML = '<i class="ph-fill ph-pause"></i><span>PAUSE</span>';
+                updateVisualizer(performance.now());
+            }
         });
 
         function formatTime(seconds) {

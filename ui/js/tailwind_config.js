@@ -8,56 +8,34 @@ window.tailwind.config = {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
-                mono: ['Fira Code', 'monospace'],
-            },
-            fontSize: {
-                'xs': ['0.75rem', { lineHeight: '1rem' }],
-                'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-                'base': ['1rem', { lineHeight: '1.5rem' }],
-                'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-                'xl': ['1.25rem', { lineHeight: '1.75rem' }],
-                '2xl': ['1.5rem', { lineHeight: '2rem' }],
-                '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-                '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-                '5xl': ['3rem', { lineHeight: '1' }],
-                '6xl': ['3.75rem', { lineHeight: '1' }],
-            },
-            fontWeight: {
-                normal: '400',
-                bold: '700',
-                black: '900', // Heavy usage in headers
+                sans: ['"Courier New"', 'Courier', 'monospace'], // Default to mono for brutalism
+                mono: ['"Courier New"', 'Courier', 'monospace'],
             },
             colors: {
-                // Base Layout
-                'bbs-bg': '#FFFAF0',      // Floral White (Light Mode Base)
-                'bbs-surface': '#FFFFFF',
-                'bbs-border': '#000000',
+                // Base
+                'black': '#000000',
+                'white': '#ffffff',
+                'gray-light': '#f5f5f5',
+                'gray-dark': '#333333',
 
-                // Neo-Brutalist Palette (Penguin UI)
-                'neo-black': '#000000',
-                'neo-white': '#FFFFFF',
-                'neo-bg': '#0a0f1a',      // Dark Mode Base
+                // Neobrutalist Palette
+                'neon-green': '#ccff00',
+                'hot-pink': '#ff0055',
+                'cyber-blue': '#00ccff',
+                'electric-yellow': '#ffff00',
+                'acid-green': '#39ff14',
+                'purple': '#9d00ff',
+                'orange': '#ff8800',
 
-                // Accents (The "Acid" Pop)
-                'acid-green': '#a3e635',  // Primary Highlight
-                'hot-pink': '#ff6b6b',    // Destructive / Attention
-                'electric-blue': '#22d3ee',
-                'construction-orange': '#fb923c',
-                'warm-beige': '#f5f5dc',
-
-                // Semantic Aliases
-                'neo-green': '#a3e635',
-                'neo-pink': '#ff6b6b',
-                'neo-blue': '#22d3ee',
-                'neo-yellow': '#F3F722', // Warning
+                // Semantic Aliases for compatibility
+                'neo-bg': '#f5f5f5',
+                'bbs-bg': '#f5f5f5', // Deprecated but aliased to gray-light
             },
             boxShadow: {
                 'hard': '4px 4px 0px 0px #000000',
                 'hard-sm': '2px 2px 0px 0px #000000',
                 'hard-md': '6px 6px 0px 0px #000000',
                 'hard-xl': '8px 8px 0px 0px #000000',
-                'glow': '0 0 20px rgba(96, 165, 250, 0.5)',
             },
             animation: {
                 'marquee': 'marquee 20s linear infinite',
@@ -67,7 +45,7 @@ window.tailwind.config = {
             },
             keyframes: {
                 marquee: {
-                    '0%': { transform: 'translateX(100%)' },
+                    '0%': { transform: 'translateX(0%)' },
                     '100%': { transform: 'translateX(-100%)' }
                 },
                 fadeIn: {

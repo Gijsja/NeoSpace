@@ -17,8 +17,17 @@ def app_view():
 @bp.route("/dashboard")
 def dashboard():
     if g.user is None:
-         return redirect(url_for("auth.login"))
-    return render_template("dashboard.html")
+        return redirect(url_for("auth.login"))
+    
+    # Sentinel: Restricted to Staff
+    if not g.user.get("is_staff"):
+        return redirect(url_for("wall.index"))
+        
+    from queries.admin_queries import get_system_metrics, get_security_audit_log
+    metrics = get_system_metrics()
+    logs = get_security_audit_log(limit=8)
+    
+    return render_template("dashboard.html", metrics=metrics, audit_logs=logs)
 
 @bp.route("/directory", strict_slashes=False)
 def directory():

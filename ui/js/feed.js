@@ -95,33 +95,33 @@ if (!window.FeedManager) {
             if (post.module_type === 'text') {
                 let text = post.content.text || "";
                 if (typeof marked !== 'undefined') text = marked.parse(text);
-                contentHTML = `<div class="prose prose-sm prose-invert max-w-none text-slate-300 break-words">${text}</div>`;
+                contentHTML = `<div class="prose prose-sm prose-black max-w-none font-mono text-sm leading-relaxed">${text}</div>`;
 
             } else if (post.module_type === 'image') {
-                contentHTML = `<img src="${post.content.url}" class="w-full h-auto rounded border border-white/10" loading="lazy">`;
+                contentHTML = `<img src="${post.content.url}" class="w-full h-auto border-4 border-black box-shadow-hard" loading="lazy">`;
 
             } else if (post.module_type === 'link') {
                 contentHTML = `
-                    <a href="${post.content.url}" target="_blank" class="block p-4 bg-slate-800 rounded border border-white/10 hover:bg-slate-700 transition">
+                    <a href="${post.content.url}" target="_blank" class="block p-4 bg-white border-4 border-black hover:bg-yellow-200 transition shadow-hard">
                         <div class="flex items-center gap-3">
-                            <i class="ph-bold ph-link text-slate-400"></i>
+                            <i class="ph-bold ph-link text-2xl"></i>
                             <div class="min-w-0">
-                                 <div class="font-bold text-sky-400 truncate">${post.content.title || post.content.url}</div>
-                                 <div class="text-xs text-slate-500 truncate">${post.content.url}</div>
+                                 <div class="font-black uppercase truncate">${post.content.title || post.content.url}</div>
+                                 <div class="text-xs font-mono truncate">${post.content.url}</div>
                             </div>
                         </div>
                     </a>
                 `;
             } else if (post.module_type === 'audio') {
                 contentHTML = `
-                    <div class="p-3 bg-slate-800 rounded border border-white/10">
+                    <div class="p-3 bg-white border-4 border-black shadow-hard">
                         <div class="flex items-center gap-3 mb-2">
-                             <div class="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400">
-                                <i class="ph-fill ph-music-notes"></i>
+                             <div class="w-10 h-10 bg-hot-pink border-4 border-black flex items-center justify-center text-white">
+                                <i class="ph-fill ph-music-notes text-xl"></i>
                              </div>
-                             <div class="text-sm font-bold text-slate-200">${post.content.title || "Audio Track"}</div>
+                             <div class="text-sm font-black uppercase">${post.content.title || "Audio Track"}</div>
                         </div>
-                        <audio controls src="${post.content.url}" class="w-full h-8"></audio>
+                        <audio controls src="${post.content.url}" class="w-full h-8 border-2 border-black"></audio>
                     </div>
                 `;
             } else if (post.module_type === 'script') {
@@ -131,55 +131,61 @@ if (!window.FeedManager) {
                 const scriptTitle = post.content.title || "Untitled Script";
 
                 contentHTML = `
-                    <div class="relative group overflow-hidden bg-black border border-white/10 rounded-xl" id="${scriptId}-container">
+                    <div class="relative group overflow-hidden bg-black border-4 border-black shadow-hard" id="${scriptId}-container">
                         
                         <!-- Thumbnail / Start Screen -->
-                        <div class="aspect-video flex flex-col items-center justify-center p-6 relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
-                            <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-black/80"></div>
+                        <div class="aspect-video flex flex-col items-center justify-center p-6 relative z-10">
+                            <div class="absolute inset-0 bg-white opacity-10" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 10px 10px;"></div>
                             
                             <!-- Icon -->
-                            <div class="w-16 h-16 rounded-full bg-black/50 border border-white/20 flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:border-acid-green backdrop-blur-sm shadow-xl">
-                                <i class="ph-bold ph-play text-3xl text-white group-hover:text-acid-green ml-1"></i>
+                            <div class="w-16 h-16 bg-acid-green border-4 border-black flex items-center justify-center mb-4 shadow-hard transition-transform group-hover:scale-110">
+                                <i class="ph-bold ph-play text-3xl text-black"></i>
                             </div>
                             
-                            <h3 class="relative z-20 font-black text-2xl text-white uppercase tracking-tighter shadow-black drop-shadow-md">${scriptTitle}</h3>
+                            <h3 class="relative z-20 font-black text-2xl text-white uppercase tracking-tighter mix-blend-difference">${scriptTitle}</h3>
                             <button onclick="window.FeedManager.playScript('${scriptId}', '${scriptCode}')" 
-                                    class="relative z-20 mt-4 px-6 py-2 bg-acid-green text-black font-bold uppercase tracking-widest border-2 border-black hover:bg-white transition-colors shadow-hard">
+                                    class="relative z-20 mt-4 px-6 py-2 bg-white text-black font-bold uppercase tracking-widest border-4 border-black hover:bg-neon-green transition-colors shadow-hard">
                                 Run Program
                             </button>
-                        </div>
-                        
-                        <!-- Grid Background -->
-                        <div class="absolute inset-0 opacity-20 pointer-events-none" 
-                             style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 20px 20px;">
                         </div>
                     </div>
                  `;
             }
 
             return `
-                <div class="nb-card p-0 mb-6 overflow-hidden animate-fade-in relative group">
+                <div class="nb-card p-0 mb-6 overflow-hidden animate-fade-in relative group transition hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-hard-xl">
                      <!-- Author Header -->
-                     <div class="flex items-center gap-3 p-4 border-b border-black/10 bg-slate-50 dark:bg-slate-900/50">
-                        <a href="/wall?user_id=${post.user_id}" class="shrink-0">
-                            <img src="${avatar}" class="w-10 h-10 rounded-full border border-black/20 object-cover">
+                     <div class="flex items-center gap-3 p-4 border-b-4 border-black bg-white">
+                        <a href="/wall?user_id=${post.user_id}" class="shrink-0 relative">
+                            <div class="absolute inset-0 bg-black translate-x-1 translate-y-1 rounded-none"></div>
+                            <img src="${avatar}" class="relative w-12 h-12 border-4 border-black object-cover bg-gray-200 z-10">
                         </a>
                         <div class="min-w-0 flex-1">
-                            <a href="/wall?user_id=${post.user_id}" class="block font-bold text-sm hover:underline truncate">
+                            <a href="/wall?user_id=${post.user_id}" class="block font-black text-sm uppercase hover:underline truncate">
                                 ${author}
                             </a>
-                            <div class="text-xs text-slate-500">@${username} • ${time}</div>
+                            <div class="text-xs font-mono font-bold text-gray-500">@${username} • ${time}</div>
                         </div>
                         <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
-                             <a href="/wall?user_id=${post.user_id}" class="text-xs font-bold uppercase tracking-wider text-black border border-black px-2 py-1 bg-white hover:bg-black hover:text-white transition">
+                             <a href="/wall?user_id=${post.user_id}" class="text-xs font-bold uppercase tracking-wider text-black border-2 border-black px-2 py-1 bg-white hover:bg-black hover:text-white transition shadow-hard-sm">
                                 View Wall
                              </a>
                         </div>
                      </div>
                      
                      <!-- Content -->
-                     <div class="p-4 bg-white dark:bg-slate-900">
+                     <div class="p-6 bg-white">
                         ${contentHTML}
+                     </div>
+
+                     <!-- Actions Footer -->
+                     <div class="border-t-4 border-black p-3 flex gap-4 bg-gray-50">
+                        <button class="flex items-center gap-2 text-xs font-bold uppercase hover:bg-hot-pink hover:text-white px-2 py-1 border-2 border-transparent hover:border-black transition">
+                            <i class="ph-bold ph-heart"></i> Like
+                        </button>
+                        <button class="flex items-center gap-2 text-xs font-bold uppercase hover:bg-neon-green hover:text-black px-2 py-1 border-2 border-transparent hover:border-black transition">
+                            <i class="ph-bold ph-chat-circle"></i> Comment
+                        </button>
                      </div>
                 </div>
             `;
@@ -285,18 +291,18 @@ if (!window.FeedManager) {
         renderSkeletons() {
             // Render 3 skeleton posts
             this.container.innerHTML = Array(3).fill(0).map(() => `
-                <div class="nb-card p-0 mb-6 animate-pulse bg-white">
-                    <div class="flex items-center gap-3 p-4 border-b border-black/10">
-                        <div class="w-10 h-10 rounded-full bg-gray-200 border border-gray-300"></div>
+                <div class="nb-card p-0 mb-6 animate-pulse bg-white border-4 border-black shadow-hard">
+                    <div class="flex items-center gap-3 p-4 border-b-4 border-black bg-white">
+                        <div class="w-12 h-12 bg-gray-200 border-4 border-black"></div>
                         <div class="flex-1">
-                            <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                            <div class="h-3 w-20 bg-gray-200 rounded"></div>
+                            <div class="h-4 w-32 bg-gray-200 mb-2"></div>
+                            <div class="h-3 w-20 bg-gray-200"></div>
                         </div>
                     </div>
-                    <div class="p-4 space-y-3">
-                        <div class="h-4 w-3/4 bg-gray-200 rounded"></div>
-                        <div class="h-4 w-1/2 bg-gray-200 rounded"></div>
-                        <div class="h-32 w-full bg-gray-100 rounded border border-gray-200"></div>
+                    <div class="p-6 space-y-3">
+                        <div class="h-4 w-3/4 bg-gray-200"></div>
+                        <div class="h-4 w-1/2 bg-gray-200"></div>
+                        <div class="h-32 w-full bg-gray-100 border-4 border-black mt-4"></div>
                     </div>
                 </div>
             `).join('');
@@ -313,7 +319,10 @@ if (window.FeedManager) {
     window.FeedManager.init();
 }
 
-// Handle non-SPA legacy load
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.FeedManager) window.FeedManager.init();
+    });
+} else {
     if (window.FeedManager) window.FeedManager.init();
-});
+}

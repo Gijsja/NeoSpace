@@ -3,32 +3,33 @@
 {% macro identity_header() %}
 <div class="nb-card p-0 relative group">
     <!-- Banner Pattern -->
-    <div class="h-32 bg-slate-900 border-b-2 border-black relative overflow-hidden">
+    <div class="h-40 bg-hot-pink border-b-4 border-black relative overflow-hidden">
         <!-- Abstract Pattern -->
-        <div class="absolute inset-0 opacity-20"
-            style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, transparent 10px, transparent 20px);">
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: radial-gradient(#000 2px, transparent 2px); background-size: 16px 16px;">
         </div>
     </div>
 
     <div class="relative p-6 pt-16 md:pt-6 md:pl-48">
         <!-- Avatar Glitch (Square, Offset) -->
-        <div class="absolute -top-12 left-6 md:left-8 group/avatar">
+        <div class="absolute -top-16 left-6 md:left-8 group/avatar">
             <div
-                class="w-32 h-32 bg-black absolute top-2 left-2 z-0 transition-transform group-hover/avatar:translate-x-0 group-hover/avatar:translate-y-0">
+                class="w-32 h-32 bg-black absolute top-2 left-2 z-0 transition-transform group-hover/avatar:translate-x-1 group-hover/avatar:translate-y-1">
             </div>
             <div id="avatar-container"
-                class="w-32 h-32 bg-white border-2 border-black relative z-10 flex items-center justify-center overflow-hidden">
-                <span id="avatar-initial" class="text-6xl font-black text-slate-200">?</span>
+                class="w-32 h-32 bg-white border-4 border-black relative z-10 flex items-center justify-center overflow-hidden">
+                <span id="avatar-initial" class="text-6xl font-black text-black">?</span>
             </div>
 
             <!-- Online Dot (Square) -->
             <div id="online-indicator"
-                class="absolute -bottom-1 -right-1 w-6 h-6 bg-acid-green border-2 border-black hidden" title="Online">
+                class="absolute -bottom-1 -right-1 w-6 h-6 bg-acid-green border-4 border-black hidden shadow-hard-sm"
+                title="Online">
             </div>
 
             <!-- Edit Button -->
-            <button id="edit-avatar-btn" @click="$dispatch('open-edit-modal')"
-                class="absolute bottom-2 right-2 p-1 bg-white border-2 border-black hover:bg-hot-pink transition opacity-0 group-hover/avatar:opacity-100 z-20 hidden pointer-events-auto shadow-hard-sm">
+            <button id="edit-avatar-btn" @click="$dispatch('open-edit-modal')" aria-label="Edit Avatar"
+                class="absolute bottom-2 right-2 p-1 bg-white border-4 border-black hover:bg-hot-pink transition opacity-0 group-hover/avatar:opacity-100 z-20 hidden pointer-events-auto shadow-hard-sm">
                 <i class="ph-bold ph-camera"></i>
             </button>
         </div>
@@ -52,10 +53,10 @@
 
             <!-- Status Line (Raw Input Style) -->
             <div
-                class="relative w-full md:w-auto max-w-lg bg-white border-2 border-black p-3 shadow-hard-sm group hover:bg-warm-beige transition-colors">
-                <div class="flex items-start gap-3">
+                class="relative w-full md:w-auto max-w-lg bg-white border-4 border-black p-4 shadow-hard group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-hard-md transition-all">
+                <div class="flex items-start gap-4">
                     <span id="status-emoji"
-                        class="text-3xl pt-0.5 filter grayscale group-hover:grayscale-0 transition">👋</span>
+                        class="text-4xl pt-0.5 filter grayscale group-hover:grayscale-0 transition">👋</span>
                     <div class="flex-1">
                         <p id="status-message" class="text-lg font-bold leading-snug font-mono">...</p>
                         <p class="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider border-t border-black pt-1 inline-block"
@@ -66,7 +67,8 @@
         </div>
 
         <!-- Anthem Controls -->
-        <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group">
+        <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group" aria-label="Toggle Anthem"
+            role="button" tabindex="0">
             <div
                 class="w-10 h-10 bg-white border-2 border-black hover:bg-hot-pink flex items-center justify-center transition-colors shadow-hard-sm">
                 <i id="anthem-icon" class="ph-bold ph-speaker-high text-xl"></i>

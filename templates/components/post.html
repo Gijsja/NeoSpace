@@ -1,0 +1,97 @@
+{% macro render_post(post) %}
+<div class="nb-card p-0 mb-6 group animate-fade-in">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-3 border-b-4 border-black bg-white">
+        <a href="/wall?user_id={{ post.author_id }}" class="flex items-center gap-3 group/author">
+            <div
+                class="w-10 h-10 border-2 border-black overflow-hidden bg-gray-100 shadow-hard-sm group-hover/author:translate-x-[2px] group-hover/author:translate-y-[2px] transition-transform">
+                <img src="{{ post.author_avatar or '/static/images/cats/null.png' }}"
+                    class="w-full h-full object-cover">
+            </div>
+            <div class="leading-tight">
+                <div class="font-black uppercase tracking-wide hover:text-hot-pink transition-colors">
+                    {{ post.author_name }}
+                </div>
+                <div class="text-[10px] font-mono text-gray-500">
+                    {{ post.created_at }} <!-- TODO: Format time -->
+                </div>
+            </div>
+        </a>
+
+        <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 border-2 border-black bg-gray-100 font-mono text-[10px] uppercase font-bold">
+                {{ post.module_type or 'TEXT' }}
+            </span>
+            {% if post.author_id == g.user['id'] %}
+            <button
+                class="w-6 h-6 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors border-2 border-transparent hover:border-black rounded-sm"
+                title="Delete Signal">
+                <i class="ph-bold ph-trash"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 bg-white min-h-[80px]">
+        {% if post.module_type == 'text' %}
+        <div class="prose font-mono text-sm leading-relaxed whitespace-pre-wrap">{{ post.content }}</div>
+        {% elif post.module_type == 'image' %}
+        <div class="border-4 border-black shadow-hard-sm bg-black overflow-hidden">
+            <img src="{{ post.content }}" class="w-full h-auto block" loading="lazy">
+        </div>
+        {% elif post.module_type == 'link' %}
+        <a href="{{ post.content }}" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-3 p-3 border-4 border-black bg-electric-yellow/20 hover:bg-electric-yellow transition-colors group/link">
+            <div class="w-10 h-10 border-2 border-black bg-white flex items-center justify-center shrink-0">
+                <i class="ph-bold ph-link text-xl"></i>
+            </div>
+            <div class="overflow-hidden">
+                <div class="font-bold text-sm truncate">{{ post.content }}</div>
+                <div class="text-[10px] uppercase font-bold tracking-widest mt-0.5">External Link</div>
+            </div>
+            <i class="ph-bold ph-arrow-up-right ml-auto group-hover/link:translate-x-1 transition-transform"></i>
+        </a>
+        {% elif post.module_type == 'audio' %}
+        <div class="audio-player p-3 border-4 border-black bg-gray-50 flex items-center gap-3">
+            <button
+                class="w-10 h-10 border-2 border-black bg-black text-neon-green flex items-center justify-center hover:bg-gray-800 transition-colors">
+                <i class="ph-bold ph-play-circle text-2xl"></i>
+            </button>
+            <div class="flex-1">
+                <div class="h-8 bg-gray-200 border-2 border-black relative overflow-hidden group/waveform">
+                    <!-- Pseudo-waveform -->
+                    <div class="absolute inset-0 flex items-end justify-between px-1 pb-1 opacity-50">
+                        {% for i in range(20) %}
+                        <div class="w-1 bg-black" style="height: {{ range(20, 100)|random }}%"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Fallback -->
+        <div class="font-mono text-sm">{{ post.content }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="px-4 py-2 border-t-4 border-black bg-gray-50 flex items-center justify-between">
+        <div class="flex gap-4">
+            <button
+                class="flex items-center gap-1.5 text-xs font-bold hover:text-hot-pink transition-colors group/action">
+                <i class="ph-bold ph-heart group-hover/action:scale-110 transition-transform"></i>
+                <span>LIKE</span>
+            </button>
+            <button
+                class="flex items-center gap-1.5 text-xs font-bold hover:text-cyber-blue transition-colors group/action">
+                <i class="ph-bold ph-chat-circle group-hover/action:scale-110 transition-transform"></i>
+                <span>{{ post.comment_count or 0 }}</span>
+            </button>
+        </div>
+        <button class="text-gray-400 hover:text-black transition-colors">
+            <i class="ph-bold ph-share-network"></i>
+        </button>
+    </div>
+</div>
+{% endmacro %}

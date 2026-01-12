@@ -28,212 +28,183 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    (function () {
-        const canvas = document.getElementById('lobby-canvas');
-        const ctx = canvas.getContext('2d');
-        const userCountEl = document.getElementById('user-count');
-        const introTip = document.getElementById('intro-tip');
+<script type="module">
+    import { IsoGrid } from '/static/js/lobby/IsoGrid.js';
 
-        // State
-        let width, height;
-        let users = [];
-        let particles = [];
-        let mouse = { x: -1000, y: -1000 };
+    const canvas = document.getElementById('lobby-canvas');
+    const ctx = canvas.getContext('2d');
+    const userCountEl = document.getElementById('user-count');
+    const introTip = document.getElementById('intro-tip');
 
-        // Configuration
-        const CONFIG = {
-            baseSpeed: 0.5,
-            connectionDistance: 150,
-            mouseRepelRadius: 200,
-            particleSize: 4
-        };
+    // Grid Setup
+    let grid;
+    const catImages = {};
+    const catFiles = [
+        'ash.png', 'beans.png', 'beans_grumpy.png', 'beans_playful.png',
+        'beans_zen.png', 'delta.png', 'glitch.png', 'miso.png',
+        'neon.png', 'patch.png', 'tofu.png'
+    ];
 
-        // Resize
-        function resize() {
-            width = canvas.width = canvas.offsetWidth;
-            height = canvas.height = canvas.offsetHeight;
+    async function preloadAssets() {
+        const promises = catFiles.map(file => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = `/static/images/cats/${file}`;
+                img.onload = () => {
+                    const name = file.split('.')[0];
+                    catImages[name] = img;
+                    resolve();
+                };
+            });
+        });
+        await Promise.all(promises);
+        catImages['default'] = catImages['ash']; // Fallback
+    }
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        if (grid) {
+            // Recenter grid
+            grid.originX = canvas.width / 2;
+            grid.originY = canvas.height / 4;
         }
-        window.addEventListener('resize', resize);
+    }
+
+    // Input Handling
+    canvas.addEventListener('click', (e) => {
+        if (!grid) return;
+        const rect = canvas.getBoundingClientRect();
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+
+        const coords = grid.fromScreen(screenX, screenY);
+        console.log('Clicked tile:', coords);
+
+        // TODO: Send move command via socket
+        // For now, simulate local move of "Self"
+        // grid.addEntity({ id: 'me', x: coords.col, y: coords.row, ... });
+    });
+
+    async function init() {
+        await preloadAssets();
+
         resize();
+        window.addEventListener('resize', resize);
+
+        grid = new IsoGrid(ctx, {
+            cols: 20,
+            rows: 20,
+            tileWidth: 64,
+            tileHeight: 32,
+            originX: canvas.width / 2,
+            originY: canvas.height / 4
+        });
+        grid.bakeAssets(catImages);
+
+        // OPTIMIZATION: Release high-res source/heavy assets now that they are baked
+        // This dramatically reduces memory usage (texture memory)
+        for (const key in catImages) {
+            delete catImages[key];
+        }
+
+        // Start Loop
+        lastTime = performance.now();
+        requestAnimationFrame(loop);
+
+        // Start Polling
+        fetchUsers();
+        setInterval(fetchUsers, 2000);
 
         // Show tip
         setTimeout(() => introTip.classList.remove('opacity-0'), 1000);
-        setTimeout(() => introTip.classList.add('opacity-0'), 8000); // Hide after a while
+    }
 
-        // Particle Class
-        class Particle {
-            constructor(user) {
-                this.user = user;
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * CONFIG.baseSpeed;
-                this.vy = (Math.random() - 0.5) * CONFIG.baseSpeed;
+    let lastTime = 0;
+    function loop(timestamp) {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
 
-                // Generate a unique color based on username hash
-                const hue = this.hashString(user.username) % 360;
-                this.color = `hsl(${hue}, 70%, 60%)`;
-                this.glow = `hsl(${hue}, 70%, 60%)`;
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                this.radius = CONFIG.particleSize;
-                this.hovered = false;
-            }
-
-            hashString(str) {
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-                }
-                return Math.abs(hash);
-            }
-
-            update() {
-                // Mouse Interaction (Repel)
-                const dx = mouse.x - this.x;
-                const dy = mouse.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < CONFIG.mouseRepelRadius) {
-                    const force = (CONFIG.mouseRepelRadius - dist) / CONFIG.mouseRepelRadius;
-                    const angle = Math.atan2(dy, dx);
-                    this.vx -= Math.cos(angle) * force * 0.5;
-                    this.vy -= Math.sin(angle) * force * 0.5;
-                    this.hovered = dist < 20; // Hover triggered if very close
-                } else {
-                    this.hovered = false;
-                }
-
-                // Normal Movement
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Friction/Recovery
-                // We want them to drift, so minimal friction, but clamp speed
-                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (speed > 2) {
-                    this.vx *= 0.95;
-                    this.vy *= 0.95;
-                } else if (speed < 0.2) {
-                    this.vx *= 1.05;
-                    this.vy *= 1.05;
-                }
-
-                // Bounce off walls
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.glow;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.closePath();
-
-                // Name label if hovered or close to mouse
-                if (this.hovered || Math.hypot(this.x - mouse.x, this.y - mouse.y) < 50) {
-                    ctx.fillStyle = "white";
-                    ctx.font = "10px monospace";
-                    ctx.fillText(`@${this.user.username}`, this.x + 10, this.y - 10);
-
-                    ctx.fillStyle = "rgba(255,255,255,0.5)";
-                    ctx.fillText(`in #${this.user.room || 'general'}`, this.x + 10, this.y);
-                }
-            }
+        if (grid) {
+            grid.update(dt);
+            grid.draw();
         }
 
-        // Loop
-        function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Trail effect
-            ctx.fillRect(0, 0, width, height);
+        requestAnimationFrame(loop);
+    }
 
-            // Draw connections
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.lineWidth = 1;
+    // Data Fetching
+    async function fetchUsers() {
+        try {
+            const res = await fetch('/lobby/users');
+            if (res.ok) {
+                const data = await res.json();
+                userCountEl.textContent = data.users.length;
+                updateEntities(data.users);
+            }
+        } catch (e) {
+            console.error("Lobby sync error:", e);
+        }
+    }
 
-            for (let i = 0; i < particles.length; i++) {
-                const p1 = particles[i];
+    function updateEntities(users) {
+        if (!grid) return;
 
-                /* Connect nearby particles */
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx = p1.x - p2.x;
-                    const dy = p1.y - p2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+        const validIds = new Set(users.map(u => u.id));
 
-                    if (dist < CONFIG.connectionDistance) {
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
+        // Remove left users
+        grid.entities = grid.entities.filter(e => validIds.has(e.id));
+
+        // Add/Update users
+        users.forEach((u, index) => {
+            // Stable pseudorandom pos based on ID if not provided
+            // In real app, position comes from server
+            const uidStr = String(u.id);
+            const seed = uidStr.charCodeAt(0) + uidStr.charCodeAt(uidStr.length - 1);
+            const rCol = seed % 20;
+            const rRow = (seed * 13) % 20;
+
+            // Random Cat
+            const catIndex = seed % catFiles.length;
+            const catName = catFiles[catIndex].split('.')[0];
+
+            const existing = grid.entities.find(e => e.id === u.id);
+            if (!existing) {
+                grid.addEntity({
+                    id: u.id,
+                    x: rCol,
+                    y: rRow,
+                    type: 'cat',
+                    meta: {
+                        username: u.username,
+                        avatar: catName,
+                        color: 'red'
                     }
-                }
-
-                p1.update();
-                p1.draw();
+                });
             }
-
-            requestAnimationFrame(animate);
-        }
-
-        // Input Handling
-        window.addEventListener('mousemove', e => {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
+            // Else update position if standard socket payload had it
         });
 
-        // Fetch Data
-        async function fetchUsers() {
-            try {
-                const res = await fetch('/lobby/users');
-                if (res.ok) {
-                    const data = await res.json();
-                    updateParticles(data.users);
-                    userCountEl.textContent = data.users.length;
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        function updateParticles(newUsers) {
-            // Sync particle list with user list
-            // Strategy: 
-            // 1. Remove particles for users who left
-            // 2. Add particles for users who joined
-            // 3. Keep existing
-
-            const validIds = new Set(newUsers.map(u => u.id));
-
-            // Remove dead
-            particles = particles.filter(p => validIds.has(p.user.id));
-
-            // Add new
-            newUsers.forEach(u => {
-                if (!particles.find(p => p.user.id === u.id)) {
-                    particles.push(new Particle(u));
-                }
-            });
-
-            // If empty (dev mode), add some mock data if < 5
-            if (particles.length < 5) {
-                const count = 5 - particles.length;
-                for (let i = 0; i < count; i++) {
-                    particles.push(new Particle({
-                        id: 'ghost-' + i,
-                        username: 'GHOST_' + i.toString(16).toUpperCase(),
-                        room: 'shadow-grid'
-                    }));
-                }
+        // Add Mock Ghost if empty (Dev)
+        if (users.length === 0 || users.length < 3) {
+            if (!grid.entities.find(e => e.id === 'ghost-1')) {
+                grid.addEntity({
+                    id: 'ghost-1',
+                    x: 5, y: 5,
+                    type: 'cat',
+                    meta: { username: 'GHOST_CAT', avatar: 'miso' }
+                });
             }
         }
 
-        // Init
-        fetchUsers();
-        setInterval(fetchUsers, 5000);
-        animate();
-    })();
+        // Add Self if active (Mock)
+        // grid.addEntity(...)
+    }
+
+    init();
+
 </script>
 {% endblock %}

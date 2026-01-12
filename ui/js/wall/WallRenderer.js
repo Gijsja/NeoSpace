@@ -173,7 +173,7 @@ function renderTop8(friends) {
     grid.innerHTML = friends.map(f => `
         <a href="/wall?user_id=${f.id}" class="block group relative" title="${f.display_name}">
             <img src="${f.avatar_path || '/static/images/cats/null.png'}" 
-                 class="w-full aspect-square object-cover border-2 border-black group-hover:scale-105 transition-transform bg-white">
+                 class="w-full aspect-square object-cover border-4 border-black group-hover:scale-105 transition-transform bg-white shadow-hard-sm">
             <div class="absolute inset-x-0 bottom-0 bg-black text-white text-[10px] font-bold truncate px-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 ${f.username}
             </div>
