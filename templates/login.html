@@ -182,10 +182,12 @@
         </div>
 
         <!-- Login Form -->
-        <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5">
-            {{ input('username', 'Username', placeholder='your_handle', attrs='x-model="username" required') }}
-            {{ input('password', 'Password', type='password', placeholder='••••••••', attrs='x-model="password"
-            required')
+        <form x-show="isLogin" x-data="loginForm()" @submit.prevent="submit" x-transition class="space-y-5"
+            autocomplete="off">
+            {{ input('username', 'Username', placeholder='your_handle', attrs='x-model="username" required
+            autocomplete="off"') }}
+            {{ input('password', 'Password', type='password', placeholder='••••••••', attrs='x-model="password" required
+            autocomplete="off"')
             }}
 
             <!-- Progress -->
@@ -199,8 +201,7 @@
             </div>
 
             {{ button('Enter Grid', variant='primary', class='w-full py-4', icon='ph-bold ph-sign-in',
-            attrs='type="submit"
-            :disabled="loading"') }}
+            attrs='type="submit" :disabled="loading"') }}
 
             <div class="absolute -bottom-6 -right-6 transform rotate-12 z-0">
                 <img src="/static/images/cats/cat_stickers.png" alt="Cats" class="w-16 h-16 object-contain">

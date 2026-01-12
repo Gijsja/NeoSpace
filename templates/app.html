@@ -66,6 +66,13 @@
                 attrs='type="button" aria-label="Upload Image"') }}
                 {% endcall %}
 
+                {% call tooltip('Voice Message', position='top') %}
+                {{ button(None, variant='secondary', id='record-btn', class='w-10 h-10 p-0 flex items-center
+                justify-center shadow-hard-sm hover:bg-red-400 hover:text-white bg-gray-100 transition-colors',
+                icon='ph-bold ph-microphone text-xl',
+                attrs='type="button" aria-label="Record Voice Message"') }}
+                {% endcall %}
+
                 <!-- Input -->
                 <div class="flex-1 relative">
                     {{ input('message', id='input', class='h-10 font-bold', placeholder='Broadcast message...',
@@ -84,6 +91,23 @@
             <div id="emoji-picker-container"
                 class="hidden absolute bottom-full left-0 mb-2 z-50 border-4 border-black shadow-hard-xl bg-white">
                 <emoji-picker></emoji-picker>
+            </div>
+
+            <!-- Recording Overlay -->
+            <div id="recording-overlay"
+                class="hidden absolute inset-0 bg-black/90 z-50 flex items-center px-4 gap-4 animate-fade-in">
+                <div class="w-8 h-8 rounded-full bg-red-500 animate-pulse"></div>
+                <canvas id="voice-canvas" class="flex-1 h-12 bg-black/50 rounded"></canvas>
+                <div class="flex gap-2">
+                    <button id="cancel-recording"
+                        class="px-4 py-2 bg-gray-700 text-white font-bold border-2 border-white/20 hover:bg-gray-600 rounded">
+                        CANCEL
+                    </button>
+                    <button id="stop-recording"
+                        class="px-4 py-2 bg-red-500 text-white font-bold border-2 border-white/20 hover:bg-red-600 rounded flex items-center gap-2">
+                        <i class="ph-bold ph-paper-plane-right"></i> SEND
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -159,6 +183,7 @@
 {% block scripts %}
 
 <!-- <script src="/ui/js/socket_glue.js?v=5"></script> -->
+<script src="/ui/js/voice.js"></script>
 <script type="module" src="/ui/js/chat/ChatMain.js"></script>
 <script>
     // Init Logic to handle Rooms via Query Params

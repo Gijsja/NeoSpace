@@ -1,8 +1,8 @@
 from functools import wraps
-from flask import jsonify, g, request
+from flask import g, request
 import sqlite3
 from core.responses import error_response
-from db import db_retry, get_db
+from db import get_db
 
 def mutation_handler(f):
     """
@@ -26,7 +26,7 @@ def mutation_handler(f):
             # However, since our existing code structure often defines inner functions for retry,
             # we'll just wrap the call to f.
             return f(*args, **kwargs)
-        except sqlite3.OperationalError as e:
+        except sqlite3.OperationalError:
             # If db_retry failed after max attempts, or if it wasn't used inside f
             return error_response("Database busy, please retry", 503)
         except Exception as e:

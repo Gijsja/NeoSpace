@@ -28,7 +28,7 @@
             </div>
 
             <!-- Edit Button -->
-            <button id="edit-avatar-btn" @click="$dispatch('open-edit-modal')"
+            <button id="edit-avatar-btn" @click="$dispatch('open-edit-modal')" aria-label="Edit Avatar"
                 class="absolute bottom-2 right-2 p-1 bg-white border-4 border-black hover:bg-hot-pink transition opacity-0 group-hover/avatar:opacity-100 z-20 hidden pointer-events-auto shadow-hard-sm">
                 <i class="ph-bold ph-camera"></i>
             </button>
@@ -67,7 +67,8 @@
         </div>
 
         <!-- Anthem Controls -->
-        <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group">
+        <div id="anthem-toggle" class="hidden absolute top-4 right-4 cursor-pointer group" aria-label="Toggle Anthem"
+            role="button" tabindex="0">
             <div
                 class="w-10 h-10 bg-white border-2 border-black hover:bg-hot-pink flex items-center justify-center transition-colors shadow-hard-sm">
                 <i id="anthem-icon" class="ph-bold ph-speaker-high text-xl"></i>

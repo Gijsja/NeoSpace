@@ -285,6 +285,7 @@ cat_personalities = Table(
     Column("created_at", Text, server_default=sa.text("CURRENT_TIMESTAMP")),
     Column("faction_id", Integer, ForeignKey("cat_factions.id")),
 )
+Index("idx_cat_personalities_faction", cat_personalities.c.faction_id)
 
 # Cat Relationships
 cat_relationships = Table(

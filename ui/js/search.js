@@ -180,6 +180,8 @@ window.SearchUI = window.SearchUI || {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => SearchUI.init());
+} else {
     SearchUI.init();
-});
+}

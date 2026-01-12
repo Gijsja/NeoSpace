@@ -319,7 +319,10 @@ if (window.FeedManager) {
     window.FeedManager.init();
 }
 
-// Handle non-SPA legacy load
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.FeedManager) window.FeedManager.init();
+    });
+} else {
     if (window.FeedManager) window.FeedManager.init();
-});
+}

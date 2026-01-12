@@ -284,6 +284,18 @@ CREATE TABLE IF NOT EXISTS admin_ops (
 );
 CREATE INDEX IF NOT EXISTS idx_admin_ops_admin ON admin_ops(admin_id);
 CREATE INDEX IF NOT EXISTS idx_admin_ops_created ON admin_ops(created_at);
+
+-- Sprint 26: Song Studio
+CREATE TABLE IF NOT EXISTS songs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    is_public INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_songs_user ON songs(user_id);
 '''
 
 

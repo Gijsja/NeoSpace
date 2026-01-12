@@ -33,4 +33,8 @@ def feed_index():
         
     posts = get_feed(g.user["id"], limit=limit, before_id=before_id)
     
+    # HTMX or HTML request
+    if request.headers.get("HX-Request") or request.args.get("format") == "html":
+        return render_template("components/feed_fragment.html", posts=posts)
+    
     return jsonify(ok=True, posts=posts)

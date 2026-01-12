@@ -1,0 +1,28 @@
+[flake8]
+# E501: Line too long (80 chars) - Disabled for now
+# W291: Trailing whitespace
+# W293: Blank line contains whitespace
+# E302: Expected 2 blank lines
+# E402: Module level import not at top of file (Needed for Flask)
+ignore = E501, W291, W293, E302, E402, W391, E261, E305
+
+# Enforce these strictly:
+# F401: Module imported but unused
+# F841: Local variable assigned but never used
+# E722: Do not use bare 'except'
+# E9, F63, F7, F82: Syntax errors and undefined names
+select = C,E,F,W,B,B950
+
+# Exclude common directories
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    .venv_clean,
+    migrations,
+    node_modules,
+    build,
+    dist
+
+# Complexity threshold
+max-complexity = 15

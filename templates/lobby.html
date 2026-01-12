@@ -102,7 +102,14 @@
         });
         grid.bakeAssets(catImages);
 
+        // OPTIMIZATION: Release high-res source/heavy assets now that they are baked
+        // This dramatically reduces memory usage (texture memory)
+        for (const key in catImages) {
+            delete catImages[key];
+        }
+
         // Start Loop
+        lastTime = performance.now();
         requestAnimationFrame(loop);
 
         // Start Polling
@@ -113,12 +120,16 @@
         setTimeout(() => introTip.classList.remove('opacity-0'), 1000);
     }
 
-    function loop() {
+    let lastTime = 0;
+    function loop(timestamp) {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
         ctx.fillStyle = '#111';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (grid) {
-            grid.update();
+            grid.update(dt);
             grid.draw();
         }
 
@@ -156,6 +167,10 @@
             const rCol = seed % 20;
             const rRow = (seed * 13) % 20;
 
+            // Random Cat
+            const catIndex = seed % catFiles.length;
+            const catName = catFiles[catIndex].split('.')[0];
+
             const existing = grid.entities.find(e => e.id === u.id);
             if (!existing) {
                 grid.addEntity({
@@ -165,7 +180,7 @@
                     type: 'cat',
                     meta: {
                         username: u.username,
-                        avatar: 'ash', // Default for now, ideally fetch connection to specific cat
+                        avatar: catName,
                         color: 'red'
                     }
                 });

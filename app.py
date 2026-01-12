@@ -144,6 +144,9 @@ def create_app(test_config=None):
 
     from routes.files import bp as files_bp
     app.register_blueprint(files_bp)
+    
+    from routes.upload import bp as upload_bp
+    app.register_blueprint(upload_bp)
 
     # =============================================
     # ERROR HANDLERS (Cat Error Pages)

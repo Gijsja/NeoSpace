@@ -30,6 +30,7 @@
         {% endmacro %}
 
         {{ nav_link('/wall', 'ph-bold ph-user-square', 'Identity', class='sidebar-link') }}
+        {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Feed', class='sidebar-link') }}
         {{ nav_link('/directory', 'ph-bold ph-users', 'Network', class='sidebar-link') }}
         {{ nav_link('/codeground', 'ph-bold ph-code', 'Codeground', class='sidebar-link') }}
 
@@ -37,7 +38,7 @@
         <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
             <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Review</span>
         </div>
-        {{ nav_link('/components', 'ph-bold ph-paint-brush', 'Components', class='sidebar-link') }}
+        {{ nav_link('/components', 'ph-bold ph-paint-brush', 'Components', class='sidebar-link', boost=False) }}
         {{ nav_link('/penguin', 'ph-bold ph-bird', 'Penguin UI', class='sidebar-link') }}
 
         <!-- Room Category -->
@@ -72,7 +73,8 @@
         <div class="px-4 py-2 mt-4 mb-1 flex items-center justify-between">
             <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Features</span>
         </div>
-        {{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}
+        {% if False %}{{ nav_link('/feed/home', 'ph-bold ph-waves', 'Stream Listening', class='sidebar-link') }}{% endif
+        %}
         {{ nav_link('/lobby', 'ph-bold ph-users-three', 'Visual Lobby', class='sidebar-link') }}
         {{ nav_link('/messages', 'ph-bold ph-chat-centered-text', 'Communications', class='sidebar-link') }}
         {{ nav_link('/notifications/center', 'ph-bold ph-bell-ringing', 'Live Wire', class='sidebar-link') }}

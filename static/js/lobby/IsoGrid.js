@@ -106,15 +106,21 @@ export class IsoGrid {
         this.entities = this.entities.filter(e => e.id !== id);
     }
 
-    update() {
+    update(dt) {
         // Interpolate positions
+        // dt is in seconds
+        const smoothing = 10; // Speed factor
+
         for (const ent of this.entities) {
             const dx = ent.targetX - ent.curX;
             const dy = ent.targetY - ent.curY;
 
-            if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
-                ent.curX += dx * 0.1;
-                ent.curY += dy * 0.1;
+            // Framerate independent lerp: a + (b - a) * (1 - exp(-speed * dt))
+            const factor = 1 - Math.exp(-smoothing * dt);
+
+            if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
+                ent.curX += dx * factor;
+                ent.curY += dy * factor;
             } else {
                 ent.curX = ent.targetX;
                 ent.curY = ent.targetY;

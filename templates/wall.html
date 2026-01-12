@@ -8,7 +8,7 @@
 <!-- Vendored Assets -->
 <script src="/static/vendor/mobile-drag-drop.min.js"></script>
 <!-- Tone.js for Audio Features -->
-<script src="/static/vendor/tone.js"></script>
+<!-- Script removed to fix AudioContext warning, sound disabled in WallStickers.js fallback -->
 <script>
     if (typeof MobileDragDrop !== 'undefined') {
         MobileDragDrop.polyfill({
@@ -206,7 +206,8 @@
     {{ edit_profile_modal() }}
 
     <!-- Add Module FAB (Brutalist Square) -->
-    {{ button(None, icon='ph-bold ph-plus', size='fab', attrs='@click="$dispatch(\'open-add-module\')"', class='fixed
+    {{ button(None, icon='ph-bold ph-plus', size='fab', attrs='@click="$dispatch(\'open-add-module\')"', aria_label="Add
+    Module", class='fixed
     bottom-8 right-8 z-40
     bg-electric-blue hover:bg-hot-pink hidden group !text-black !border-black') }}
 

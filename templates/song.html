@@ -1,237 +1,696 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>The Song // Studio</title>
-    <link rel="stylesheet" href="/static/css/fonts.css" />
-    <script src="/static/vendor/tailwindcss.js"></script>
-    <script src="/static/vendor/tone.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'cyber-black': '#050505',
-                        'cyber-grid': '#1a1a1a',
-                        'cyber-neon': '#ccff00',
-                        'cyber-hot': '#ff0055',
-                        'cyber-blue': '#00ccff',
-                        'cyber-purp': '#9d00ff',
-                    },
-                    fontFamily: { mono: ['JetBrains Mono', 'monospace'] },
-                    boxShadow: {
-                        'neon': '0 0 10px currentColor',
-                        'neon-lg': '0 0 20px currentColor',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* scanline overlay */
-        .scanlines {
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
-            background-size: 100% 4px;
-            pointer-events: none;
-        }
+{% block title %}The Song Studio - NeoSpace{% endblock %}
+{% block page_title %}Studio{% endblock %}
 
-        .crt-flicker {
-            animation: flicker 0.15s infinite;
-            pointer-events: none;
-        }
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/phosphor/phosphor-bold.css">
 
-        @keyframes flicker {
-            0% {
-                opacity: 0.99;
-            }
+<style>
+    :root {
+        --neon-green: #ccff00;
+        --hot-pink: #ff0055;
+        --cyber-blue: #00ccff;
+        --electric-yellow: #ffff00;
+        --acid-green: #39ff14;
+        --purple: #9d00ff;
+        --orange: #ff8800;
+    }
 
-            50% {
-                opacity: 0.95;
-            }
+    .brutal-shadow {
+        box-shadow: 4px 4px 0 #000;
+    }
 
-            100% {
-                opacity: 0.99;
-            }
-        }
+    .brutal-shadow-lg {
+        box-shadow: 6px 6px 0 #000;
+    }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+    .brutal-border {
+        border: 4px solid #000;
+    }
 
-        ::-webkit-scrollbar-track {
-            background: #050505;
-        }
+    .brutal-border-thick {
+        border: 6px solid #000;
+    }
 
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-        }
+    .brutal-btn:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 #000 !important;
+    }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ccff00;
-        }
+    .grid-bg {
+        background: #f5f5f5;
+        background-image:
+            repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 20px),
+            repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px);
+    }
 
-        .knob-range {
-            -webkit-appearance: none;
-            background: transparent;
-        }
+    /* Track colors */
+    .track-kick {
+        background: var(--hot-pink);
+    }
 
-        .knob-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            background: #ccff00;
-            border-radius: 50%;
-            cursor: pointer;
-            margin-top: -6px;
-            box-shadow: 0 0 10px #ccff00;
-        }
+    .track-snare {
+        background: var(--cyber-blue);
+    }
 
-        .knob-range::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-        }
-    </style>
-</head>
+    .track-hat-c {
+        background: var(--neon-green);
+    }
 
-<body class="bg-cyber-black text-white font-mono h-screen flex flex-col overflow-hidden relative">
+    .track-hat-o {
+        background: var(--acid-green);
+    }
 
-    <div class="absolute inset-0 scanlines z-50"></div>
-    <div class="absolute inset-0 crt-flicker bg-white/1 z-40"></div>
+    .track-bass {
+        background: var(--purple);
+    }
+
+    .track-lead {
+        background: var(--orange);
+    }
+
+    .track-pad {
+        background: var(--electric-yellow);
+    }
+
+    .track-fx {
+        background: #ddd;
+    }
+
+    ::-webkit-scrollbar {
+        width: 16px;
+        height: 16px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-left: 3px solid #000;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--hot-pink);
+        border: 3px solid #000;
+    }
+</style>
+{% endblock %}
+
+{% block main_container %}
+<div class="h-full flex flex-col overflow-hidden" x-data="studioApp()" x-init="init()">
 
     <!-- Header -->
     <header
-        class="h-14 border-b border-cyber-grid flex items-center justify-between px-6 bg-cyber-black shrink-0 relative z-50">
-        <div class="flex items-center gap-6">
-            <a href="/"
-                class="text-cyber-grid hover:text-white transition uppercase font-bold text-xs tracking-widest flex items-center gap-2">
-                <span>◄</span> EXIT
-            </a>
-            <div class="h-6 w-px bg-cyber-grid"></div>
-            <div class="flex flex-col">
-                <h1 class="text-lg font-black italic tracking-tighter uppercase leading-none">
-                    THE<span class="text-cyber-hot">SONG</span>
-                </h1>
-                <span class="text-[10px] text-cyber-blue tracking-[0.2em] opacity-80">STUDIO.SYS</span>
-            </div>
+        class="bg-[#ff0055] brutal-border-thick border-t-0 border-x-0 p-4 flex items-center justify-between shrink-0"
+        style="border-bottom-width: 6px;">
+        <div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter">
+                THE<span class="text-white">SONG</span>
+            </h1>
+            <p class="text-xs uppercase tracking-widest opacity-80">STUDIO.SYS</p>
         </div>
 
-        <!-- Transport Center -->
-        <div
-            class="absolute left-1/2 -translate-x-1/2 flex items-center gap-6 bg-cyber-grid/20 px-6 py-2 rounded-full border border-white/5">
-            <div class="flex flex-col items-center">
-                <span class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">BPM</span>
-                <input type="number" id="bpm-input" value="120"
-                    class="bg-transparent text-center font-bold text-cyber-neon w-12 border-none focus:outline-none focus:ring-0 appearance-none">
+        <!-- Transport -->
+        <div class="flex items-center gap-3">
+            <div class="bg-white brutal-border px-3 py-2 brutal-shadow">
+                <label class="text-[10px] font-black uppercase">BPM</label>
+                <input type="number" x-model="bpm" @change="updateBPM()"
+                    class="w-12 bg-transparent border-none text-center font-black text-base focus:outline-none" min="60"
+                    max="200">
             </div>
 
-            <button id="btn-play"
-                class="bg-cyber-neon text-cyber-black px-8 py-2 font-black uppercase tracking-widest hover:bg-white hover:scale-105 transition-all shadow-neon flex items-center gap-2 rounded-sm clip-path-斜め">
-                <span>► PLAY</span>
+            <button @click="togglePlay()"
+                class="brutal-btn bg-black text-white brutal-border px-6 py-2 font-black uppercase text-xs tracking-wider brutal-shadow hover:bg-[#ccff00] hover:text-black transition-colors"
+                :class="{ 'bg-[#ccff00] text-black': isPlaying }">
+                <span x-text="isPlaying ? '■ STOP' : '▶ PLAY'"></span>
             </button>
 
-            <div class="flex flex-col items-center w-16">
-                <span class="text-[8px] text-gray-500 uppercase tracking-widest font-bold">TIME</span>
-                <span id="transport-time" class="font-bold font-mono">0:0</span>
+            <div class="bg-black text-[#ccff00] brutal-border px-4 py-2 font-black brutal-shadow">
+                <span x-text="position">1.1.0</span>
             </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center gap-4">
-            <button id="btn-save"
-                class="text-xs font-bold text-cyber-blue hover:text-white uppercase tracking-widest border border-cyber-blue/30 px-3 py-1 hover:bg-cyber-blue/10 transition">
-                Save
+        <div class="flex gap-3">
+            <button @click="openSaveModal()"
+                class="brutal-btn bg-black text-white brutal-border px-4 py-2 font-black uppercase text-xs brutal-shadow hover:bg-[#ccff00] hover:text-black">
+                💾 SAVE
             </button>
-            <button id="btn-clear" class="text-xs font-bold text-gray-600 hover:text-red-500 uppercase tracking-widest">
-                Clear
+            <button @click="openLoadModal()"
+                class="brutal-btn bg-black text-white brutal-border px-4 py-2 font-black uppercase text-xs brutal-shadow hover:bg-[#ccff00] hover:text-black">
+                📂 LOAD
+            </button>
+            <button @click="exportProject()"
+                class="brutal-btn bg-black text-white brutal-border px-4 py-2 font-black uppercase text-xs brutal-shadow hover:bg-[#ccff00] hover:text-black">
+                ⬇ EXPORT
             </button>
         </div>
     </header>
 
     <!-- Main Workspace -->
-    <main class="flex-1 flex overflow-hidden relative z-10">
+    <div class="flex flex-1 overflow-hidden">
 
-        <!-- Left: Instrument Rack -->
-        <aside class="w-48 border-r border-cyber-grid bg-[#0a0a0a] flex flex-col overflow-y-auto">
-            <div class="p-3 border-b border-cyber-grid text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                TRACKS [8]
+        <!-- Mixer Sidebar -->
+        <aside class="w-72 bg-[#f5f5f5] brutal-border-thick border-y-0 border-l-0 overflow-y-auto p-5 shrink-0"
+            style="border-right-width: 6px;">
+            <div class="mb-6">
+                <h3 class="text-xs font-black uppercase tracking-widest mb-4 pb-2 border-b-4 border-black">
+                    TRACKS
+                </h3>
+
+                <template x-for="(track, idx) in tracks" :key="idx">
+                    <div class="bg-white brutal-border p-3 mb-3 brutal-shadow">
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b-3 border-black">
+                            <div class="text-xs font-black uppercase tracking-wide" x-text="track.name"></div>
+                            <div class="flex gap-2">
+                                <button @click="track.solo = !track.solo"
+                                    class="w-7 h-7 brutal-border font-black text-[10px] hover:bg-[#ccff00] transition-colors"
+                                    :class="{ 'bg-[#ccff00]': track.solo, 'bg-white': !track.solo }">
+                                    S
+                                </button>
+                                <button @click="track.mute = !track.mute"
+                                    class="w-7 h-7 brutal-border font-black text-[10px] transition-colors"
+                                    :class="{ 'bg-[#ff0055] text-white': track.mute, 'bg-white': !track.mute }">
+                                    M
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="flex justify-between text-[10px] font-black uppercase mb-2">
+                                <span>VOL</span>
+                                <span class="text-[#ff0055]" x-text="track.volume + 'dB'"></span>
+                            </div>
+                            <input type="range" x-model="track.volume" min="-60" max="0" step="1"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[10px] font-black uppercase mb-2">
+                                <span>PAN</span>
+                                <span class="text-[#ff0055]"
+                                    x-text="track.pan > 0 ? 'R' : track.pan < 0 ? 'L' : 'C'"></span>
+                            </div>
+                            <input type="range" x-model="track.pan" min="-1" max="1" step="0.1"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+                    </div>
+                </template>
             </div>
 
-            <!-- Track Headers (Static labels for now, but aligned with grid) -->
-            <div id="track-headers" class="flex-1 flex flex-col gap-1 p-2 pt-14">
-                <!-- Matches grid spacing -->
-                <!-- We will generate these dynamically in JS or keep static if simpler -->
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-hot bg-white/5">
-                    <span class="font-bold text-xs">KICK</span>
-                    <div class="w-2 h-2 rounded-full bg-cyber-hot shadow-neon"></div>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-blue bg-white/5">
-                    <span class="font-bold text-xs">SNARE</span>
-                    <div class="w-2 h-2 rounded-full bg-cyber-blue"></div>
-                </div>
-                <!-- ... Repeat for others or let JS handle mapping -->
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-neon bg-white/5">
-                    <span class="font-bold text-xs">HAT.C</span>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-cyber-neon bg-white/5">
-                    <span class="font-bold text-xs">HAT.O</span>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-[#9d00ff] bg-white/5">
-                    <span class="font-bold text-xs">BASS</span>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-orange-500 bg-white/5">
-                    <span class="font-bold text-xs">LEAD</span>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-pink-500 bg-white/5">
-                    <span class="font-bold text-xs">PAD</span>
-                </div>
-                <div class="h-10 flex items-center justify-between px-3 border-l-2 border-white bg-white/5">
-                    <span class="font-bold text-xs">FX</span>
+            <!-- Master -->
+            <div>
+                <h3 class="text-xs font-black uppercase tracking-widest mb-4 pb-2 border-b-4 border-black">
+                    MASTER
+                </h3>
+                <div class="bg-white brutal-border p-3 brutal-shadow">
+                    <div class="flex justify-between text-[10px] font-black uppercase mb-2">
+                        <span>VOLUME</span>
+                        <span class="text-[#ff0055]" x-text="masterVolume + 'dB'"></span>
+                    </div>
+                    <input type="range" x-model="masterVolume" min="-60" max="0" step="1"
+                        class="w-full h-2 bg-black border-2 border-black appearance-none">
                 </div>
             </div>
-
-            <!-- Bottom FX Knobs -->
-            <div class="p-4 border-t border-cyber-grid space-y-4">
-                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">MASTER FX</div>
-
-                <div class="space-y-1">
-                    <label class="text-[xs] font-bold text-gray-400 flex justify-between">Reverb <span
-                            class="text-cyber-blue">20%</span></label>
-                    <input type="range"
-                        class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyber-blue range-sm">
-                </div>
-            </div>
-
         </aside>
 
-        <!-- Center: Grid -->
-        <div class="flex-1 bg-[#080808] relative overflow-hidden flex flex-col">
-            <!-- Timeline Ruler -->
-            <div
-                class="h-8 border-b border-cyber-grid flex items-end pb-1 px-4 text-[10px] text-gray-600 font-mono tracking-widest gap-1">
-                <div class="flex-1 flex justify-between">
-                    <span>1.1</span><span>1.2</span><span>1.3</span><span>1.4</span>
+        <!-- Sequencer -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Sequencer Header -->
+            <div class="bg-[#ccff00] brutal-border-thick border-x-0 border-t-0 p-3 flex justify-between items-center shrink-0"
+                style="border-bottom-width: 6px;">
+                <div class="flex gap-2">
+                    <button
+                        class="brutal-border px-4 py-2 font-black uppercase text-[11px] tracking-wide transition-colors"
+                        :class="view === 'grid' ? 'bg-black text-white' : 'bg-white'" @click="view = 'grid'">
+                        GRID
+                    </button>
+                    <button
+                        class="brutal-border px-4 py-2 font-black uppercase text-[11px] tracking-wide transition-colors"
+                        :class="view === 'piano' ? 'bg-black text-white' : 'bg-white'" @click="view = 'piano'">
+                        PIANO
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <label class="text-[10px] font-black uppercase">SNAP:</label>
+                    <select class="bg-white brutal-border px-2 py-1 font-black text-[11px]" x-model="snapGrid">
+                        <option value="16">1/16</option>
+                        <option value="8">1/8</option>
+                        <option value="4">1/4</option>
+                    </select>
                 </div>
             </div>
 
             <!-- Grid Container -->
-            <div class="flex-1 p-4 overflow-auto">
-                <div class="grid grid-cols-16 gap-1 w-full max-w-5xl" id="sequencer-grid">
-                    <!-- JS populates this -->
+            <div class="flex-1 overflow-auto grid-bg p-5">
+                <div class="flex flex-col gap-[2px]" x-show="view === 'grid'">
+
+                    <!-- Header Row -->
+                    <div class="grid gap-[2px] mb-2" style="grid-template-columns: 100px repeat(16, 40px);">
+                        <div class="font-black text-[10px] text-right pr-2 pt-3 uppercase opacity-50">Beat</div>
+                        <template x-for="i in 16">
+                            <div
+                                class="text-center font-black text-[10px] opacity-50 flex items-end justify-center pb-1">
+                                <span x-text="(i % 4 === 1) ? Math.ceil(i / 4) : ''"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Track Rows -->
+                    <template x-for="(track, trackIdx) in tracks" :key="trackIdx">
+                        <div class="grid gap-[2px]" style="grid-template-columns: 100px repeat(16, 40px);">
+                            <!-- Track Label -->
+                            <div class="bg-white brutal-border p-2 flex items-center font-black uppercase text-[11px] brutal-shadow"
+                                :class="`border-l-8 track-${track.name.toLowerCase().replace('.', '-')}`"
+                                x-text="track.name">
+                            </div>
+
+                            <!-- Steps -->
+                            <template x-for="step in 16" :key="step">
+                                <button @click="toggleStep(trackIdx, step - 1)"
+                                    class="w-10 h-10 brutal-border bg-white hover:bg-gray-100 transition-colors" :class="{
+                                            'border-l-4': (step - 1) % 4 === 0,
+                                            [`track-${track.name.toLowerCase().replace('.', '-')}`]: track.pattern[step - 1],
+                                            'ring-4 ring-black': currentStep === (step - 1) && isPlaying
+                                        }"
+                                    :style="track.pattern[step - 1] ? 'box-shadow: inset 4px 4px 0 rgba(0,0,0,0.3);' : ''">
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Piano Roll Placeholder -->
+                <div x-show="view === 'piano'" class="h-full flex items-center justify-center">
+                    <div class="bg-white brutal-border-thick p-12 brutal-shadow-lg text-center">
+                        <div class="text-6xl mb-4">🎹</div>
+                        <h3 class="text-2xl font-black uppercase tracking-tight mb-2">PIANO ROLL</h3>
+                        <p class="text-sm opacity-60">Coming soon...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects Panel -->
+            <div class="bg-[#00ccff] brutal-border-thick border-x-0 border-b-0 p-4 flex gap-4 overflow-x-auto shrink-0"
+                style="border-top-width: 6px;">
+
+                <!-- Reverb -->
+                <div class="bg-white brutal-border p-4 min-w-[200px] brutal-shadow">
+                    <h4 class="text-xs font-black uppercase tracking-wide mb-3 pb-2 border-b-3 border-black">
+                        REVERB
+                    </h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[9px] font-black uppercase block mb-1">WET</label>
+                            <input type="range" x-model="fx.reverbWet" min="0" max="100"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black uppercase block mb-1">DECAY</label>
+                            <input type="range" x-model="fx.reverbDecay" min="1" max="10" step="0.1"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delay -->
+                <div class="bg-white brutal-border p-4 min-w-[200px] brutal-shadow">
+                    <h4 class="text-xs font-black uppercase tracking-wide mb-3 pb-2 border-b-3 border-black">
+                        DELAY
+                    </h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[9px] font-black uppercase block mb-1">WET</label>
+                            <input type="range" x-model="fx.delayWet" min="0" max="100"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black uppercase block mb-1">FEEDBACK</label>
+                            <input type="range" x-model="fx.delayFeedback" min="0" max="100"
+                                class="w-full h-2 bg-black border-2 border-black appearance-none">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    </main>
+    <!-- Save Modal -->
+    <div x-show="showSaveModal" x-transition.opacity
+        class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+        @click.self="showSaveModal = false">
+        <div class="bg-white brutal-border-thick brutal-shadow-lg max-w-md w-full">
+            <div class="bg-[#00ccff] brutal-border-thick border-x-0 border-t-0 p-4" style="border-bottom-width: 6px;">
+                <h2 class="text-xl font-black uppercase tracking-tight">SAVE PROJECT</h2>
+            </div>
+            <div class="p-6">
+                <label class="block text-xs font-black uppercase mb-2">TITLE</label>
+                <input type="text" x-model="saveTitle"
+                    class="w-full bg-white brutal-border px-4 py-2 mb-4 font-mono focus:outline-none focus:bg-[#ccff00]"
+                    placeholder="Untitled Track">
 
-    <script type="module">
-        import { SongStudio } from '/ui/js/song/SongStudio.js';
+                <label class="flex items-center gap-2 mb-4">
+                    <input type="checkbox" x-model="savePublic" class="brutal-border">
+                    <span class="text-xs font-black uppercase">MAKE PUBLIC</span>
+                </label>
 
-        window.studio = new SongStudio();
-    </script>
-</body>
+                <div class="flex gap-3">
+                    <button @click="saveProject()" :disabled="saving"
+                        class="brutal-btn flex-1 bg-black text-white brutal-border px-4 py-3 font-black uppercase brutal-shadow hover:bg-[#ccff00] hover:text-black disabled:opacity-50">
+                        <span x-show="!saving">💾 SAVE</span>
+                        <span x-show="saving">SAVING...</span>
+                    </button>
+                    <button @click="showSaveModal = false"
+                        class="brutal-btn bg-white brutal-border px-4 py-3 font-black uppercase brutal-shadow hover:bg-gray-100">
+                        CANCEL
+                    </button>
+                </div>
 
-</html>
+                <div x-show="saveError" class="mt-4 bg-[#ff0055] text-white brutal-border p-3 font-mono text-xs">
+                    <span x-text="saveError"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Modal -->
+    <div x-show="showLoadModal" x-transition.opacity
+        class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+        @click.self="showLoadModal = false">
+        <div class="bg-white brutal-border-thick brutal-shadow-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
+            <div class="bg-[#00ccff] brutal-border-thick border-x-0 border-t-0 p-4" style="border-bottom-width: 6px;">
+                <h2 class="text-xl font-black uppercase tracking-tight">LOAD PROJECT</h2>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div x-show="loadingSongs" class="text-center py-12">
+                    <div class="inline-block w-12 h-12 border-6 border-black border-t-[#ff0055] animate-spin mb-4">
+                    </div>
+                    <p class="font-black uppercase">LOADING...</p>
+                </div>
+
+                <div x-show="!loadingSongs && songs.length === 0" class="text-center py-12">
+                    <div class="text-6xl mb-4">🎵</div>
+                    <p class="font-black uppercase">NO SAVED PROJECTS</p>
+                </div>
+
+                <div x-show="!loadingSongs && songs.length > 0" class="space-y-3">
+                    <template x-for="song in songs" :key="song.id">
+                        <div class="bg-white brutal-border p-4 brutal-shadow hover:translate-x-1 hover:translate-y-1 transition-transform cursor-pointer"
+                            @click="loadProject(song.id)">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-black uppercase" x-text="song.title"></h3>
+                                <span class="text-xs opacity-60" x-text="formatDate(song.updated_at)"></span>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="text-[10px] font-black uppercase px-2 py-1 bg-black text-white">
+                                    <span x-text="song.is_public ? 'PUBLIC' : 'PRIVATE'"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="brutal-border-thick border-x-0 border-b-0 p-4" style="border-top-width: 6px;">
+                <button @click="showLoadModal = false"
+                    class="brutal-btn w-full bg-white brutal-border px-4 py-3 font-black uppercase brutal-shadow hover:bg-gray-100">
+                    CANCEL
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('studioApp', () => ({
+            engine: null, // Initialize null, load async
+
+            // Playback state
+            isPlaying: false,
+            bpm: 120,
+            position: '1.1.0',
+            currentStep: 0,
+            view: 'grid',
+            snapGrid: 16,
+            masterVolume: 0,
+
+            // Project state
+            currentSongId: null,
+            saveTitle: 'Untitled Track',
+            savePublic: false,
+            saving: false,
+            saveError: null,
+
+            // UI state
+            showSaveModal: false,
+            showLoadModal: false,
+            loadingSongs: false,
+            songs: [],
+
+            // Track data
+            tracks: [
+                { name: 'KICK', pattern: Array(16).fill(0), volume: -6, pan: 0, solo: false, mute: false },
+                { name: 'SNARE', pattern: Array(16).fill(0), volume: -3, pan: 0, solo: false, mute: false },
+                { name: 'HAT.C', pattern: Array(16).fill(0), volume: -15, pan: 0.2, solo: false, mute: false },
+                { name: 'HAT.O', pattern: Array(16).fill(0), volume: -15, pan: -0.2, solo: false, mute: false },
+                { name: 'BASS', pattern: Array(16).fill(0), volume: -6, pan: 0, solo: false, mute: false },
+                { name: 'LEAD', pattern: Array(16).fill(0), volume: -8, pan: 0, solo: false, mute: false },
+                { name: 'PAD', pattern: Array(16).fill(0), volume: -12, pan: 0, solo: false, mute: false },
+                { name: 'FX', pattern: Array(16).fill(0), volume: -6, pan: 0, solo: false, mute: false }
+            ],
+
+            trackMap: {
+                'KICK': 'kick', 'SNARE': 'snare', 'HAT.C': 'hat_c', 'HAT.O': 'hat_o',
+                'BASS': 'bass', 'LEAD': 'lead', 'PAD': 'pad', 'FX': 'fx'
+            },
+
+            // Effects
+            fx: {
+                reverbWet: 20,
+                reverbDecay: 2,
+                delayWet: 10,
+                delayFeedback: 20
+            },
+
+            // Resource loading
+            async loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            },
+
+            async init() {
+                // Initialize URL params handling
+                const urlParams = new URLSearchParams(window.location.search);
+                const songId = urlParams.get('id');
+                if (songId) {
+                    await this.loadProject(parseInt(songId));
+                }
+            },
+
+            async loadAudio() {
+                if (this.engine) return;
+
+                // Show loading state if needed
+                await this.loadScript('/static/vendor/tone.js');
+                const { AudioEngine } = await import('/ui/js/song/AudioEngine.js');
+                this.engine = new AudioEngine();
+            },
+
+            async togglePlay() {
+                // Ensure Audio & Engine are loaded
+                await this.loadAudio();
+
+                // Now safe to init engine which calls Tone.start()
+                await this.engine.init();
+
+                if (this.isPlaying) {
+                    Tone.Transport.stop();
+                    this.isPlaying = false;
+                    this.currentStep = 0;
+                } else {
+                    Tone.Transport.bpm.value = this.bpm;
+                    Tone.Transport.start();
+                    this.isPlaying = true;
+
+                    Tone.Transport.scheduleRepeat((time) => {
+                        this.stepLoop(time);
+                    }, "16n");
+                }
+            },
+
+            stepLoop(time) {
+                // UI update specific
+                Tone.Draw.schedule(() => {
+                    this.currentStep = (this.currentStep + 1) % 16;
+                    const bar = 1;
+                    const beat = Math.floor(this.currentStep / 4) + 1;
+                    const tick = this.currentStep % 4;
+                    this.position = `${bar}.${beat}.${tick}`;
+                }, time);
+
+                // Audio Logic
+                const nextStep = (this.currentStep + 1) % 16;
+
+                this.tracks.forEach(track => {
+                    if (track.mute) return;
+                    const anySolo = this.tracks.some(t => t.solo);
+                    if (anySolo && !track.solo) return;
+
+                    if (track.pattern[nextStep]) {
+                        const engineName = this.trackMap[track.name];
+                        this.engine.trigger(engineName, time);
+                    }
+                });
+            },
+
+            toggleStep(trackIdx, stepIdx) {
+                this.tracks[trackIdx].pattern[stepIdx] = this.tracks[trackIdx].pattern[stepIdx] ? 0 : 1;
+            },
+
+            updateBPM() {
+                if (this.isPlaying) {
+                    Tone.Transport.bpm.value = this.bpm;
+                }
+            },
+
+            getProjectData() {
+                return {
+                    pattern: this.tracks.map(t => ({
+                        name: t.name,
+                        pattern: t.pattern,
+                        volume: t.volume,
+                        pan: t.pan
+                    })),
+                    bpm: this.bpm,
+                    fx: this.fx
+                };
+            },
+
+            setProjectData(data) {
+                if (data.pattern) {
+                    data.pattern.forEach((trackData, idx) => {
+                        if (this.tracks[idx]) {
+                            this.tracks[idx].pattern = trackData.pattern || Array(16).fill(0);
+                            this.tracks[idx].volume = trackData.volume || -6;
+                            this.tracks[idx].pan = trackData.pan || 0;
+                        }
+                    });
+                }
+                if (data.bpm) this.bpm = data.bpm;
+                if (data.fx) this.fx = data.fx;
+            },
+
+            openSaveModal() {
+                this.saveError = null;
+                this.showSaveModal = true;
+            },
+
+            async saveProject() {
+                this.saving = true;
+                this.saveError = null;
+
+                try {
+                    const payload = {
+                        title: this.saveTitle || 'Untitled Track',
+                        data: this.getProjectData(),
+                        is_public: this.savePublic ? 1 : 0
+                    };
+
+                    if (this.currentSongId) {
+                        payload.id = this.currentSongId;
+                    }
+
+                    const response = await fetch('/song/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        this.currentSongId = data.id;
+                        this.showSaveModal = false;
+                        this.showToast('Project saved successfully!');
+                    } else {
+                        this.saveError = data.error || 'Failed to save project';
+                    }
+                } catch (error) {
+                    console.error('Save error:', error);
+                    this.saveError = 'Network error: ' + error.message;
+                } finally {
+                    this.saving = false;
+                }
+            },
+
+            async openLoadModal() {
+                this.showLoadModal = true;
+                this.loadingSongs = true;
+
+                try {
+                    const response = await fetch('/song/list');
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        this.songs = data.songs;
+                    }
+                } catch (error) {
+                    console.error('Load error:', error);
+                } finally {
+                    this.loadingSongs = false;
+                }
+            },
+
+            async loadProject(songId) {
+                try {
+                    const response = await fetch(`/song/get/${songId}`);
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        this.currentSongId = data.song.id;
+                        this.saveTitle = data.song.title;
+                        this.savePublic = data.song.is_public === 1;
+                        this.setProjectData(data.song.data);
+                        this.showLoadModal = false;
+                        this.showToast('Project loaded!');
+                    } else {
+                        alert('Failed to load project: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Load error:', error);
+                    alert('Network error: ' + error.message);
+                }
+            },
+
+            exportProject() {
+                const data = this.getProjectData();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${this.saveTitle || 'track'}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            formatDate(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            },
+
+            showToast(message) {
+                // You can integrate with your existing toast system
+                console.log('Toast:', message);
+            }
+        }));
+    });
+</script>
+{% endblock %}
