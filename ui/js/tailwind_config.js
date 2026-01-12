@@ -45,7 +45,7 @@ window.tailwind.config = {
             },
             keyframes: {
                 marquee: {
-                    '0%': { transform: 'translateX(100%)' },
+                    '0%': { transform: 'translateX(0%)' },
                     '100%': { transform: 'translateX(-100%)' }
                 },
                 fadeIn: {

@@ -58,13 +58,13 @@
     <div
         class="h-8 bg-electric-yellow border-b-[6px] border-black overflow-hidden flex items-center shrink-0 relative z-50">
         <div
-            class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-[4px] border-black">
+            class="animate-marquee will-change-transform whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-[4px] border-black">
             *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** NEOSPACE v{{ version }} *** SYSTEM
             NOMINAL
             ***
         </div>
         <div
-            class="animate-marquee whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-4 border-black absolute top-0 left-full">
+            class="animate-marquee will-change-transform whitespace-nowrap font-mono font-bold text-xs uppercase tracking-widest px-4 border-r-4 border-black absolute top-0 left-full">
             *** WELCOME TO NEOSPACE *** 24 USERS ONLINE *** DON'T BE EVIL *** NEOSPACE v{{ version }} *** SYSTEM
             NOMINAL
             ***
@@ -109,17 +109,18 @@
                 <div class="flex items-center gap-4">
                     <!-- Brutalist Search -->
                     <div class="relative group">
-                        <input type="text" class="nb-input h-10 w-64" placeholder="SEARCH DATABASE...">
+                        <input type="text" class="nb-input h-10 w-64" placeholder="SEARCH DATABASE..."
+                            aria-label="Search Database">
                     </div>
 
                     <!-- Action Icons -->
-                    <button id="notification-bell-btn"
+                    <button id="notification-bell-btn" aria-label="Notifications"
                         class="w-10 h-10 border-[4px] border-black flex items-center justify-center bg-white hover:bg-neon-green transition-colors shadow-hard active:translate-x-[4px] active:translate-y-[4px] active:shadow-none relative outline-none">
                         <i class="ph-bold ph-bell"></i>
                         <span id="notification-badge"
                             class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border border-black text-white text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
                     </button>
-                    <button
+                    <button aria-label="Settings"
                         class="w-10 h-10 border-[4px] border-black flex items-center justify-center bg-white hover:bg-yellow-400 transition-colors shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
                         <i class="ph-bold ph-gear"></i>
                     </button>
@@ -141,6 +142,7 @@
     <!-- Scripts Block Moved Inside Main for Re-Execution -->
 
     <script src="/ui/js/notifications.js"></script>
+    <script src="/ui/js/presence.js"></script>
     <script type="module" src="/ui/js/components/ShortcutsModal.js"></script>
 
     <!-- Penguin UI Toaster -->
