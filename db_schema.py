@@ -197,6 +197,7 @@ profile_posts = Table(
     Column("updated_at", Text),
 )
 Index("idx_posts_profile", profile_posts.c.profile_id, profile_posts.c.display_order)
+Index("idx_posts_profile_created", profile_posts.c.profile_id, profile_posts.c.created_at)
 
 # Friends Table
 friends = Table(
