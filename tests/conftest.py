@@ -16,7 +16,8 @@ def app():
     test_config = {
         'DATABASE': db_path,
         'TESTING': True,
-        'WTF_CSRF_ENABLED': False
+        'WTF_CSRF_ENABLED': False,
+        'RATELIMIT_ENABLED': False
     }
     
     app = create_app(test_config)
@@ -44,4 +45,3 @@ def auth_client(app):
         })
         # Session is now set
         yield client
-
