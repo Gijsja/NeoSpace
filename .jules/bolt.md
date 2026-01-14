@@ -1,3 +1,3 @@
-## 2026-01-11 - [Middleware N+1 Query]
-**Learning:** Middleware hooks like `before_request` in Flask execute for EVERY request, including static assets if served by the app. A DB query here is a hidden performance killer.
-**Action:** Always filter `request.path` in global middleware to exclude static/asset paths before running expensive operations.
+## 2026-01-14 - [Unbounded Query in Hot Path]
+**Learning:** The `/backfill` endpoint (both HTTP and Socket.IO) was executing `SELECT * FROM messages` without any LIMIT or room filtering. This is a classic "works in dev, explodes in prod" pattern.
+**Action:** Always enforce hard LIMITs on list endpoints and ensure `WHERE` clauses filter by the parent entity (e.g., `room_id`). Defaulting to a safe limit (e.g., 500) protects the DB from massive reads.
