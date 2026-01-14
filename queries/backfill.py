@@ -1,5 +1,5 @@
 
-from flask import jsonify, current_app
+from flask import jsonify, current_app, request
 from db import get_db
 import msgspec
 from core.schemas import Message, BackfillResponse
@@ -7,11 +7,14 @@ from core.schemas import Message, BackfillResponse
 
 def backfill_messages():
     """
-    Fetch all chat messages using msgspec for high-performance serialization.
+    Fetch chat messages using msgspec for high-performance serialization.
     10-80x faster than standard jsonify.
     """
+    room_id = request.args.get('room_id', 1, type=int)
+
     rows = get_db().execute(
-        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL"
+        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE room_id = ? AND deleted_at IS NULL",
+        (room_id,)
     ).fetchall()
     
     # Convert SQLite rows to msgspec Message structs
