@@ -276,13 +276,16 @@ def init_sockets(app):
         room_id = auth_info.get("room_id", 1) if auth_info else 1
         
         after = int(data.get("after_id", 0))
+        limit = 500  # Bolt ⚡: Limit backfill to prevent massive payloads
+
         db = get_db()
         rows = db.execute(
             """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
                FROM messages 
                WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
+               ORDER BY id
+               LIMIT ?""",
+            (after, room_id, limit)
         ).fetchall()
 
         # Use msgspec structs for fast serialization
