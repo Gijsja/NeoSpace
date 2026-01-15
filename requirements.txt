@@ -1,53 +1,48 @@
-# NeoSpace Core Dependencies
-# ==========================
-# Minimal requirements for the application to run.
-# This lean file is used by CI and fresh installs.
 
-# Core Framework
 Flask==3.1.2
 Flask-SocketIO==5.6.0
 flask-cors==6.0.2
 Flask-Login==0.6.3
 
-# Real-time
+# Websocket Dependencies
 python-socketio==5.16.0
 python-engineio==4.13.0
 simple-websocket==1.1.0
 
-# Database & Security
+# Cryptography
 bcrypt==5.0.0
 cryptography==46.0.3
 
-# Production Server
+# Prod Server
 gunicorn==22.0.0
 gevent==25.9.1
 gevent-websocket==0.10.1
 greenlet==3.3.0
 
-# Utilities
+# Template & Utility
 Jinja2==3.1.2
 MarkupSafe==2.1.5
-Werkzeug==3.0.3
+Werkzeug>=3.1.0
 click==8.3.1
-itsdangerous==2.1.2
-blinker==1.7.0
+itsdangerous>=2.2.0
+blinker>=1.9.0
 bidict==0.23.1
 
-# JSON Performance (Phase 4)
+# Performance
 msgspec==0.20.0
 
-# Security Hardening (Phase 5)
+# Security
 Flask-WTF==1.2.2
 Flask-Talisman==1.1.0
 Flask-Limiter==4.1.1
 structlog==25.5.0
 sentry-sdk==2.8.0
 
-# Database Migrations
+# Migrations
 alembic==1.18.0
 
-# Security & Sanitization
+# Sanitization
 bleach==6.3.0
 
-# HTTP Client (for scripts/utils)
+# HTTP Client
 requests==2.32.5

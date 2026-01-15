@@ -276,14 +276,39 @@ def init_sockets(app):
         room_id = auth_info.get("room_id", 1) if auth_info else 1
         
         after = int(data.get("after_id", 0))
+        before = int(data.get("before_id", 0))
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        if before > 0:
+             # Load Older: Fetch 50 messages strictly before ID
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE id < ? AND deleted_at IS NULL AND room_id = ?
+                   ORDER BY id DESC LIMIT 50""",
+                (before, room_id)
+            ).fetchall()
+            rows.reverse()
+        elif after == 0:
+            # Initial Load: Fetch latest 50 messages
+            # Order DESC to get latest, then reverse in code to correct order
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE deleted_at IS NULL AND room_id = ?
+                   ORDER BY id DESC LIMIT 50""",
+                (room_id,)
+            ).fetchall()
+            rows.reverse()
+        else:
+            # Sync: Fetch next 50 messages
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                   ORDER BY id ASC LIMIT 50""",
+                (after, room_id)
+            ).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
