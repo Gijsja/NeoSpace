@@ -275,15 +275,44 @@ def init_sockets(app):
         auth_info = authenticated_sockets.get(request.sid)
         room_id = auth_info.get("room_id", 1) if auth_info else 1
         
-        after = int(data.get("after_id", 0))
+        LIMIT = 50
+        after_id = int(data.get("after_id", 0))
+        before_id = int(data.get("before_id", 0))
+
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        if after_id > 0:
+            # Sync: New messages since after_id
+            query = """
+                SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                FROM messages
+                WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                ORDER BY id ASC
+            """
+            rows = db.execute(query, (after_id, room_id)).fetchall()
+
+        elif before_id > 0:
+            # Pagination: Old messages before before_id
+            query = """
+                SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                FROM messages
+                WHERE id < ? AND deleted_at IS NULL AND room_id = ?
+                ORDER BY id DESC LIMIT ?
+            """
+            rows = db.execute(query, (before_id, room_id, LIMIT)).fetchall()
+            # Reverse back to chronological order for client
+            rows = rows[::-1]
+
+        else:
+            # Initial Load: Latest messages
+            query = """
+                SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                FROM messages
+                WHERE deleted_at IS NULL AND room_id = ?
+                ORDER BY id DESC LIMIT ?
+            """
+            rows = db.execute(query, (room_id, LIMIT)).fetchall()
+            rows = rows[::-1]
 
         # Use msgspec structs for fast serialization
         msgs = []
