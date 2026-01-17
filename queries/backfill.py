@@ -1,5 +1,5 @@
 
-from flask import jsonify, current_app
+from flask import jsonify, current_app, request
 from db import get_db
 import msgspec
 from core.schemas import Message, BackfillResponse
@@ -7,13 +7,25 @@ from core.schemas import Message, BackfillResponse
 
 def backfill_messages():
     """
-    Fetch all chat messages using msgspec for high-performance serialization.
+    Fetch chat messages using msgspec for high-performance serialization.
     10-80x faster than standard jsonify.
+    Includes pagination limit to prevent fetching entire history.
     """
+    # Default to 50 messages, allow client override up to 100
+    try:
+        limit = min(int(request.args.get('limit', 50)), 100)
+    except (ValueError, TypeError):
+        limit = 50
+
+    # Fetch latest messages using DESC order
     rows = get_db().execute(
-        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL"
+        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL ORDER BY id DESC LIMIT ?",
+        (limit,)
     ).fetchall()
     
+    # Reverse to return in chronological order (oldest -> newest)
+    rows = list(reversed(rows))
+
     # Convert SQLite rows to msgspec Message structs
     messages = [
         Message(
