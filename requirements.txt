@@ -44,7 +44,7 @@ structlog==25.5.0
 sentry-sdk==2.8.0
 
 # Database Migrations
-alembic==1.18.0
+alembic==1.18.1
 
 # Security & Sanitization
 bleach==6.3.0
