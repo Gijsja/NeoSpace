@@ -13,9 +13,9 @@ def test_root_serves_ui_when_authenticated(auth_client):
     assert "/home" in res.location or "/wall" in res.location
 
 
-def test_unread_endpoint(client):
-    """Unread endpoint returns count."""
-    res = client.get("/unread")
+def test_unread_endpoint(auth_client):
+    """Unread endpoint returns count (authenticated)."""
+    res = auth_client.get("/unread")
     assert res.status_code == 200
     data = res.get_json()
     assert "count" in data
