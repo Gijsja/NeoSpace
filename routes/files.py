@@ -41,6 +41,9 @@ def serve_unsharded_user_file(user_id, category, filename):
     if category != 'avatars' and not viewer_id:
         abort(401)
 
+    if '..' in filename or '..' in category:
+        abort(400)
+
     upload_root = current_app.config.get('UPLOAD_FOLDER', 'uploads')
     directory = os.path.join(current_app.root_path, upload_root, f"user_{user_id}", category)
     return send_from_directory(directory, filename)
