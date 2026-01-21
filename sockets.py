@@ -1,12 +1,12 @@
+from collections import defaultdict, deque
+import time
 
 from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
-from flask import g, session, request
+from flask import session, request
 from db import get_db
-from mutations.message_mutations import send_message
-from core.structs import Message, row_to_message
+from core.structs import Message
 import msgspec
-import os
-import html
+
 
 # Security: Restrict CORS to configured origins (default: localhost for dev)
 # Moved to config.py, loaded in init_sockets
@@ -24,11 +24,9 @@ WS_TYPING_LIMIT = 10
 WS_TYPING_WINDOW = 10
 
 # Rate Limiting Storage
-from collections import defaultdict, deque
-import time
-
 # Map user_id -> default dict of actions -> deque of timestamps
 rate_limits = defaultdict(lambda: defaultdict(deque))
+
 
 def check_rate_limit(user_id, action="message", limit=60, window=60):
     """
@@ -37,14 +35,14 @@ def check_rate_limit(user_id, action="message", limit=60, window=60):
     """
     now = time.time()
     timestamps = rate_limits[user_id][action]
-    
+
     # Remove old timestamps
     while timestamps and now - timestamps[0] > window:
         timestamps.popleft()
-        
+
     if len(timestamps) >= limit:
         return False
-        
+
     timestamps.append(now)
     return True
 
@@ -67,7 +65,7 @@ def validate_auth(sid, max_age=3600):  # Default 1 hour re-check
     auth = authenticated_sockets.get(sid)
     if not auth:
         return False
-        
+
     # Check if re-validation is needed
     now = time.time()
     if now - auth.get("last_auth", 0) > max_age:
@@ -77,13 +75,13 @@ def validate_auth(sid, max_age=3600):  # Default 1 hour re-check
             "SELECT id, is_banned FROM users WHERE id = ? AND username = ?",
             (auth["user_id"], auth["username"])
         ).fetchone()
-        
+
         if not user or user['is_banned']:
             return False
-            
+
         # Update timestamp on success
         auth["last_auth"] = now
-        
+
     return True
 
 
@@ -103,22 +101,27 @@ def init_sockets(app):
         # Get user from Flask session (set by HTTP login)
         user_id = session.get('user_id')
         username = session.get('username')
-        
+
         if not user_id or not username:
             # Reject unauthenticated connections
             emit("error", {"message": "Authentication required"})
             disconnect()
             return False
-        
+
         # Verify user exists and is not banned
         db = get_db()
-        user = db.execute("SELECT is_banned FROM users WHERE id = ?", (user_id,)).fetchone()
-        
+        user = db.execute(
+            "SELECT is_banned FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+
         if not user or user['is_banned']:
-             session.clear()
-             emit("error", {"message": "Connection rejected: Account banned or invalid"})
-             disconnect()
-             return False
+            session.clear()
+            emit("error", {
+                "message": "Connection rejected: Account banned or invalid"
+            })
+            disconnect()
+            return False
 
         # Store authenticated connection (room set on join_room event)
         authenticated_sockets[request.sid] = {
@@ -128,7 +131,7 @@ def init_sockets(app):
             "room_name": "general",
             "last_auth": time.time()  # Track auth time
         }
-        
+
         emit("connected", {"ok": True, "username": username})
         return True
 
@@ -140,8 +143,8 @@ def init_sockets(app):
             # Leave the room
             leave_room(auth_info["room_name"])
             del authenticated_sockets[request.sid]
-            
-            # Optional: Clean up rate limits if memory is concern, 
+
+            # Optional: Clean up rate limits if memory is concern,
             # but getting user_id here might be tricky if cleaned up too early.
             # Leaving in memory for now as they are small deques.
 
@@ -155,27 +158,27 @@ def init_sockets(app):
             emit("error", {"message": "Session expired or invalid"})
             disconnect()
             return
-            
+
         auth_info = authenticated_sockets[request.sid]
-        
+
         room_name = data.get("room", "general").lower().strip()
-        
+
         # Leave previous room if any
         old_room = auth_info.get("room_name")
         if old_room and old_room != room_name:
             leave_room(old_room)
-        
+
         # Get room ID from database
         db = get_db()
         room_id = get_room_id_by_name(db, room_name)
-        
+
         # Update socket state
         auth_info["room_id"] = room_id
         auth_info["room_name"] = room_name
-        
+
         # Join Socket.IO room
         join_room(room_name)
-        
+
         emit("room_joined", {
             "room": room_name,
             "room_id": room_id
@@ -190,7 +193,7 @@ def init_sockets(app):
         """
         import time
         import sqlite3
-        
+
         if not validate_auth(request.sid):
             emit("error", {"message": "Session expired or invalid"})
             disconnect()
@@ -198,7 +201,7 @@ def init_sockets(app):
 
         # Get authenticated user from our socket registry
         auth_info = authenticated_sockets[request.sid]
-        
+
         username = auth_info["username"]
         user_id = auth_info["user_id"]
         room_id = auth_info.get("room_id", 1)
@@ -209,30 +212,37 @@ def init_sockets(app):
         config_window = WS_MSG_WINDOW
 
         # Rate Limiting (60 messages per 60 seconds)
-        if not check_rate_limit(user_id, action="message", limit=config_limit, window=config_window):
+        if not check_rate_limit(
+            user_id,
+            action="message",
+            limit=config_limit,
+            window=config_window
+        ):
             emit("error", {"message": "Rate limit exceeded. Slow down!"})
             return
-        
+
         if not content:
             emit("error", {"message": "Empty message"})
             return
-        
+
         # Sanitize content
         from utils.sanitize import clean_html
         safe_content = clean_html(content)
-        
+
         # Insert with retry logic for high concurrency
         MAX_RETRIES = 5
         RETRY_DELAY_BASE = 0.05
-        
+
         db = get_db()
         row = None
         last_error = None
-        
+
         for attempt in range(MAX_RETRIES):
             try:
                 row = db.execute(
-                    "INSERT INTO messages(user, content, room_id) VALUES (?, ?, ?) RETURNING id, user, content, created_at, room_id",
+                    "INSERT INTO messages(user, content, room_id) "
+                    "VALUES (?, ?, ?) "
+                    "RETURNING id, user, content, created_at, room_id",
                     (username, safe_content, room_id)
                 ).fetchone()
                 db.commit()
@@ -251,9 +261,10 @@ def init_sockets(app):
                 print(f"Error inserting message: {e}")
                 emit("error", {"message": "Database error"})
                 return
-        
+
         if row is None:
-            print(f"Message insert failed after {MAX_RETRIES} retries: {last_error}")
+            print(f"Message insert failed after {MAX_RETRIES} retries: "
+                  f"{last_error}")
             emit("error", {"message": "Database busy, please retry"})
             return
 
@@ -271,19 +282,38 @@ def init_sockets(app):
 
     @socketio.on("request_backfill")
     def backfill(data):
-        """Fetch message history for current room."""
+        """
+        Fetch message history for current room.
+        Optimized to fetch only latest 100 messages on initial load.
+        """
         auth_info = authenticated_sockets.get(request.sid)
         room_id = auth_info.get("room_id", 1) if auth_info else 1
-        
+
         after = int(data.get("after_id", 0))
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        if after == 0:
+            # Initial load: Get latest 100 messages
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at,
+                          deleted_at, room_id
+                   FROM messages
+                   WHERE deleted_at IS NULL AND room_id = ?
+                   ORDER BY id DESC LIMIT 100""",
+                (room_id,)
+            ).fetchall()
+            # Reverse to restore chronological order (oldest -> newest)
+            rows = rows[::-1]
+        else:
+            # Pagination/Sync: Get messages after specific ID (Limit 500)
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at,
+                          deleted_at, room_id
+                   FROM messages
+                   WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                   ORDER BY id ASC LIMIT 500""",
+                (after, room_id)
+            ).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
@@ -307,13 +337,23 @@ def init_sockets(app):
             return
 
         auth_info = authenticated_sockets[request.sid]
-        
+
         # Rate limit typing events (prevent spam)
-        if not check_rate_limit(auth_info["user_id"], action="typing", limit=WS_TYPING_LIMIT, window=WS_TYPING_WINDOW):
+        if not check_rate_limit(
+            auth_info["user_id"],
+            action="typing",
+            limit=WS_TYPING_LIMIT,
+            window=WS_TYPING_WINDOW
+        ):
             return
 
         room_name = auth_info.get("room_name", "general")
-        emit("typing", {"user": auth_info["username"]}, room=room_name, include_self=False)
+        emit(
+            "typing",
+            {"user": auth_info["username"]},
+            room=room_name,
+            include_self=False
+        )
 
     @socketio.on("stop_typing")
     def handle_stop_typing(data):
@@ -321,7 +361,12 @@ def init_sockets(app):
         auth_info = authenticated_sockets.get(request.sid)
         if auth_info:
             room_name = auth_info.get("room_name", "general")
-            emit("stop_typing", {"user": auth_info["username"]}, room=room_name, include_self=False)
+            emit(
+                "stop_typing",
+                {"user": auth_info["username"]},
+                room=room_name,
+                include_self=False
+            )
 
     @socketio.on("latency_check")
     def latency_check(data=None):
