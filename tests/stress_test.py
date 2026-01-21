@@ -323,7 +323,8 @@ def stress_auth_cycles(fixture: StressTestFixture, config: StressConfig) -> Stre
     
     for i in range(config.auth_login_cycles):
         client = fixture.app.test_client()
-        user_num = i % 100
+        # Ensure we target existing users
+        user_num = i % fixture.user_count
         
         op_start = time.perf_counter()
         
