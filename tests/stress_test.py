@@ -167,8 +167,14 @@ class StressTestFixture:
         os.close(self.db_fd)
         db_module.DB_PATH = self.db_path
         
-        self.app = create_app()
-        self.app.config["TESTING"] = True
+        # Pass config to create_app to ensure init_db uses the correct path
+        # and disable CSRF for stress testing convenience
+        self.app = create_app({
+            "TESTING": True,
+            "DATABASE": self.db_path,
+            "WTF_CSRF_ENABLED": False,
+            "RATELIMIT_ENABLED": False
+        })
         self.client = self.app.test_client()
         
         # Create test users based on requested count
@@ -317,7 +323,8 @@ def stress_auth_cycles(fixture: StressTestFixture, config: StressConfig) -> Stre
     
     for i in range(config.auth_login_cycles):
         client = fixture.app.test_client()
-        user_num = i % 100
+        # Ensure we target existing users
+        user_num = i % fixture.user_count
         
         op_start = time.perf_counter()
         
