@@ -1,0 +1,137 @@
+
+============================================================
+🔥 NeoSpace STRESS TEST SUITE
+============================================================
+Configuration: 10 concurrent users
+Started: 2026-01-21T16:35:50.487087
+
+⚙️  Setting up test environment...
+[2m2026-01-21T16:35:50.537716Z[0m [[32m[1minfo     [0m] [1mlogging_configured            [0m [36menv[0m=[35mdevelopment[0m
+   Creating 10 test users...
+   ✅ Test environment ready
+
+🔄 Running: HTTP Message Endpoints...
+
+============================================================
+📊 HTTP Message Endpoints ❌ FAIL
+============================================================
+  Total Operations: 50
+  Success Rate:     0.0%
+  Throughput:       347.7 ops/sec
+  Avg Latency:      6.52 ms
+  P95 Latency:      55.82 ms
+  Max Latency:      63.73 ms
+
+  Unique Errors (1 types):
+    - HTTP 400: b'<!doctype html>\n<html lang=en>\n<title>400 Bad Request</title>\n<h1
+
+🔄 Running: HTTP Backfill (Read)...
+
+============================================================
+📊 HTTP Backfill (Read) ❌ FAIL
+============================================================
+  Total Operations: 50
+  Success Rate:     0.0%
+  Throughput:       389.0 ops/sec
+  Avg Latency:      4.87 ms
+  P95 Latency:      27.89 ms
+  Max Latency:      32.71 ms
+
+🔄 Running: Authentication Cycles...
+
+============================================================
+📊 Authentication Cycles ❌ FAIL
+============================================================
+  Total Operations: 20
+  Success Rate:     0.0%
+  Throughput:       720.2 ops/sec
+  Avg Latency:      1.29 ms
+  P95 Latency:      3.08 ms
+  Max Latency:      3.15 ms
+
+  Unique Errors (1 types):
+    - Login failed: 400
+
+🔄 Running: WebSocket Messages...
+
+============================================================
+📊 WebSocket Messages ❌ FAIL
+============================================================
+  Total Operations: 100
+  Success Rate:     0.0%
+  Throughput:       748.1 ops/sec
+  Avg Latency:      0.00 ms
+  P95 Latency:      0.00 ms
+  Max Latency:      0.00 ms
+
+  Unique Errors (2 types):
+    - Connection failed: not connected
+    - not connected
+
+🔄 Running: Database Writes...
+
+============================================================
+📊 Database Writes ❌ FAIL
+============================================================
+  Total Operations: 50
+  Success Rate:     0.0%
+  Throughput:       18199.5 ops/sec
+  Avg Latency:      0.00 ms
+  P95 Latency:      0.00 ms
+  Max Latency:      0.00 ms
+
+  Unique Errors (1 types):
+    - no such table: messages
+
+🔄 Running: Database Reads...
+
+============================================================
+📊 Database Reads ❌ FAIL
+============================================================
+  Total Operations: 100
+  Success Rate:     0.0%
+  Throughput:       43812.7 ops/sec
+  Avg Latency:      0.00 ms
+  P95 Latency:      0.00 ms
+  Max Latency:      0.00 ms
+
+  Unique Errors (1 types):
+    - no such table: messages
+
+🔄 Running: Profile Operations...
+
+============================================================
+📊 Profile Operations ❌ FAIL
+============================================================
+  Total Operations: 100
+  Success Rate:     0.0%
+  Throughput:       765.0 ops/sec
+  Avg Latency:      3.99 ms
+  P95 Latency:      28.30 ms
+  Max Latency:      43.04 ms
+
+🔄 Running: User Directory Lookups...
+
+============================================================
+📊 User Directory Lookups ❌ FAIL
+============================================================
+  Total Operations: 50
+  Success Rate:     0.0%
+  Throughput:       562.8 ops/sec
+  Avg Latency:      3.28 ms
+  P95 Latency:      14.95 ms
+  Max Latency:      19.50 ms
+
+⚙️  Cleaning up...
+
+============================================================
+📈 OVERALL SUMMARY
+============================================================
+  Total Operations: 520
+  Overall Success:  0.0%
+  Total Duration:   1.1s
+  Avg Throughput:   488.1 ops/sec
+
+  Tests Passed: 0/8
+
+❌ STRESS TEST FAILED
