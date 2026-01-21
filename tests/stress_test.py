@@ -167,8 +167,15 @@ class StressTestFixture:
         os.close(self.db_fd)
         db_module.DB_PATH = self.db_path
         
-        self.app = create_app()
-        self.app.config["TESTING"] = True
+        # Bolt: Pass configuration explicitly to create_app to ensure DB init uses it
+        # and disable CSRF for stress testing
+        test_config = {
+            'DATABASE': self.db_path,
+            'TESTING': True,
+            'WTF_CSRF_ENABLED': False,
+            'RATELIMIT_ENABLED': False
+        }
+        self.app = create_app(test_config)
         self.client = self.app.test_client()
         
         # Create test users based on requested count
