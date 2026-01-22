@@ -283,7 +283,8 @@ def stress_http_backfill(fixture: StressTestFixture, config: StressConfig) -> St
         client.post('/send', json={'content': f'Backfill seed message {i}'})
     
     def worker(user_id: int):
-        client = fixture.get_authenticated_client(user_id % 100)
+        client = fixture.get_authenticated_client(user_id % fixture.user_count)
+        client = fixture.get_authenticated_client(user_id % fixture.user_count)
         local_success = 0
         local_failures = 0
         local_latencies = []
@@ -327,7 +328,7 @@ def stress_auth_cycles(fixture: StressTestFixture, config: StressConfig) -> Stre
     
     for i in range(config.auth_login_cycles):
         client = fixture.app.test_client()
-        user_num = i % 100
+        user_num = i % fixture.user_count
         
         op_start = time.perf_counter()
         
@@ -376,7 +377,7 @@ def stress_websocket_messages(fixture: StressTestFixture, config: StressConfig) 
         
         try:
             # Get authenticated session first
-            http_client = fixture.get_authenticated_client(user_id % 100)
+            http_client = fixture.get_authenticated_client(user_id % fixture.user_count)
             
             # Create WebSocket client with the same session
             ws_client = SocketIOTestClient(
@@ -453,7 +454,7 @@ def stress_database_writes(fixture: StressTestFixture, config: StressConfig) -> 
         try:
             conn.execute(
                 "INSERT INTO messages(user, content) VALUES (?, ?)",
-                (f"stressuser{i % 100}", f"DB stress message {i}")
+                (f"stressuser{i % fixture.user_count}", f"DB stress message {i}")
             )
             conn.commit()
             result.success_count += 1
@@ -504,7 +505,7 @@ def stress_profile_operations(fixture: StressTestFixture, config: StressConfig) 
     num_operations = config.http_concurrent_users * 10
     
     def worker(user_id: int):
-        client = fixture.get_authenticated_client(user_id % 100)
+        client = fixture.get_authenticated_client(user_id % fixture.user_count)
         local_success = 0
         local_failures = 0
         local_latencies = []
@@ -515,7 +516,7 @@ def stress_profile_operations(fixture: StressTestFixture, config: StressConfig) 
             try:
                 if i % 2 == 0:
                     # Read profile
-                    resp = client.get(f'/profile?username=stressuser{user_id % 100}')
+                    resp = client.get(f'/profile?username=stressuser{user_id % fixture.user_count}')
                 else:
                     # Update profile
                     resp = client.post('/profile/update', json={
@@ -557,7 +558,7 @@ def stress_user_directory(fixture: StressTestFixture, config: StressConfig) -> S
     lock = threading.Lock()
     
     def worker(user_id: int):
-        client = fixture.get_authenticated_client(user_id % 100)
+        client = fixture.get_authenticated_client(user_id % fixture.user_count)
         local_success = 0
         local_failures = 0
         local_latencies = []
@@ -569,7 +570,7 @@ def stress_user_directory(fixture: StressTestFixture, config: StressConfig) -> S
                 if i % 2 == 0:
                     resp = client.get('/users')
                 else:
-                    resp = client.get(f'/users/lookup?username=stressuser{i % 100}')
+                    resp = client.get(f'/users/lookup?username=stressuser{i % fixture.user_count}')
                 
                 elapsed = time.perf_counter() - start
                 
