@@ -1,6 +1,5 @@
-
-pytest
-flake8
-bandit
-pytest-cov
-locust
+pytest==9.0.2
+flake8==7.3.0
+bandit==1.9.3
+pytest-cov==7.0.0
+locust==2.43.1
