@@ -271,19 +271,38 @@ def init_sockets(app):
 
     @socketio.on("request_backfill")
     def backfill(data):
-        """Fetch message history for current room."""
+        """
+        Fetch message history for current room.
+        Optimized with pagination:
+        - after_id=0: Fetch latest 100 messages (reversed)
+        - after_id>0: Fetch next 1000 messages (capped)
+        """
         auth_info = authenticated_sockets.get(request.sid)
         room_id = auth_info.get("room_id", 1) if auth_info else 1
         
         after = int(data.get("after_id", 0))
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        if after == 0:
+            # Initial load: Fetch LATEST 100 messages
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                FROM messages
+                WHERE deleted_at IS NULL AND room_id = ?
+                ORDER BY id DESC LIMIT 100""",
+                (room_id,)
+            ).fetchall()
+            # Reverse to return in chronological order
+            rows = list(reversed(rows))
+        else:
+            # Sync: Fetch subsequent messages (capped at 1000)
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                FROM messages
+                WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                ORDER BY id ASC LIMIT 1000""",
+                (after, room_id)
+            ).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
