@@ -4,4 +4,4 @@ flake8
 bandit
 pytest-cov
 locust
-safety
+safety<3.0.0
