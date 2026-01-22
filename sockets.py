@@ -51,7 +51,9 @@ def check_rate_limit(user_id, action="message", limit=60, window=60):
 
 def get_room_id_by_name(db, room_name):
     """Get room ID from name, defaults to 'general' if not found."""
-    row = db.execute("SELECT id FROM rooms WHERE name = ?", (room_name,)).fetchone()
+    row = db.execute(
+        "SELECT id FROM rooms WHERE name = ?", (room_name,)
+    ).fetchone()
     if row:
         return row["id"]
     # Fallback to general
@@ -236,11 +238,13 @@ def init_sockets(app):
         for attempt in range(MAX_RETRIES):
             try:
                 # RETURNING clause is supported in SQLite 3.35+
-                row = db.execute(
+                query = (
                     "INSERT INTO messages(user, content, room_id) "
                     "VALUES (?, ?, ?) "
-                    "RETURNING id, user, content, created_at, room_id",
-                    (username, safe_content, room_id),
+                    "RETURNING id, user, content, created_at, room_id"
+                )
+                row = db.execute(
+                    query, (username, safe_content, room_id)
                 ).fetchone()
                 db.commit()
                 break
@@ -260,7 +264,10 @@ def init_sockets(app):
                 return
 
         if row is None:
-            print(f"Message insert failed after {MAX_RETRIES} retries: {last_error}")
+            print(
+                f"Message insert failed after {MAX_RETRIES} retries: "
+                f"{last_error}"
+            )
             emit("error", {"message": "Database busy, please retry"})
             return
 
@@ -290,26 +297,28 @@ def init_sockets(app):
             # Initial load: Fetch LATEST 100 messages
             # (ordered DESC, then reversed)
             # This avoids fetching the entire history for a room
-            rows = db.execute(
-                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-                   FROM messages
-                   WHERE deleted_at IS NULL AND room_id = ?
-                   ORDER BY id DESC LIMIT 100""",
-                (room_id,),
-            ).fetchall()
+            query = """
+                SELECT id, user, content, created_at, edited_at, deleted_at,
+                       room_id
+                FROM messages
+                WHERE deleted_at IS NULL AND room_id = ?
+                ORDER BY id DESC LIMIT 100
+            """
+            rows = db.execute(query, (room_id,)).fetchall()
             # Reverse to return chronological order
             rows = list(reversed(rows))
         else:
             # Sync: Fetch messages NEWER than after_id
             # Cap at 1000 to prevent massive payloads if client
             # is very far behind
-            rows = db.execute(
-                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-                   FROM messages
-                   WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-                   ORDER BY id ASC LIMIT 1000""",
-                (after, room_id),
-            ).fetchall()
+            query = """
+                SELECT id, user, content, created_at, edited_at, deleted_at,
+                       room_id
+                FROM messages
+                WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                ORDER BY id ASC LIMIT 1000
+            """
+            rows = db.execute(query, (after, room_id)).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
