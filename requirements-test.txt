@@ -4,3 +4,4 @@ flake8
 bandit
 pytest-cov
 locust
+msgspec==0.20.0
