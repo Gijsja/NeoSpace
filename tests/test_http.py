@@ -1,4 +1,3 @@
-
 def test_root_redirects_when_unauthenticated(client):
     """Root endpoint redirects to login when not authenticated."""
     res = client.get("/")
@@ -27,11 +26,11 @@ def test_unread_count_increases_with_messages(auth_client, app):
     # Initial count
     res = auth_client.get("/unread")
     initial_count = res.get_json()["count"]
-    
+
     # Add messages
     auth_client.post("/send", json={"content": "Message 1"})
     auth_client.post("/send", json={"content": "Message 2"})
-    
+
     # New count should be higher
     res = auth_client.get("/unread")
     new_count = res.get_json()["count"]
@@ -43,15 +42,15 @@ def test_unread_count_excludes_deleted(auth_client, app):
     # Add and delete a message
     res = auth_client.post("/send", json={"content": "Delete me"})
     msg_id = res.get_json()["id"]
-    
+
     res = auth_client.get("/unread")
     count_before = res.get_json()["count"]
-    
+
     auth_client.post("/delete", json={"id": msg_id})
-    
+
     res = auth_client.get("/unread")
     count_after = res.get_json()["count"]
-    
+
     assert count_after == count_before - 1
 
 
@@ -72,7 +71,7 @@ def test_static_js_served(client):
 def test_backfill_endpoint(auth_client, app):
     """HTTP backfill endpoint works."""
     auth_client.post("/send", json={"content": "Test"})
-    
+
     res = auth_client.get("/backfill")
     assert res.status_code == 200
     data = res.get_json()
