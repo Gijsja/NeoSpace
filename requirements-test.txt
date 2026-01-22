@@ -1,5 +1,5 @@
 
-pytest<8.0.0
+pytest
 flake8
 bandit
 pytest-cov
