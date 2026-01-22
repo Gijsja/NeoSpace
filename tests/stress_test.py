@@ -165,12 +165,22 @@ class StressTestFixture:
         """Create isolated test environment."""
         self.db_fd, self.db_path = tempfile.mkstemp(suffix=".db")
         os.close(self.db_fd)
-        db_module.DB_PATH = self.db_path
         
-        self.app = create_app()
-        self.app.config["TESTING"] = True
+        # Configure app like conftest.py
+        test_config = {
+            'DATABASE': self.db_path,
+            'TESTING': True,
+            'WTF_CSRF_ENABLED': False,
+            'RATELIMIT_ENABLED': False
+        }
+
+        self.app = create_app(test_config)
         self.client = self.app.test_client()
         
+        # Initialize database
+        with self.app.app_context():
+            db_module.init_db()
+
         # Create test users based on requested count
         self.user_count = user_count
         self._create_test_users(user_count)
