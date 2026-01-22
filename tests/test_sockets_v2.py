@@ -96,8 +96,13 @@ class TestSocketsV2:
         # Request sync from message 0
         socket_client.emit("request_backfill", {"after_id": 0})
 
-        # Clear the queue so we don't mix up events
-        socket_client.get_received()
+        # Verify we received the initial load (limit 100)
+        received = socket_client.get_received()
+        initial_backfill = next(
+            (e for e in received if e["name"] == "backfill"), None
+        )
+        assert initial_backfill, "Initial backfill event not received"
+        assert len(initial_backfill["args"][0]["messages"]) == 100
 
         # Wait, after_id=0 is initial load (limit 100).
         # We want sync, so after_id must be > 0.
