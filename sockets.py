@@ -1,3 +1,4 @@
+import sqlite3
 import time
 from collections import defaultdict, deque
 
@@ -189,9 +190,6 @@ def init_sockets(app):
         Uses server-authenticated username, ignoring any client-provided user.
         Messages are scoped to the user's current room.
         """
-        import sqlite3
-        import time
-
         if not validate_auth(request.sid):
             emit("error", {"message": "Session expired or invalid"})
             disconnect()
