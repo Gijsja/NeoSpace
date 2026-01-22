@@ -57,9 +57,7 @@ def get_room_id_by_name(db, room_name):
     if row:
         return row["id"]
     # Fallback to general
-    row = db.execute(
-        "SELECT id FROM rooms WHERE name = 'general'"
-    ).fetchone()
+    row = db.execute("SELECT id FROM rooms WHERE name = 'general'").fetchone()
     return row["id"] if row else 1
 
 
