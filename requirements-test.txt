@@ -1,7 +1,7 @@
 
-pytest
+pytest<8.0.0
 flake8
 bandit
 pytest-cov
-locust
-safety
+locust==2.39.1
+safety<3.0.0
