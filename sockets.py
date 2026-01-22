@@ -286,22 +286,28 @@ def init_sockets(app):
         if after == 0:
             # Initial load: Fetch LATEST 100 messages
             rows = db.execute(
-                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                """
+                SELECT id, user, content, created_at, edited_at, deleted_at,
+                       room_id
                 FROM messages
                 WHERE deleted_at IS NULL AND room_id = ?
-                ORDER BY id DESC LIMIT 100""",
-                (room_id,)
+                ORDER BY id DESC LIMIT 100
+                """,
+                (room_id,),
             ).fetchall()
             # Reverse to return in chronological order
             rows = list(reversed(rows))
         else:
             # Sync: Fetch subsequent messages (capped at 1000)
             rows = db.execute(
-                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                """
+                SELECT id, user, content, created_at, edited_at, deleted_at,
+                       room_id
                 FROM messages
                 WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-                ORDER BY id ASC LIMIT 1000""",
-                (after, room_id)
+                ORDER BY id ASC LIMIT 1000
+                """,
+                (after, room_id),
             ).fetchall()
 
         # Use msgspec structs for fast serialization
