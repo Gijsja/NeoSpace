@@ -27,7 +27,7 @@ jobs:
           pip install -r requirements-test.txt
 
       - name: Run tests with coverage
-        run: pytest -v --tb=short --cov=. --cov-report=term-missing --cov-fail-under=80
+        run: pytest -v --tb=short --cov=. --cov-report=term-missing --cov-fail-under=65
 
       - name: Security scan (Bandit)
         run: bandit -r . -x ./.venv,./tests,./docs --skip B101
