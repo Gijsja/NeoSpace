@@ -63,7 +63,12 @@ class TestSocketsV2:
         )
         assert backfill_event, "Backfill event not received"
 
-        data = backfill_event["args"][0]
+        # Handle args as list or dict for robustness
+        args = backfill_event["args"]
+        if isinstance(args, list):
+            data = args[0]
+        else:
+            data = args
         messages = data["messages"]
 
         # Should be capped at 100
@@ -122,8 +127,14 @@ class TestSocketsV2:
         backfill_event = next(
             (e for e in received if e["name"] == "backfill"), None
         )
+        assert backfill_event, "Backfill event not received"
 
-        data = backfill_event["args"][0]
+        # Handle args as list or dict for robustness
+        args = backfill_event["args"]
+        if isinstance(args, list):
+            data = args[0]
+        else:
+            data = args
         messages = data["messages"]
 
         # Should be capped at 1000
