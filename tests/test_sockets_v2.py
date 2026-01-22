@@ -180,5 +180,7 @@ class TestSocketsV2:
         # latency_check returns data directly (callback), not emit
         # SocketIOTestClient emit(..., callback=True) returns the Ack response
 
-        response = socket_client.emit("latency_check", {"ts": 12345}, callback=True)
+        response = socket_client.emit(
+            "latency_check", {"ts": 12345}, callback=True
+        )
         assert response == {"ts": 12345}
