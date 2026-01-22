@@ -33,7 +33,7 @@ itsdangerous==2.1.2
 blinker==1.7.0
 bidict==0.23.1
 
-# JSON Performance (Phase 4)
+# JSON Performance
 msgspec==0.20.0
 
 # Security Hardening (Phase 5)
