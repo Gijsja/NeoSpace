@@ -277,13 +277,29 @@ def init_sockets(app):
         
         after = int(data.get("after_id", 0))
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        if after <= 0:
+            # Initial load: Fetch latest 100 messages (Optimization: limit payload)
+            rows = db.execute(
+                """SELECT * FROM (
+                    SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                    FROM messages
+                    WHERE deleted_at IS NULL AND room_id = ?
+                    ORDER BY id DESC
+                    LIMIT 100
+                   ) ORDER BY id ASC""",
+                (room_id,)
+            ).fetchall()
+        else:
+            # Sync: Fetch next batch (limit 500)
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                   ORDER BY id ASC
+                   LIMIT 500""",
+                (after, room_id)
+            ).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
