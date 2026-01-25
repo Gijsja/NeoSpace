@@ -42,6 +42,10 @@ def serve_unsharded_user_file(user_id, category, filename):
         abort(401)
 
     upload_root = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+
+    if '..' in filename or '..' in category:
+        abort(400)
+
     directory = os.path.join(current_app.root_path, upload_root, f"user_{user_id}", category)
     return send_from_directory(directory, filename)
 
@@ -54,6 +58,9 @@ def serve_legacy_file(filename):
     if not session.get('user_id'):
         abort(401)
         
+    if '..' in filename:
+        abort(400)
+
     upload_root = current_app.config.get('UPLOAD_FOLDER', 'uploads')
     directory = os.path.join(current_app.root_path, upload_root)
     return send_from_directory(directory, filename)
