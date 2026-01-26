@@ -1,3 +1,3 @@
-## 2026-01-11 - [Middleware N+1 Query]
-**Learning:** Middleware hooks like `before_request` in Flask execute for EVERY request, including static assets if served by the app. A DB query here is a hidden performance killer.
-**Action:** Always filter `request.path` in global middleware to exclude static/asset paths before running expensive operations.
+## 2026-01-26 - [Socket Backfill Pagination]
+**Learning:** Initial full data loads (like chat history) via WebSocket must be paginated to prevent memory exhaustion and slow start times.
+**Action:** Limit initial loads (e.g., `after_id=0`) to a fixed count (e.g., 100) using `ORDER BY id DESC LIMIT N` in a subquery, then re-sorting. Cap sync requests (`after_id > N`) to a reasonable batch size (e.g., 500).
