@@ -277,13 +277,28 @@ def init_sockets(app):
         
         after = int(data.get("after_id", 0))
         db = get_db()
-        rows = db.execute(
-            """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
-               FROM messages 
-               WHERE id > ? AND deleted_at IS NULL AND room_id = ?
-               ORDER BY id""",
-            (after, room_id)
-        ).fetchall()
+
+        # Performance: Pagination Limit
+        # 1. Initial Load (after=0): Get latest 100 messages (DESC then reverse)
+        # 2. Sync (after>0): Get next 500 messages (ASC)
+        if after == 0:
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE deleted_at IS NULL AND room_id = ?
+                   ORDER BY id DESC LIMIT 100""",
+                (room_id,)
+            ).fetchall()
+            # Restore chronological order
+            rows = reversed(rows)
+        else:
+            rows = db.execute(
+                """SELECT id, user, content, created_at, edited_at, deleted_at, room_id
+                   FROM messages
+                   WHERE id > ? AND deleted_at IS NULL AND room_id = ?
+                   ORDER BY id ASC LIMIT 500""",
+                (after, room_id)
+            ).fetchall()
 
         # Use msgspec structs for fast serialization
         msgs = []
