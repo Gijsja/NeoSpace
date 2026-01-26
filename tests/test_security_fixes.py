@@ -248,3 +248,24 @@ class TestSecurityFixes:
             pass
             
         assert not socket_client.is_connected(), "User should be disconnected"
+
+    def test_file_path_traversal_prevention(self, app, client):
+        """Test that file path traversal is prevented in file serving routes."""
+        from werkzeug.exceptions import BadRequest
+        from flask import session
+
+        # Need to simulate session
+        with client.session_transaction() as sess:
+            sess['user_id'] = 1
+
+        # Calling view function directly is the best verification for the specific logic added.
+        from routes.files import serve_unsharded_user_file, serve_legacy_file
+
+        # 1. Test serve_unsharded_user_file with '..' in category
+        with app.test_request_context('/files/user_1/../secret.txt'):
+             session['user_id'] = 1
+             try:
+                 serve_unsharded_user_file(user_id=1, category='..', filename='secret.txt')
+                 pytest.fail("serve_unsharded_user_file should raise BadRequest")
+             except BadRequest:
+                 pass
