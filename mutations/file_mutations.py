@@ -3,6 +3,7 @@ import secrets
 from flask import request, jsonify, current_app, g
 from werkzeug.utils import secure_filename
 from services.storage_service import StorageService
+from core.security import limiter
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'webm', 'mp3', 'wav'}
 
@@ -10,6 +11,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@limiter.limit("10/minute")
 def upload_file():
     if not g.user:
         return jsonify(error="Authentication required"), 401
