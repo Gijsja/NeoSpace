@@ -7,12 +7,14 @@ Endpoint for searching users and content.
 from flask import Blueprint, jsonify, request, g
 from auth import login_required
 from queries.search import search_users, search_posts
+from core.security import limiter
 
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
 @bp.route("/")
 @login_required
+@limiter.limit("30/minute")
 def search_index():
     """
     Search endpoint.
