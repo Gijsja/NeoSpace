@@ -11,9 +11,12 @@ def backfill_messages():
     10-80x faster than standard jsonify.
     """
     rows = get_db().execute(
-        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL"
+        "SELECT id, user, content, created_at, edited_at, deleted_at FROM messages WHERE deleted_at IS NULL ORDER BY id DESC LIMIT 1000"
     ).fetchall()
     
+    # Restore chronological order for the response
+    rows = list(reversed(rows))
+
     # Convert SQLite rows to msgspec Message structs
     messages = [
         Message(
