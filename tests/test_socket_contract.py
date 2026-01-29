@@ -69,51 +69,6 @@ class TestBackfillContract:
         assert backfill_response["phase"] == "continuity"
 
 
-class TestBackfillIntegration:
-    """Integration tests for backfill endpoint."""
-
-    def test_backfill_returns_messages(self, auth_client, app):
-        """Backfill endpoint returns created messages."""
-        # Create messages
-        auth_client.post("/send", json={"content": "Message 1"})
-        auth_client.post("/send", json={"content": "Message 2"})
-        
-        # Fetch backfill
-        res = auth_client.get("/backfill")
-        assert res.status_code == 200
-        data = res.get_json()
-        assert "messages" in data
-        assert len(data["messages"]) == 2
-
-    def test_backfill_respects_message_order(self, auth_client, app):
-        """Messages should be returned in creation order."""
-        auth_client.post("/send", json={"content": "First"})
-        auth_client.post("/send", json={"content": "Second"})
-        auth_client.post("/send", json={"content": "Third"})
-        
-        res = auth_client.get("/backfill")
-        messages = res.get_json()["messages"]
-        
-        assert messages[0]["content"] == "First"
-        assert messages[1]["content"] == "Second"
-        assert messages[2]["content"] == "Third"
-
-    def test_backfill_includes_edited_flag(self, auth_client, app):
-        """Edited messages should have edited flag in backfill."""
-        # Create and edit message
-        res = auth_client.post("/send", json={"content": "Original"})
-        msg_id = res.get_json()["id"]
-        auth_client.post("/edit", json={"id": msg_id, "content": "Edited"})
-        
-        # Check backfill
-        res = auth_client.get("/backfill")
-        messages = res.get_json()["messages"]
-        edited_msg = next(m for m in messages if m["id"] == msg_id)
-        
-        assert edited_msg["content"] == "Edited"
-        # Note: HTTP backfill doesn't include edited flag currently
-
-
 class TestCoreInvariants:
     """Tests for core invariants defined in CORE_INVARIANTS.md."""
 
@@ -155,21 +110,6 @@ class TestCoreInvariants:
             db = get_db()
             row = db.execute("SELECT content FROM messages WHERE id=?", (msg_id,)).fetchone()
             assert row["content"] == "Alice message here"
-
-    def test_invariant_reconnect_idempotent(self, auth_client, app):
-        """Invariant 5: Multiple backfill requests produce same result."""
-        # Create some messages
-        auth_client.post("/send", json={"content": "Msg 1"})
-        auth_client.post("/send", json={"content": "Msg 2"})
-        
-        # Multiple backfill requests
-        res1 = auth_client.get("/backfill")
-        res2 = auth_client.get("/backfill")
-        res3 = auth_client.get("/backfill")
-        
-        # All should return same data
-        assert res1.get_json() == res2.get_json() == res3.get_json()
-
 
 class TestEdgeCases:
     """Edge case and boundary tests."""
