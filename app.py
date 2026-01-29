@@ -4,7 +4,6 @@ from db import get_db, close_db, init_db
 from sockets import socketio, init_sockets
 from mutations.message_mutations import send_message, edit_message, delete_message
 from mutations.file_mutations import upload_file
-from queries.backfill import backfill_messages
 from queries.unread import unread_count
 import secrets
 import os
