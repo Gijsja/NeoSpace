@@ -27,6 +27,8 @@ jobs:
           sed -i 's/blinker==1.7.0/blinker>=1.9.0/' requirements.txt
           sed -i 's/Werkzeug==3.0.3/Werkzeug>=3.1.3/' requirements.txt
           sed -i 's/itsdangerous==2.1.2/itsdangerous>=2.2.0/' requirements.txt
+          # Explicitly install tinycss2 as it is required by bleach but not bundled in 6.0+
+          pip install tinycss2
           pip install -r requirements.txt
           pip install -r requirements-test.txt
 
