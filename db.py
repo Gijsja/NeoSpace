@@ -263,6 +263,7 @@ CREATE TABLE IF NOT EXISTS cat_memories (
     opinion_modifier REAL,
     expires_at TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_cat_memories_lookup ON cat_memories(source_cat_id, target_user_id, expires_at);
 
 CREATE TABLE IF NOT EXISTS cat_relationships (
     source_cat_id INTEGER NOT NULL,
