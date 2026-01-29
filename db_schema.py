@@ -309,6 +309,7 @@ cat_memories = Table(
     Column("created_at", sa.TIMESTAMP, server_default=sa.text("CURRENT_TIMESTAMP")),
     Column("expires_at", sa.TIMESTAMP),
 )
+Index("idx_cat_memories_lookup", cat_memories.c.source_cat_id, cat_memories.c.target_user_id, cat_memories.c.expires_at)
 
 # Cat States
 cat_states = Table(
