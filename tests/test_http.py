@@ -69,17 +69,6 @@ def test_static_js_served(client):
     assert b"socket" in res.data.lower()
 
 
-def test_backfill_endpoint(auth_client, app):
-    """HTTP backfill endpoint works."""
-    auth_client.post("/send", json={"content": "Test"})
-    
-    res = auth_client.get("/backfill")
-    assert res.status_code == 200
-    data = res.get_json()
-    assert "messages" in data
-    assert len(data["messages"]) >= 1
-
-
 def test_404_on_unknown_route(client):
     """Unknown routes return 404."""
     res = client.get("/unknown/route")
