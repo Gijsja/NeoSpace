@@ -42,6 +42,10 @@ def serve_unsharded_user_file(user_id, category, filename):
         abort(401)
 
     upload_root = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+
+    if '..' in category:
+        abort(400)
+
     directory = os.path.join(current_app.root_path, upload_root, f"user_{user_id}", category)
     return send_from_directory(directory, filename)
 
