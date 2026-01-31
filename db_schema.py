@@ -68,6 +68,7 @@ messages = Table(
 Index("idx_messages_created", messages.c.created_at)
 Index("idx_messages_user", messages.c.user)
 Index("idx_messages_room", messages.c.room_id, messages.c.created_at)
+Index("idx_messages_room_id", messages.c.room_id, messages.c.id)
 
 # Messages Archive Table (Cold Storage)
 messages_archive = Table(

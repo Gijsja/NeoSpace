@@ -181,6 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_posts_profile ON profile_posts(profile_id, displa
 -- Additional performance indexes
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_user ON messages(user);
+CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id, id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
 -- Sprint 14: Social Graph (Friends + Top 8)
