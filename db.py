@@ -177,6 +177,8 @@ CREATE TABLE IF NOT EXISTS profile_posts (
     updated_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_posts_profile ON profile_posts(profile_id, display_order);
+-- Optimization: Index for time-based feed sorting (LIMIT + ORDER BY created_at)
+CREATE INDEX IF NOT EXISTS idx_posts_created_at ON profile_posts(created_at);
 
 -- Additional performance indexes
 CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at);
